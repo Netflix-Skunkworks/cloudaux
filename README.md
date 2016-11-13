@@ -13,6 +13,11 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
 
  - IAM Role
  - IAM User
+ 
+## Install
+
+    pip install cloudaux
+    
 
 ## Example
 
