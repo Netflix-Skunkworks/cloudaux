@@ -1,4 +1,6 @@
 # cloudaux
+
+[![Join the chat at https://gitter.im/Netflix-Skunkworks/cloudaux](https://badges.gitter.im/Netflix-Skunkworks/cloudaux.svg)](https://gitter.im/Netflix-Skunkworks/cloudaux?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Cloud Auxiliary is a python wrapper and orchestration module for interacting with cloud providers
 
 ## Features
