@@ -1,6 +1,7 @@
 # cloudaux
 
 [![Join the chat at https://gitter.im/Netflix-Skunkworks/cloudaux](https://badges.gitter.im/Netflix-Skunkworks/cloudaux.svg)](https://gitter.im/Netflix-Skunkworks/cloudaux?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Cloud Auxiliary is a python wrapper and orchestration module for interacting with cloud providers
 
 ## Features
@@ -65,7 +66,9 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
 
 ## Orchestration Example
 
-    from cloudaux.orchestration.aws.iam import get_role
+### Role
+
+    from cloudaux.orchestration.aws.iam.role import get_role
     
     # account_number may be extracted from the ARN of the role passed to get_role
     # if not included in conn.
@@ -95,6 +98,10 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
         "RoleName": ...,
         "_version": 1    # Orchestration results return a _Version
     }
+    
+### User    
+    
+    from cloudaux.orchestration.aws.iam.user import get_user
     
     user = get_user(
         dict(arn='arn:aws:iam::000000000000:user/myUser', role_name='myUser'),
