@@ -21,10 +21,10 @@ def _get_base(user, **conn):
         user = CloudAux.go('iam.client.get_user', UserName=user_name, **conn)
         user = user['User']
 
-        # cast CreateDate from a datetime to something JSON serializable.
-        user.update(dict(CreateDate=str(user['CreateDate'])))
-        if 'PasswordLastUsed' in user:
-            user.update(dict(PasswordLastUsed=str(user['PasswordLastUsed'])))
+    # cast CreateDate from a datetime to something JSON serializable.
+    user.update(dict(CreateDate=str(user['CreateDate'])))
+    if 'PasswordLastUsed' in user:
+        user.update(dict(PasswordLastUsed=str(user['PasswordLastUsed'])))
 
     return user
 

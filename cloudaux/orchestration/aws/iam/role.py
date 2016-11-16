@@ -24,8 +24,8 @@ def _get_base(role, **conn):
         role = CloudAux.go('iam.client.get_role', RoleName=role_name, **conn)
         role = role['Role']
 
-        # cast CreateDate from a datetime to something JSON serializable.
-        role.update(dict(CreateDate=str(role['CreateDate'])))
+    # cast CreateDate from a datetime to something JSON serializable.
+    role.update(dict(CreateDate=str(role['CreateDate'])))
 
     return role
 
