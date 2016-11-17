@@ -114,8 +114,13 @@ def get_logging(bucket_name, **conn):
 
 
 def get_policy(bucket_name, **conn):
-    result = get_bucket_policy(Bucket=bucket_name, **conn)
-    return json.loads(result['Policy'])
+    try:
+        result = get_bucket_policy(Bucket=bucket_name, **conn)
+        return json.loads(result['Policy'])
+    except ClientError as e:
+        if 'NoSuchBucketPolicy' not in str(e):
+            raise e
+        return None
 
 
 def get_tags(bucket_name, **conn):
