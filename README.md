@@ -16,7 +16,8 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
 
  - IAM Role
  - IAM User
- 
+ - S3
+
 ## Install
 
     pip install cloudaux
@@ -132,5 +133,63 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
       "SigningCertificates": {}, 
       "UserId": ..., 
       "UserName": ...,
+      "_version": 1
+    }
+
+### S3
+
+    from cloudaux.orchestration.aws.s3 import get_bucket
+    
+    conn = dict(
+        account_number='000000000000',
+        assume_role='SecurityMonkey')
+    
+    bucket = get_bucket('MyS3Bucket', **conn)
+    
+    print(json.dumps(bucket, indent=2, sort_keys=True))
+    
+    {
+      "Arn": "arn:aws:s3:::MyS3Bucket", 
+      "Grants": {
+        "cloudaux_grantee": [
+          "FULL_CONTROL"
+        ]
+      }, 
+      "LifecycleRules": [
+        {
+          "expiration": {
+            "days": 365
+          }, 
+          "id": "deleteoldstuff", 
+          "prefix": "/doesntactuallyexist", 
+          "status": "Enabled"
+        }
+      ], 
+      "Logging": {
+        "enabled": true, 
+        "grants": [], 
+        "prefix": "logs/", 
+        "target": "MyS3LoggingBucket"
+      }, 
+      "Policy": {
+        "Statement": [
+          {
+            "Action": "s3:GetObject", 
+            "Effect": "Allow", 
+            "Principal": {
+              "AWS": "*"
+            }, 
+            "Resource": "arn:aws:s3:::MyS3Bucket/*", 
+            "Sid": "AddPerm"
+          }
+        ], 
+        "Version": "2008-10-17"
+      }, 
+      "Tags": {
+        "tagkey": "tagvalue"
+      }, 
+      "Versioning": {
+        "Versioning": "Enabled"
+      }, 
       "_version": 1
     }
