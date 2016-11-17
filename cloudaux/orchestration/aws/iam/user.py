@@ -5,7 +5,8 @@ from cloudaux.aws.iam import get_user_login_profile
 from cloudaux.aws.iam import get_user_managed_policies
 from cloudaux.aws.iam import get_user_mfa_devices
 from cloudaux.aws.iam import get_user_signing_certificates
-from . import _get_name_from_structure, modify, _conn_from_args
+from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
+from cloudaux.orchestration import modify
 
 
 def _get_base(user, **conn):
