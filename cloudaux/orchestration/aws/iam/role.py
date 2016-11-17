@@ -1,6 +1,7 @@
 from cloudaux import CloudAux
 from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles
-from . import _get_name_from_structure, modify, _conn_from_args
+from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
+from cloudaux.orchestration import modify
 
 
 def _get_base(role, **conn):
