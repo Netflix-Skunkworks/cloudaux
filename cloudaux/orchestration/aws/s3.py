@@ -174,6 +174,7 @@ def get_bucket(bucket_name, output='camelized', **conn):
        'lifecycle_rules': get_lifecycle(bucket_name, **conn),
        'logging': get_logging(bucket_name, **conn),
        'policy': get_policy(bucket_name, **conn),
+       'region': region,
        'tags': get_tags(bucket_name, **conn),
        'versioning': get_versioning(bucket_name, **conn),
        '_version': 1
