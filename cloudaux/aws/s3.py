@@ -83,6 +83,57 @@ def get_bucket_logging(client=None, **kwargs):
     return client.get_bucket_logging(**kwargs)
 
 
+@sts_conn('s3')
+@rate_limited()
+def get_bucket_website(client=None, **kwargs):
+    """
+    Bucket='string'
+    """
+    return client.get_bucket_website(**kwargs)
+
+
+@sts_conn('s3')
+@rate_limited()
+def get_bucket_cors(client=None, **kwargs):
+    """
+    Bucket='string'
+    """
+    return client.get_bucket_cors(**kwargs)
+
+
+@sts_conn('s3')
+@rate_limited()
+def get_bucket_notification_configuration(client=None, **kwargs):
+    """
+    Bucket='string'
+    """
+    return client.get_bucket_notification_configuration(**kwargs)
+
+
+@sts_conn('s3')
+@rate_limited()
+def get_bucket_accelerate_configuration(client=None, **kwargs):
+    """
+    Bucket='string'
+    """
+    return client.get_bucket_accelerate_configuration(**kwargs)
+
+
+@sts_conn('s3')
+@rate_limited()
+def get_bucket_replication(client=None, **kwargs):
+    """
+    Bucket='string'
+    """
+    return client.get_bucket_replication(**kwargs)
+
+
+@sts_conn('s3', service_type='resource')
+@rate_limited()
+def get_bucket_resource(bucket_name, resource=None, **kwargs):
+    return resource.Bucket(bucket_name)
+
+
 def get_bucket_region(**kwargs):
     # Some s3 buckets do not allow viewing of details. We do not want to
     # throw an error in this case because we still want to see that the
@@ -90,7 +141,7 @@ def get_bucket_region(**kwargs):
     try:
         result = get_bucket_location(**kwargs)
         location = result['LocationConstraint']
-    except ClientError, e:
+    except ClientError as e:
         if 'AccessDenied' not in str(e):
             raise e
         return None
@@ -99,4 +150,3 @@ def get_bucket_region(**kwargs):
         return 'us-east-1'
 
     return S3_REGION_MAPPING.get(location, location)
-
