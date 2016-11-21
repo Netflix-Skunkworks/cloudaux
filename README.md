@@ -156,7 +156,11 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
         "cloudaux_grantee": [
           "FULL_CONTROL"
         ]
-      }, 
+      },
+      "Owner": {
+        "ID": "SomeIdStringHere",
+        "DisplayName": "cloudaux_grantee"
+      },
       "LifecycleRules": [
         {
           "expiration": {
@@ -186,12 +190,66 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
           }
         ], 
         "Version": "2008-10-17"
-      }, 
+      },
+      "Region": "us-east-1",
       "Tags": {
         "tagkey": "tagvalue"
       }, 
       "Versioning": {
-        "Versioning": "Enabled"
-      }, 
-      "_version": 1
+        "Status": "Enabled"
+      },
+      "Website": {
+        "IndexDocument": {
+          "Suffix": "index.html"
+        }
+      },
+      "Cors": {
+        "AllowedMethods": [
+          "GET"
+        ],
+        "MaxAgeSeconds": 3000,
+        "AllowedHeaders": [
+          "Authorization"
+        ],
+        "AllowedOrigins": [
+          "*",
+        ]
+      },
+      "Notifications": {
+        "LambdaFunctionConfigurations": [
+          {
+            "LambdaFunctionArn": "arn:aws:lambda:us-east-1:ACCNTNUM:function:LAMBDAFUNC",
+            "Id": "1234-34534-12-5-123-4213-4123-41235612423",
+            "Filter": {
+              "Key": {
+                "FilterRules": [
+                  {
+                    "Name": "Prefix",
+                    "Value": "somepath/"
+                  }
+                ]
+              },
+              "Events": [
+                "s3:ObjectCreated:Put"
+              ]
+            }
+          }
+        ]
+      },
+      "Acceleration": "Enabled",
+      "Replication": {
+        "Rules": [
+          {
+            "Prefix": "",
+            "ID": "MyS3Bucket",
+            "Destination": {
+              "Bucket": "arn:aws:s3:::MyOtherS3Bucket"
+            },
+            "Status": "Enabled"
+          }
+        ],
+        "Role": "arn:aws:iam::ACCOUNTNUM:role/MYREPLICATIONROLE"
+      },
+      "Created": "2016-11-21 10:00:00+00:00",
+      "_version": 2
     }
