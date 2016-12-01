@@ -89,13 +89,20 @@ def get_lifecycle(bucket_name, **conn):
 
             rule_dict['expiration'] = expiration_dict
 
+        if rule.get('AbortIncompleteMultipartUpload'):
+            abort_multipart_dict = {}
+            abort_multipart = rule['AbortIncompleteMultipartUpload']
+            if abort_multipart.get('DaysAfterInitiation'):
+                abort_multipart_dict['days'] = abort_multipart['DaysAfterInitiation']
+            rule_dict['abort_multipart'] = abort_multipart_dict
+
         lifecycle_rules.append(rule_dict)
     return lifecycle_rules
 
 
 def get_logging(bucket_name, **conn):
     result = get_bucket_logging(Bucket=bucket_name, **conn)
-    
+
     logging_dict = {}
     if result.get('LoggingEnabled'):
         logging = result['LoggingEnabled']
