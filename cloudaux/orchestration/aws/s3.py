@@ -302,7 +302,7 @@ def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
         'notifications': get_notifications(bucket_name, **conn),
         'acceleration': get_acceleration(bucket_name, **conn),
         'replication': get_replication(bucket_name, **conn),
-        '_version': 2
+        '_version': 3
     }
 
     if include_created:
