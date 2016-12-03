@@ -11,6 +11,9 @@ from cloudaux.aws.s3 import get_bucket_notification_configuration
 from cloudaux.aws.s3 import get_bucket_accelerate_configuration
 from cloudaux.aws.s3 import get_bucket_replication
 from cloudaux.aws.s3 import get_bucket_resource
+from cloudaux.aws.s3 import list_bucket_analytics_configurations
+from cloudaux.aws.s3 import list_bucket_metrics_configurations
+from cloudaux.aws.s3 import list_bucket_inventory_configurations
 from cloudaux.orchestration import modify
 
 from botocore.exceptions import ClientError
@@ -250,6 +253,18 @@ def get_bucket_created(bucket_name, **conn):
     return str(bucket.creation_date)
 
 
+def get_bucket_analytics_configurations(bucket_name, **conn):
+    return list_bucket_analytics_configurations(Bucket=bucket_name, **conn)
+
+
+def get_bucket_metrics_configurations(bucket_name, **conn):
+    return list_bucket_metrics_configurations(Bucket=bucket_name, **conn)
+
+
+def get_bucket_inventory_configurations(bucket_name, **conn):
+    return list_bucket_inventory_configurations(Bucket=bucket_name, **conn)
+
+
 def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
     """
     Orchestrates all the calls required to fully build out an S3 bucket in the following format:
@@ -269,7 +284,10 @@ def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
         "Acceleration": ...,
         "Replication": ...,
         "Created": ...,
-        "_version": 1
+        "AnalyticsConfigurations": ...,
+        "MetricsConfigurations": ...,
+        "InventoryConfigurations": ...,
+        "_version": 4
     }
     
     :param include_created:
@@ -302,7 +320,10 @@ def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
         'notifications': get_notifications(bucket_name, **conn),
         'acceleration': get_acceleration(bucket_name, **conn),
         'replication': get_replication(bucket_name, **conn),
-        '_version': 3
+        'analytics_configurations': get_bucket_analytics_configurations(bucket_name, **conn),
+        'metrics_configurations': get_bucket_metrics_configurations(bucket_name, **conn),
+        'inventory_configurations': get_bucket_inventory_configurations(bucket_name, **conn),
+        '_version': 4
     }
 
     if include_created:

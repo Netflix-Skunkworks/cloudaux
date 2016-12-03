@@ -250,6 +250,62 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
         ],
         "Role": "arn:aws:iam::ACCOUNTNUM:role/MYREPLICATIONROLE"
       },
-      "Created": "2016-11-21 10:00:00+00:00",
-      "_version": 2
+      "AnalyticsConfigurations": [
+        "Filter": {
+          "Prefix": "someprefix"
+        },
+        "StorageClassAnalysis": {
+          "DataExport": {
+            "Destination": {
+              "S3BucketDestination": {
+                "Prefix": "someother/prefix",
+                "Format": "CSV",
+                "Bucket": "arn:aws:s3:::SOMEBUCKETDESTINATION"
+              }
+              "OutputSchemaVersion": "V_1"
+            }
+          }
+          "Id": "s3analytics"
+        }
+      ],
+      "MetricsConfigurations": [
+        {
+          "Id": "SomeWholeBucketMetricsConfig"
+        },
+        {
+          "Filter": {
+            "Prefix": "some/prefix"
+          },
+          "Id": "SomeOtherMetricsConfig"
+        }
+      ],
+      "InventoryConfigurations": [
+        {
+          "Destination": {
+            "S3BucketDestination": {
+              "Prefix": "someother/prefix",
+              "Format": "CSV",
+              "Bucket": "arn:aws:s3:::SOMEBUCKETDESTINATION"
+            },
+            "Filter": {
+              "Prefix": "someprefix/"
+            },
+            "IsEnabled": true,
+            "OptionalFields": [
+              "Size",
+              "LastModifiedDate",
+              "StorageClass",
+              "ETag",
+              "ReplicationStatus"
+            ],
+            "IncludedObjectVersions": "All",
+            "Schedule": {
+              "Frequency": "Weekly"
+            },
+            "Id": "inventoryconfig"
+          }
+        }
+      ],
+      "Created": "2016-12-2 10:00:00+00:00",
+      "_version": 4
     }
