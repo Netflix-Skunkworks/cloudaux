@@ -24,7 +24,8 @@ with open(os.path.join(ROOT, "cloudaux", "__about__.py")) as f:
     exec(f.read(), about)
 
 install_requires = [
-    'boto3>=1.4.1',
+    'boto3>=1.4.2',
+    'botocore>=1.4.81',
     'boto>=2.41.0',
     'joblib>=0.9.4',
     'inflection'

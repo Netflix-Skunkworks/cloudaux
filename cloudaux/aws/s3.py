@@ -1,5 +1,5 @@
 from cloudaux.aws.sts import sts_conn
-from cloudaux.aws.decorators import rate_limited
+from cloudaux.aws.decorators import rate_limited, paginated
 from botocore.exceptions import ClientError
 
 
@@ -126,6 +126,48 @@ def get_bucket_replication(client=None, **kwargs):
     Bucket='string'
     """
     return client.get_bucket_replication(**kwargs)
+
+
+@sts_conn('s3')
+@paginated('AnalyticsConfigurationList', pagination_marker="NextContinuationToken")
+@rate_limited()
+def list_bucket_analytics_configurations(client=None, **kwargs):
+    """
+    Bucket='string'
+    """
+    result = client.list_bucket_analytics_configurations(**kwargs)
+    if not result.get("AnalyticsConfigurationList"):
+        result.update({"AnalyticsConfigurationList": []})
+
+    return result
+
+
+@sts_conn('s3')
+@paginated('MetricsConfigurationList', pagination_marker="NextContinuationToken")
+@rate_limited()
+def list_bucket_metrics_configurations(client=None, **kwargs):
+    """
+    Bucket='string'
+    """
+    result = client.list_bucket_metrics_configurations(**kwargs)
+    if not result.get("MetricsConfigurationList"):
+        result.update({"MetricsConfigurationList": []})
+
+    return result
+
+
+@sts_conn('s3')
+@paginated('InventoryConfigurationList', pagination_marker="NextContinuationToken")
+@rate_limited()
+def list_bucket_inventory_configurations(client=None, **kwargs):
+    """
+    Bucket='string'
+    """
+    result = client.list_bucket_inventory_configurations(**kwargs)
+    if not result.get("InventoryConfigurationList"):
+        result.update({"InventoryConfigurationList": []})
+
+    return result
 
 
 @sts_conn('s3', service_type='resource')
