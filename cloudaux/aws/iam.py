@@ -250,6 +250,10 @@ def _get_user_signing_certificates(user, client=None, **kwargs):
 @rate_limited()
 def get_user_signing_certificates(user, client=None, **kwargs):
     certificates = _get_user_signing_certificates(user, client=client, **kwargs)
+    for certificate in certificates:
+        if 'UploadDate' in certificate:
+            certificate['UploadDate'] = str(certificate['UploadDate'])
+
     return {certificate['CertificateId']: dict(certificate) for certificate in certificates}
 
 
