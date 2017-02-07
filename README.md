@@ -8,7 +8,7 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
 
 ## Documenation
 
- - [CloudAux](../../README.md "CloudAux Readme") [THIS FILE]
+ - [CloudAux](README.md "CloudAux Readme") [THIS FILE]
  - [AWS](cloudaux/aws/README.md "Amazon Web Services Docs")
  - [GCP](cloudaux/gcp/README.md "Google Cloud Platform Docs")
 

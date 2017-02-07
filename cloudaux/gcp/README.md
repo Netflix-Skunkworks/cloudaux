@@ -6,7 +6,7 @@ Cloud Auxiliary has support for Google Cloud Platform.
 
  - [CloudAux](../../README.md "CloudAux Readme")
  - [AWS](../aws/README.md "Amazon Web Services Docs")
- - [GCP](../gcp/README.md "Google Cloud Platform Docs") [THIS FILE]
+ - [GCP](README.md "Google Cloud Platform Docs") [THIS FILE]
 
 ## Features
 
