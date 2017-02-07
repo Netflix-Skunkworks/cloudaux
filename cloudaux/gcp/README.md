@@ -2,6 +2,12 @@
 
 Cloud Auxiliary has support for Google Cloud Platform.
 
+## Documenation
+
+ - [CloudAux](../../README.md "CloudAux Readme")
+ - [AWS](cloudaux/aws/README.md "Amazon Web Services Docs")
+ - [GCP](cloudaux/gcp/README.md "Google Cloud Platform Docs") [THIS FILE]
+
 ## Features
 
  - choosing the best client based on service
@@ -15,11 +21,14 @@ Cloud Auxiliary has support for Google Cloud Platform.
  - Network/Subnetworks
  - Storage Buckets
 
+## Install
+
+    pip install cloudaux
+
 ## Authentication/Authorization
 
  - Default Credentials (if running on GCE)
  - JSON key format
-    
 
 ## Example
 
@@ -44,7 +53,7 @@ Cloud Auxiliary has support for Google Cloud Platform.
     #
     # To use default credentials, omit the key_file argument
     # @iter_project(projects=projects)
-
+    
     @iter_project(projects=projects, key_file='/path/to/key.json')
     def test_iter(**kwargs):
        accounts = list_serviceaccounts(**kwargs)
