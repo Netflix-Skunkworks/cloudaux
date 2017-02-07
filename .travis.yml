@@ -12,7 +12,7 @@ cache:
 env:
   global:
     - PIP_DOWNLOAD_CACHE=".pip_download_cache"
-    - GOOGLE_APPLICATION_CREDENTIALS=~/Netflix-Skunkworks/cloudaux/tests/gcp/fixtures/testkey.json
+    - GOOGLE_APPLICATION_CREDENTIALS=$TRAVIS_BUILD_DIR/tests/gcp/fixtures/testkey.json
 
 before_script:
   - python setup.py develop
