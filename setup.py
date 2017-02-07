@@ -28,10 +28,14 @@ install_requires = [
     'botocore>=1.4.81',
     'boto>=2.41.0',
     'joblib>=0.9.4',
-    'inflection'
+    'inflection',
+    'google-api-python-client>=1.6.1'
 ]
 
-tests_require = []
+tests_require = [
+    'pytest',
+    'mock'
+]
 
 docs_require = []
 
