@@ -4,28 +4,50 @@
 
 [![Version](http://img.shields.io/pypi/v/cloudaux.svg?style=flat)](https://pypi.python.org/pypi/cloudaux/)
 
-Cloud Auxiliary is a python wrapper and orchestration module for interacting with cloud providers
+Cloud Auxiliary is a python wrapper and orchestration module for interacting with cloud providers.
+
+## Documenation
+
+ - [CloudAux](../../README.md "CloudAux Readme") [THIS FILE]
+ - [AWS](cloudaux/aws/README.md "Amazon Web Services Docs")
+ - [GCP](cloudaux/gcp/README.md "Google Cloud Platform Docs")
 
 ## Features
 
+AWS:
  - intelligent connection caching.
  - handles pagination for certain client methods.
  - rate limit handling, with exponential backoff.
  - multi-account sts:assumerole abstraction.
  - orchestrates all the calls required to fully describe an item.
 
+GCP:
+ - choosing the best client based on service
+ - client caching
+ - general caching and stats decorators available
+ - basic support for non-specified discovery-API services
+
 ## Orchestration Supported Technologies
 
+AWS:
  - IAM Role
  - IAM User
  - S3
+
+GCP:
+ - IAM Service Accounts
+ - Network/Subnetworks
+ - Storage Buckets
 
 ## Install
 
     pip install cloudaux
     
+## Examples
 
-## Example
+
+
+### AWS Example
 
     # Using wrapper methods:
     from cloudaux.aws.sqs import get_queue, get_messages
@@ -67,9 +89,41 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
     def list_keys(conn=None):
         return conn.list_keys()['Keys']
 
+### GCP Example
+
+    # directly asking for a client:
+    from cloudaux.aws.gcp.auth import get_client
+    client = get_client('gce', **conn_details)
+   
+    # Over your entire environment:
+    from cloudaux.gcp.decorators import iter_project
+   
+    projects = ['my-project-one', 'my-project-two']
+
+    # To specify per-project key_files, you can do thie following:
+    # projects = [
+    #  {'project': 'my-project-one', key_file='/path/to/project-one.json'},
+    #  {'project': 'my-project-two', key_file='/path/to/project-two.json'}
+    # ]
+    #
+    # To specify a single key_file for all projects, use the key_file argument
+    # to the decorator
+    # @iter_project(projects=projects, key_file='/path/to/key.json')
+    #
+    # To use default credentials, omit the key_file argument
+    # @iter_project(projects=projects)
+    
+    @iter_project(projects=projects, key_file='/path/to/key.json')
+    def test_iter(**kwargs):
+       accounts = list_serviceaccounts(**kwargs)
+       ret = []
+       for account in accounts:
+         ret.append(get_serviceaccount_complete(service_account=account['name']))
+       return ret
+
 ## Orchestration Example
 
-### Role
+### AWS IAM Role
 
     from cloudaux.orchestration.aws.iam.role import get_role
     
@@ -102,210 +156,36 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
         "_version": 1    # Orchestration results return a _Version
     }
     
-### User    
-    
-    from cloudaux.orchestration.aws.iam.user import get_user
-    
-    user = get_user(
-        dict(arn='arn:aws:iam::000000000000:user/myUser', role_name='myUser'),
-        **conn)
-    
-    print(json.dumps(user, indent=2, sort_keys=True))
-    
-    
-    {
-      "AccessKeys": [
-        {
-          "AccessKeyId": ...,
-          "CreateDate": ...,
-          "LastUsedDate": ...,
-          "Region": "us-east-1", 
-          "ServiceName": ...,
-          "Status": "Active", 
-          "UserName": ...,
-        }
-      ], 
-      "Arn": ...,
-      "CreateDate": ...,
-      "InlinePolicies": ..., 
-      "LoginProfile": null, 
-      "ManagedPolicies": [], 
-      "MfaDevices": {}, 
-      "Path": "/", 
-      "SigningCertificates": {}, 
-      "UserId": ..., 
-      "UserName": ...,
-      "_version": 1
-    }
+### GCP IAM Service Account
 
-### S3
+    from cloudaux.orchestration.gcp.iam.serviceaccount import get_serviceaccount_complete
+    sa_name = 'projects/my-project-one/serviceAccounts/service-account-key@my-project-one.iam.gserviceaccount.com'
+    sa = get_serviceaccount_complete(sa_name, **conn_details)
+    print(json.dumps(sa, indent=4, sort_keys=True))
 
-    from cloudaux.orchestration.aws.s3 import get_bucket
-    
-    conn = dict(
-        account_number='000000000000',
-        assume_role='SecurityMonkey')
-    
-    bucket = get_bucket('MyS3Bucket', **conn)
-    
-    print(json.dumps(bucket, indent=2, sort_keys=True))
-    
     {
-      "Arn": "arn:aws:s3:::MyS3Bucket", 
-      "Grants": {
-        "cloudaux_grantee": [
-          "FULL_CONTROL"
-        ]
-      },
-      "Owner": {
-        "ID": "SomeIdStringHere",
-        "DisplayName": "cloudaux_grantee"
-      },
-      "LifecycleRules": [
-        {
-          "expiration": {
-            "days": 365
+      "DisplayName": "service-account", 
+      "Email": "service-account@my-project-one.iam.gserviceaccount.com", 
+      "Etag": "BwUzTDvWgHw=", 
+      "Keys": [
+          {
+              "KeyAlgorithm": "KEY_ALG_RSA_2048", 
+              "Name": "projects/my-project-one/serviceAccounts/service-account@my-project-one.iam.gserviceaccount.com/keys/8be0096886f6ed5cf51abb463d3448c8aee6c6b6", 
+              "ValidAfterTime": "2016-06-30T18:26:45Z", 
+              "ValidBeforeTime": "2026-06-28T18:26:45Z"
           }, 
-          "id": "deleteoldstuff", 
-          "prefix": "/doesntactuallyexist", 
-          "status": "Enabled"
-        }
+ 	  ...
       ], 
-      "Logging": {
-        "enabled": true, 
-        "grants": [], 
-        "prefix": "logs/", 
-        "target": "MyS3LoggingBucket"
-      }, 
-      "Policy": {
-        "Statement": [
+      "Name": "projects/my-project-one/serviceAccounts/service-account@my-project-one.iam.gserviceaccount.com", 
+      "Oauth2ClientId": "115386704809902483492", 
+      "Policy": [
           {
-            "Action": "s3:GetObject", 
-            "Effect": "Allow", 
-            "Principal": {
-              "AWS": "*"
-            }, 
-            "Resource": "arn:aws:s3:::MyS3Bucket/*", 
-            "Sid": "AddPerm"
+              "Members": [
+                  "user:test-user@gmail.com"
+              ], 
+              "Role": "roles/iam.serviceAccountActor"
           }
-        ], 
-        "Version": "2008-10-17"
-      },
-      "Region": "us-east-1",
-      "Tags": {
-        "tagkey": "tagvalue"
-      }, 
-      "Versioning": {
-        "Status": "Enabled"
-      },
-      "Website": {
-        "IndexDocument": {
-          "Suffix": "index.html"
-        }
-      },
-      "Cors": {
-        "AllowedMethods": [
-          "GET"
-        ],
-        "MaxAgeSeconds": 3000,
-        "AllowedHeaders": [
-          "Authorization"
-        ],
-        "AllowedOrigins": [
-          "*",
-        ]
-      },
-      "Notifications": {
-        "LambdaFunctionConfigurations": [
-          {
-            "LambdaFunctionArn": "arn:aws:lambda:us-east-1:ACCNTNUM:function:LAMBDAFUNC",
-            "Id": "1234-34534-12-5-123-4213-4123-41235612423",
-            "Filter": {
-              "Key": {
-                "FilterRules": [
-                  {
-                    "Name": "Prefix",
-                    "Value": "somepath/"
-                  }
-                ]
-              },
-              "Events": [
-                "s3:ObjectCreated:Put"
-              ]
-            }
-          }
-        ]
-      },
-      "Acceleration": "Enabled",
-      "Replication": {
-        "Rules": [
-          {
-            "Prefix": "",
-            "ID": "MyS3Bucket",
-            "Destination": {
-              "Bucket": "arn:aws:s3:::MyOtherS3Bucket"
-            },
-            "Status": "Enabled"
-          }
-        ],
-        "Role": "arn:aws:iam::ACCOUNTNUM:role/MYREPLICATIONROLE"
-      },
-      "AnalyticsConfigurations": [
-        "Filter": {
-          "Prefix": "someprefix"
-        },
-        "StorageClassAnalysis": {
-          "DataExport": {
-            "Destination": {
-              "S3BucketDestination": {
-                "Prefix": "someother/prefix",
-                "Format": "CSV",
-                "Bucket": "arn:aws:s3:::SOMEBUCKETDESTINATION"
-              }
-              "OutputSchemaVersion": "V_1"
-            }
-          }
-          "Id": "s3analytics"
-        }
-      ],
-      "MetricsConfigurations": [
-        {
-          "Id": "SomeWholeBucketMetricsConfig"
-        },
-        {
-          "Filter": {
-            "Prefix": "some/prefix"
-          },
-          "Id": "SomeOtherMetricsConfig"
-        }
-      ],
-      "InventoryConfigurations": [
-        {
-          "Destination": {
-            "S3BucketDestination": {
-              "Prefix": "someother/prefix",
-              "Format": "CSV",
-              "Bucket": "arn:aws:s3:::SOMEBUCKETDESTINATION"
-            },
-            "Filter": {
-              "Prefix": "someprefix/"
-            },
-            "IsEnabled": true,
-            "OptionalFields": [
-              "Size",
-              "LastModifiedDate",
-              "StorageClass",
-              "ETag",
-              "ReplicationStatus"
-            ],
-            "IncludedObjectVersions": "All",
-            "Schedule": {
-              "Frequency": "Weekly"
-            },
-            "Id": "inventoryconfig"
-          }
-        }
-      ],
-      "Created": "2016-12-2 10:00:00+00:00",
-      "_version": 4
+      ], 
+      "ProjectId": "my-project-one", 
+      "UniqueId": "115386704809902483492"
     }
