@@ -5,8 +5,8 @@ Cloud Auxiliary has support for Amazon Web Services.
 ## Documenation
 
  - [CloudAux](../../README.md "CloudAux Readme")
- - [AWS](cloudaux/aws/README.md "Amazon Web Services Docs") [THIS FILE]
- - [GCP](cloudaux/gcp/README.md "Google Cloud Platform Docs")
+ - [AWS](../aws/README.md "Amazon Web Services Docs") [THIS FILE]
+ - [GCP](../gcp/README.md "Google Cloud Platform Docs")
 
 ## Features
 
