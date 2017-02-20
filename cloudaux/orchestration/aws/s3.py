@@ -66,7 +66,7 @@ def get_lifecycle(bucket_name, **conn):
         rule_dict = {
             'id': rule['ID'],
             'status': rule['Status'],
-            'prefix': rule['Prefix'],
+            'prefix': rule.get('Prefix'),
         }
 
         if rule.get('Transitions'):

@@ -129,7 +129,8 @@ def get_bucket_replication(client=None, **kwargs):
 
 
 @sts_conn('s3')
-@paginated('AnalyticsConfigurationList', pagination_marker="NextContinuationToken")
+@paginated('AnalyticsConfigurationList', request_pagination_marker="ContinuationToken",
+           response_pagination_marker="NextContinuationToken")
 @rate_limited()
 def list_bucket_analytics_configurations(client=None, **kwargs):
     """
@@ -143,7 +144,8 @@ def list_bucket_analytics_configurations(client=None, **kwargs):
 
 
 @sts_conn('s3')
-@paginated('MetricsConfigurationList', pagination_marker="NextContinuationToken")
+@paginated('MetricsConfigurationList', request_pagination_marker="ContinuationToken",
+           response_pagination_marker="NextContinuationToken")
 @rate_limited()
 def list_bucket_metrics_configurations(client=None, **kwargs):
     """
@@ -157,7 +159,8 @@ def list_bucket_metrics_configurations(client=None, **kwargs):
 
 
 @sts_conn('s3')
-@paginated('InventoryConfigurationList', pagination_marker="NextContinuationToken")
+@paginated('InventoryConfigurationList', request_pagination_marker="ContinuationToken",
+           response_pagination_marker="NextContinuationToken")
 @rate_limited()
 def list_bucket_inventory_configurations(client=None, **kwargs):
     """
