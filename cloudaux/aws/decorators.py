@@ -49,7 +49,7 @@ def rate_limited(max_attempts=None, max_delay=4):
     return decorator
 
 
-def paginated(response_key, pagination_marker="Marker"):
+def paginated(response_key, request_pagination_marker="Marker", response_pagination_marker="Marker"):
     def decorator(func):
         @functools.wraps(func)
         def decorated_function(*args, **kwargs):
@@ -60,7 +60,7 @@ def paginated(response_key, pagination_marker="Marker"):
                 results.extend(response[response_key])
 
                 if response['IsTruncated']:
-                    kwargs.update({pagination_marker: response[pagination_marker]})
+                    kwargs.update({request_pagination_marker: response[response_pagination_marker]})
                 else:
                     break
             return results
