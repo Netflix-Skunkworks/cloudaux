@@ -159,6 +159,42 @@ Cloud Auxiliary has support for Google Cloud Platform.
         "StorageClass": "MULTI_REGIONAL",
         "VersioningEnabled": false
     }
+## Firewall Rules
+### List Rules
+    from cloudaux.gcp.gce.firewall import list_firewall_rules
+    rules = list_firewall_rules(**conn_details)
+    for rule in rules:
+      print(json.dumps(rule, indent=4, sort_keys=True))
+
+### Get Single Rule
+    # get single rule
+    from cloudaux.gcp.gce.firewall import get_firewall_rule
+    rule = get_firewall_rule(Firewall='default-allow-http', **conn_details)
+    print(json.dumps(rule, indent=4, sort_keys=True))
+
+    {
+        "allowed": [
+            {
+                "IPProtocol": "tcp",
+                "ports": [
+                    "80"
+                ]
+            }
+        ],
+        "creationTimestamp": "2016-10-03T11:10:37.412-07:00",
+        "description": "",
+        "id": "6048401367777616399",
+        "kind": "compute#firewall",
+        "name": "default-allow-http",
+        "network": "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/default",
+        "selfLink": "https://www.googleapis.com/compute/v1/projects/my-project/global/firewalls/default-allow-http",
+        "sourceRanges": [
+            "0.0.0.0/0"
+        ],
+        "targetTags": [
+            "http-server"
+        ]
+    }
 
 ## Function Stats
     from cloudaux.gcp.utils import get_gcp_stats
