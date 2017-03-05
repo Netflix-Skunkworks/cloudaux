@@ -36,7 +36,7 @@ def get_grants(bucket_name, include_owner=False, **conn):
             logger.info("Received a bad display name: %s", display_name)
 
         if display_name is None:
-            gname = grantee.get('URI')
+            gname = grantee.get('ID')
         else:
             gname = grantee['DisplayName']
 
