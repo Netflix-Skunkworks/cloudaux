@@ -2,7 +2,7 @@
 
 Cloud Auxiliary has support for Amazon Web Services.
 
-## Documenation
+## Documentation
 
  - [CloudAux](../../README.md "CloudAux Readme")
  - [AWS](README.md "Amazon Web Services Docs") [THIS FILE]
