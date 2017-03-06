@@ -17,6 +17,7 @@ def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
         return modify(dict(Error='Unauthorized'), format=output)
 
     result['acl'] = list(bucket.acl)
+    result['default_object_acl'] = list(bucket.default_object_acl)
     result['cors'] = bucket.cors
     result['etag'] = bucket.etag
     result['id'] = bucket.id

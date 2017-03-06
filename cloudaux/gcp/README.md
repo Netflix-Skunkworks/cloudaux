@@ -146,8 +146,18 @@ Cloud Auxiliary has support for Google Cloud Platform.
               "entity": "project-owners-2094195755361",
               "role": "OWNER"
           }
-        ], 
+        ],
         "Cors": [],
+        "DefaultObjectAcl": [
+          {
+              "entity": "project-editors-1094195755360",
+              "role": "OWNER"
+          },
+          {
+              "entity": "project-viewers-1094195755360",
+              "role": "READER"
+          }
+        ],
         "Etag": "CAE=",
         "Id": "my-bucket",
         "Location": "US",
