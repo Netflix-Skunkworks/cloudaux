@@ -47,8 +47,7 @@ def get_bucket_field(**kwargs):
     """
     bucket = get_bucket(**kwargs)
     if bucket:
-        value = getattr(bucket, kwargs['Field'])
-        return value
+        return getattr(bucket, kwargs['Field'], None)
     else:
         return None
 
