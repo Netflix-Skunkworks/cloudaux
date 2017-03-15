@@ -5,6 +5,8 @@
     :license: Apache, see LICENSE for more details.
 .. moduleauthor:: Tom Melendez (@supertom) <supertom@google.com>
 """
+
+
 def strdate(dte):
     return dte.strftime('%Y-%m-%dT%H:%M:%SZ')
 
@@ -28,6 +30,8 @@ def rewrite_kwargs(conn_type, kwargs, module_name=None):
     Current modifications:
     - if conn_type is not cloud and module is 'compute', 
       then rewrite project as name.
+    - if conn_type is cloud and module is 'storage',
+      then remove 'project' from dict.
 
     :param conn_type: E.g. 'cloud' or 'general'
     :type conn_type: ``str``
@@ -45,6 +49,9 @@ def rewrite_kwargs(conn_type, kwargs, module_name=None):
     if conn_type != 'cloud' and module_name != 'compute':
         if 'project' in kwargs:
             kwargs['name'] = 'projects/%s' % kwargs.pop('project')
+    if conn_type == 'cloud' and module_name == 'storage':
+        if 'project' in kwargs:
+            del kwargs['project']
     return kwargs
 
 
@@ -58,9 +65,9 @@ def gce_list_aggregated(service=None, key_name='name', **kwargs):
         for location, item in resp['items'].items():
             if key_name in item:
                 resp_list.extend(item[key_name])
-            
+
         req = service.aggregatedList_next(previous_request=req,
-                                           previous_response=resp)
+                                          previous_response=resp)
     return resp_list
 
 
@@ -73,8 +80,7 @@ def gce_list(service=None, **kwargs):
         resp = req.execute()
         for item in resp['items']:
             resp_list.append(item)
-        req = service.list_next(previous_request=req,
-                                 previous_response=resp)
+        req = service.list_next(previous_request=req, previous_response=resp)
     return resp_list
 
 
