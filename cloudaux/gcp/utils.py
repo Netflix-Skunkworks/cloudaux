@@ -16,7 +16,8 @@ def get_creds_from_kwargs(kwargs):
     creds = {
         'key_file': kwargs.pop('key_file', None),
         'http_auth': kwargs.pop('http_auth', None),
-        'project': kwargs.get('project', None)
+        'project': kwargs.get('project', None),
+        'user_agent': kwargs.pop('user_agent', None)
     }
     return (creds, kwargs)
 
@@ -26,6 +27,10 @@ def rewrite_kwargs(conn_type, kwargs, module_name=None):
     Manipulate connection keywords.
     
     Modifieds keywords based on connection type.
+
+    There is an assumption here that the client has
+    already been created and that these keywords are being
+    passed into methods for interacting with various services.
 
     Current modifications:
     - if conn_type is not cloud and module is 'compute', 
@@ -120,3 +125,36 @@ def get_gcp_stats():
     """Retrieve stats, such as function timings."""
     from cloudaux.gcp.decorators import _GCP_STATS
     return _GCP_STATS
+
+
+def get_user_agent_default(pkg_name='cloudaux'):
+    """ 
+    Get default User Agent String.
+
+    Try to import pkg_name to get an accurate version number.
+    
+    return: string
+    """
+    version = '0.0.1'
+    try:
+        import pkg_resources
+        version = pkg_resources.get_distribution(pkg_name).version
+    except pkg_resources.DistributionNotFound:
+        pass
+    except ImportError:
+        pass
+
+    return 'cloudaux/%s' % (version)
+
+
+def get_user_agent(**kwargs):
+    """
+    If there is a useragent, find it.
+
+    Look in the keywords for user_agent. If not found,
+    return get_user_agent_default
+    """
+    user_agent = kwargs.get('user_agent', None)
+    if not user_agent:
+        return get_user_agent_default()
+    return user_agent
