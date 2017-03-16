@@ -27,6 +27,7 @@ logger = logging.getLogger('cloudaux')
 def get_grants(bucket_name, include_owner=False, **conn):
     acl = get_bucket_acl(Bucket=bucket_name, **conn)
     grantees = {}
+    grantee_ref = {}
 
     for grant in acl['Grants']:
         grantee = grant['Grantee']
@@ -35,10 +36,16 @@ def get_grants(bucket_name, include_owner=False, **conn):
         if display_name == 'None' or display_name == 'null':
             logger.info("Received a bad display name: %s", display_name)
 
-        if display_name is None:
-            gname = grantee.get('ID')
+        # Make the grantee based on the canonical ID -- if it's a canonical user:
+        if grantee["Type"] == "CanonicalUser":
+            gname = grantee["ID"]
+
+            if display_name:
+                grantee_ref[gname] = display_name
+
+        # If it's a Group, then use the "URI"
         else:
-            gname = grantee['DisplayName']
+            gname = grantee["URI"]
 
         if gname in grantees:
             grantees[gname].append(grant['Permission'])
@@ -47,9 +54,9 @@ def get_grants(bucket_name, include_owner=False, **conn):
             grantees[gname] = [grant['Permission']]
 
     if include_owner:
-        return grantees, acl["Owner"]
+        return grantees, grantee_ref, {"ID": acl["Owner"]["ID"]}
 
-    return grantees
+    return grantees, grantee_ref
 
 
 def get_lifecycle(bucket_name, **conn):
@@ -273,6 +280,7 @@ def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
         "Arn": ...,
         "Owner": ...,
         "Grants": ...,
+        "GrantReferences": ...,
         "LifecycleRules": ...,
         "Logging": ...,
         "Policy": ...,
@@ -287,8 +295,10 @@ def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
         "AnalyticsConfigurations": ...,
         "MetricsConfigurations": ...,
         "InventoryConfigurations": ...,
-        "_version": 4
+        "_version": 5
     }
+
+    NOTE: "GrantReferences" is an ephemeral field that is not guaranteed to be consistent -- do not base logic off of it
     
     :param include_created:
     :param bucket_name: str bucket name
@@ -303,11 +313,12 @@ def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
 
     conn['region'] = region
 
-    grants, owner = get_grants(bucket_name, include_owner=True, **conn)
+    grants, grant_refs, owner = get_grants(bucket_name, include_owner=True, **conn)
 
     result = {
         'arn': "arn:aws:s3:::{name}".format(name=bucket_name),
         'grants': grants,
+        'grant_references': grant_refs,
         'owner': owner,
         'lifecycle_rules': get_lifecycle(bucket_name, **conn),
         'logging': get_logging(bucket_name, **conn),
@@ -323,7 +334,7 @@ def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
         'analytics_configurations': get_bucket_analytics_configurations(bucket_name, **conn),
         'metrics_configurations': get_bucket_metrics_configurations(bucket_name, **conn),
         'inventory_configurations': get_bucket_inventory_configurations(bucket_name, **conn),
-        '_version': 4
+        '_version': 5
     }
 
     if include_created:

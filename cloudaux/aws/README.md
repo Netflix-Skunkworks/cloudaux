@@ -154,13 +154,15 @@ Cloud Auxiliary has support for Amazon Web Services.
     {
       "Arn": "arn:aws:s3:::MyS3Bucket", 
       "Grants": {
-        "cloudaux_grantee": [
+        "SomeIdStringHere": [
           "FULL_CONTROL"
         ]
       },
+      "GrantReferences": {
+        "SomeIdStringHere": "S3CanonicalNameHere"
+      },
       "Owner": {
-        "ID": "SomeIdStringHere",
-        "DisplayName": "cloudaux_grantee"
+        "ID": "SomeIdStringHere"
       },
       "LifecycleRules": [
         {
@@ -307,6 +309,8 @@ Cloud Auxiliary has support for Amazon Web Services.
           }
         }
       ],
-      "Created": "2016-12-2 10:00:00+00:00",
-      "_version": 4
+      "Created": "2017-03-16 10:00:00+00:00",
+      "_version": 5
     }
+    
+    **NOTE: "GrantReferences" is an ephemeral field -- it is not guaranteed to be consistent - do not base logic off of it**
