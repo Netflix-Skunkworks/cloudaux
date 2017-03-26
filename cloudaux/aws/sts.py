@@ -43,7 +43,7 @@ def _resource(service, region, role):
 
 
 @rate_limited()
-def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None, assume_role=None, session_name='cloudaux', region='us-east-1'):
+def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None, assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False):
     """
     Used to obtain a boto3 client or resource connection.
     For cross account, provide both account_number and assume_role.
@@ -102,6 +102,9 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
 
     if role:
         CACHE[key] = (conn, role['Credentials']['Expiration'])
+
+    if return_credentials:
+        return conn, role['Credentials']
 
     return conn
 
