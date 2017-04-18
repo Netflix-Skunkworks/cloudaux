@@ -25,7 +25,49 @@ import json
 logger = logging.getLogger('cloudaux')
 
 
-def get_grants(bucket_name, include_owner=False, **conn):
+FLAGS=Bunch(
+    GRANTS=1,
+    GRANT_REFERENCES=1,
+    OWNER=1,
+    LIFECYCLE=2,
+    LOGGING=4,
+    POLICY=8,
+    TAGS=16,
+    VERSIONING=32,
+    WEBSITE=64,
+    CORS=128,
+    NOTIFICATIONS=256,
+    ACCELERATION=512,
+    REPLICATION=1024,
+    ANALYTICS=2048,
+    METRICS=4096,
+    INVENTORY=8192,
+    CREATED_DATE=16384,
+    ALL=32767)
+
+
+class FlagRegistry:
+    r = list()
+
+    @classmethod
+    def register(cls, flag, key):
+        def decorator(fn):
+            flag_list = flag
+            key_list = key
+            if type(flag) not in [list, tuple]:
+                flag_list = [flag] 
+            if type(key) not in [list, tuple]: 
+                key_list = [key]
+            for idx in xrange(len(flag_list)):
+                cls.r.append(dict(flag=flag_list[idx], key=key_list[idx], method=fn, rtv_ix=idx))
+            return fn
+        return decorator
+
+
+# @FlagRegistry.register(
+#     flag=(FLAGS.GRANTS, FLAGS.GRANT_REFERENCES, FLAGS.OWNER),
+#     key=('grants', 'grant_references', 'owner'))
+def get_grants(bucket_name, include_owner=True, **conn):
     acl = get_bucket_acl(Bucket=bucket_name, **conn)
     grantees = {}
     grantee_ref = {}
@@ -60,6 +102,7 @@ def get_grants(bucket_name, include_owner=False, **conn):
     return grantees, grantee_ref
 
 
+@FlagRegistry.register(flag=FLAGS.LIFECYCLE, key='lifecycle_rules')
 def get_lifecycle(bucket_name, **conn):
     try:
         result = get_bucket_lifecycle_configuration(Bucket=bucket_name, **conn)
@@ -111,6 +154,7 @@ def get_lifecycle(bucket_name, **conn):
     return lifecycle_rules
 
 
+@FlagRegistry.register(flag=FLAGS.LOGGING, key='logging')
 def get_logging(bucket_name, **conn):
     result = get_bucket_logging(Bucket=bucket_name, **conn)
 
@@ -140,6 +184,7 @@ def get_logging(bucket_name, **conn):
     return logging_dict
 
 
+@FlagRegistry.register(flag=FLAGS.POLICY, key='policy')
 def get_policy(bucket_name, **conn):
     try:
         result = get_bucket_policy(Bucket=bucket_name, **conn)
@@ -150,6 +195,7 @@ def get_policy(bucket_name, **conn):
         return None
 
 
+@FlagRegistry.register(flag=FLAGS.TAGS, key='tags')
 def get_tags(bucket_name, **conn):
     try:
         result = get_bucket_tagging(Bucket=bucket_name, **conn)
@@ -161,6 +207,7 @@ def get_tags(bucket_name, **conn):
     return {tag['Key']: tag['Value'] for tag in result['TagSet']}
 
 
+@FlagRegistry.register(flag=FLAGS.VERSIONING, key='versioning')
 def get_versioning(bucket_name, **conn):
     result = get_bucket_versioning(Bucket=bucket_name, **conn)
     versioning = {}
@@ -172,6 +219,7 @@ def get_versioning(bucket_name, **conn):
     return versioning
 
 
+@FlagRegistry.register(flag=FLAGS.WEBSITE, key='website')
 def get_website(bucket_name, **conn):
     try:
         result = get_bucket_website(Bucket=bucket_name, **conn)
@@ -193,6 +241,7 @@ def get_website(bucket_name, **conn):
     return website
 
 
+@FlagRegistry.register(flag=FLAGS.CORS, key='cors')
 def get_cors(bucket_name, **conn):
     try:
         result = get_bucket_cors(Bucket=bucket_name, **conn)
@@ -220,6 +269,7 @@ def get_cors(bucket_name, **conn):
     return cors
 
 
+@FlagRegistry.register(flag=FLAGS.NOTIFICATIONS, key='notifications')
 def get_notifications(bucket_name, **conn):
     result = get_bucket_notification_configuration(Bucket=bucket_name, **conn)
 
@@ -236,60 +286,42 @@ def get_notifications(bucket_name, **conn):
     return notifications
 
 
+@FlagRegistry.register(flag=FLAGS.ACCELERATION, key='acceleration')
 def get_acceleration(bucket_name, **conn):
     result = get_bucket_accelerate_configuration(Bucket=bucket_name, **conn)
-
     return result.get("Status")
 
 
+@FlagRegistry.register(flag=FLAGS.REPLICATION, key='replication')
 def get_replication(bucket_name, **conn):
     try:
         result = get_bucket_replication(Bucket=bucket_name, **conn)
-
     except ClientError as e:
         if "ReplicationConfigurationNotFoundError" not in str(e):
             raise e
-
         return {}
-
     return result["ReplicationConfiguration"]
 
 
+@FlagRegistry.register(flag=FLAGS.CREATED_DATE, key='created')
 def get_bucket_created(bucket_name, **conn):
     bucket = get_bucket_resource(bucket_name, **conn)
-
     return str(bucket.creation_date)
 
 
+@FlagRegistry.register(flag=FLAGS.ANALYTICS, key='analytics_configurations')
 def get_bucket_analytics_configurations(bucket_name, **conn):
     return list_bucket_analytics_configurations(Bucket=bucket_name, **conn)
 
 
+@FlagRegistry.register(flag=FLAGS.METRICS, key='metrics_configurations')
 def get_bucket_metrics_configurations(bucket_name, **conn):
     return list_bucket_metrics_configurations(Bucket=bucket_name, **conn)
 
 
+@FlagRegistry.register(flag=FLAGS.INVENTORY, key='inventory_configurations')
 def get_bucket_inventory_configurations(bucket_name, **conn):
     return list_bucket_inventory_configurations(Bucket=bucket_name, **conn)
-
-FLAGS=Bunch(
-    GRANTS=1,
-    GRANT_REFERENCES=1,
-    OWNER=1,
-    LIFECYCLE=2,
-    LOGGING=4,
-    POLICY=8,
-    TAGS=16,
-    VERSIONING=32,
-    WEBSITE=64,
-    CORS=128,
-    NOTIFICATIONS=256,
-    ACCELERATION=512,
-    REPLICATION=1024,
-    ANALYTICS=2048,
-    METRICS=4096,
-    INVENTORY=8192,
-    ALL=16383)
 
 
 def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLAGS.ALL, **conn):
@@ -338,6 +370,10 @@ def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLA
         'region': region,
         '_version': 5
     }
+    
+    for entry in FlagRegistry.r:
+        if flags & entry['flag']:
+            result.update({entry['key']: entry['method'](bucket_name, **conn)})
 
     if flags & FLAGS.GRANTS:
         grants, grant_refs, owner = get_grants(bucket_name, include_owner=True, **conn)
@@ -345,47 +381,5 @@ def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLA
             grants=grants,
             grant_references=grant_refs,
             owner=owner))
-
-    if flags & FLAGS.LIFECYCLE:
-        result.update(dict(lifecycle_rules=get_lifecycle(bucket_name, **conn)))
-
-    if flags & FLAGS.LOGGING:
-        result.update(dict(logging=get_logging(bucket_name, **conn)))
-
-    if flags & FLAGS.POLICY:
-        result.update(dict(policy=get_policy(bucket_name, **conn)))
-
-    if flags & FLAGS.TAGS:
-        result.update(dict(tags=get_tags(bucket_name, **conn)))
-
-    if flags & FLAGS.VERSIONING:
-        result.update(dict(versioning=get_versioning(bucket_name, **conn)))
-
-    if flags & FLAGS.WEBSITE:
-        result.update(dict(website=get_website(bucket_name, **conn)))
-
-    if flags & FLAGS.CORS:
-        result.update(dict(cors=get_cors(bucket_name, **conn)))
-
-    if flags & FLAGS.NOTIFICATIONS:
-        result.update(dict(notifications=get_notifications(bucket_name, **conn)))
-
-    if flags & FLAGS.ACCELERATION:
-        result.update(dict(acceleration=get_acceleration(bucket_name, **conn)))
-
-    if flags & FLAGS.REPLICATION:
-        result.update(dict(replication=get_replication(bucket_name, **conn)))
-
-    if flags & FLAGS.ANALYTICS:
-        result.update(dict(analytics_configurations=get_bucket_analytics_configurations(bucket_name, **conn)))
-
-    if flags & FLAGS.METRICS:
-        result.update(dict(metrics_configurations=get_bucket_metrics_configurations(bucket_name, **conn)))
-
-    if flags & FLAGS.INVENTORY:
-        result.update(dict(inventory_configurations=get_bucket_inventory_configurations(bucket_name, **conn)))
-
-    if include_created:
-        result["Created"] = get_bucket_created(bucket_name, **conn)
 
     return modify(result, format=output)
