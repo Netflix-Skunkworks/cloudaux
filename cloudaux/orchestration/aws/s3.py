@@ -47,10 +47,39 @@ FLAGS=Bunch(
 
 
 class FlagRegistry:
-    r = list()
+    from collections import defaultdict
+    r = defaultdict(list)
 
     @classmethod
     def register(cls, flag, key):
+        """
+        optional methods must register their flag with the FlagRegistry.
+        
+        The registry:
+            - stores the flags relevant to each method.
+            - stores the dictionary key the return value will be saved as.
+            - for methods with multiple return values, stores the flag/key for each return value.
+        
+        Single Return Value Example:
+        
+        @FlagRegistry.register(flag=FLAGS.LIFECYCLE, key='lifecycle_rules')
+        def get_lifecycle(bucket_name, **conn):
+            pass
+            
+        In this example, the `get_lifecycle` method will be called when the `LIFECYCLE` flag is set.
+        The return value will be appended to the results dictionary with the 'lifecycle_rules' key.
+        
+        Multiple Return Value Example:
+        
+        @FlagRegistry.register(
+            flag=(FLAGS.GRANTS, FLAGS.GRANT_REFERENCES, FLAGS.OWNER),
+            key=('grants', 'grant_references', 'owner'))
+        def get_grants(bucket_name, include_owner=True, **conn):
+            pass
+        
+        In this example, the `get_grants` method will be called when the `GRANTS`, `GRANT_REFERENCES`, or `OWNER` flags are set.
+        The return values will be appended to the results dictionary with the corresponding 'grants', 'grant_references', 'owner' key.
+        """
         def decorator(fn):
             flag_list = flag
             key_list = key
@@ -59,14 +88,36 @@ class FlagRegistry:
             if type(key) not in [list, tuple]: 
                 key_list = [key]
             for idx in xrange(len(flag_list)):
-                cls.r.append(dict(flag=flag_list[idx], key=key_list[idx], method=fn, rtv_ix=idx))
+                cls.r[fn].append(dict(flag=flag_list[idx], key=key_list[idx], rtv_ix=idx))
             return fn
         return decorator
+    
+    @classmethod
+    def build_out(cls, result, flags, *args, **kwargs):
+        """
+        Provided user-supplied flags, `build_out` will find the appropriate methods from the FlagRegistry
+        and mutate the `result` dictionary.
+        
+        :param: result - Dictionary to put results into.
+        :param: flags - User-supplied combination of FLAGS.  (ie. `flags = FLAGS.CORS | FLAGS.WEBSITE`)
+        :param: *args - Passed on to the method registered in the FlagRegistry
+        :param: **kwargs - Passed on to the method registered in the FlagRegistry
+        :return: None.  Mutates the results dictionary.
+        """
+        for method, entries in FlagRegistry.r.items():
+            retval = method(*args, **kwargs)
+            for entry in entries:
+                if len(entries) > 1:
+                    key_retval = retval[entry['rtv_ix']]
+                else:
+                    key_retval = retval
+                if flags & entry['flag']:
+                    result.update({entry['key']: key_retval})
 
 
-# @FlagRegistry.register(
-#     flag=(FLAGS.GRANTS, FLAGS.GRANT_REFERENCES, FLAGS.OWNER),
-#     key=('grants', 'grant_references', 'owner'))
+@FlagRegistry.register(
+ flag=(FLAGS.GRANTS, FLAGS.GRANT_REFERENCES, FLAGS.OWNER),
+ key=('grants', 'grant_references', 'owner'))
 def get_grants(bucket_name, include_owner=True, **conn):
     acl = get_bucket_acl(Bucket=bucket_name, **conn)
     grantees = {}
@@ -352,13 +403,17 @@ def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLA
 
     NOTE: "GrantReferences" is an ephemeral field that is not guaranteed to be consistent -- do not base logic off of it
     
-    :param include_created:
+    :param include_created: legacy param moved to FLAGS.
     :param bucket_name: str bucket name
     :param output: Determines whether keys should be returned camelized or underscored.
     :param conn: dict containing enough information to make a connection to the desired account.
     Must at least have 'assume_role' key.
     :return: dict containing a fully built out bucket.
     """
+    if include_created:
+        # coerce the legacy param "include_created" into the flags param.
+        flags = flags & FLAGS.CREATED_DATE
+    
     region = get_bucket_region(Bucket=bucket_name, **conn)
     if not region:
         return modify(dict(Error='Unauthorized'), format=output)
@@ -371,15 +426,5 @@ def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLA
         '_version': 5
     }
     
-    for entry in FlagRegistry.r:
-        if flags & entry['flag']:
-            result.update({entry['key']: entry['method'](bucket_name, **conn)})
-
-    if flags & FLAGS.GRANTS:
-        grants, grant_refs, owner = get_grants(bucket_name, include_owner=True, **conn)
-        result.update(dict(
-            grants=grants,
-            grant_references=grant_refs,
-            owner=owner))
-
+    FlagRegistry.build_out(result, flags, bucket_name, **conn)
     return modify(result, format=output)
