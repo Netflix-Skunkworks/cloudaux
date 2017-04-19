@@ -2,7 +2,7 @@ from cloudaux import CloudAux
 from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
 from cloudaux.orchestration import modify
-from cloudaux.orchestration.flag_registry import FlagRegistry as Registry
+from cloudaux.orchestration.flag_registry import FlagRegistry
 from bunch import Bunch
 
 
@@ -12,7 +12,7 @@ FLAGS=Bunch(
     INSTANCE_PROFILES=4,
     ALL=7)
 
-class FlagRegistry(Registry):
+class RoleFlagRegistry(FlagRegistry):
     from collections import defaultdict
     r = defaultdict(list)
 
@@ -45,17 +45,17 @@ def _get_base(role, **conn):
     return role
 
 
-@FlagRegistry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
+@RoleFlagRegistry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
 def get_managed_policies(role, **conn):
     return get_role_managed_policies(role, **conn)
 
 
-@FlagRegistry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
+@RoleFlagRegistry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
 def get_inline_policies(role, **conn):
     return get_role_inline_policies(role, **conn)
 
 
-@FlagRegistry.register(flag=FLAGS.INSTANCE_PROFILES, key='instance_profiles')
+@RoleFlagRegistry.register(flag=FLAGS.INSTANCE_PROFILES, key='instance_profiles')
 def get_instance_profiles(role, **conn):
     return get_role_instance_profiles(role, **conn)
 
@@ -86,5 +86,5 @@ def get_role(role, output='camelized', flags=FLAGS.ALL, **conn):
     _conn_from_args(role, conn)
     role = _get_base(role, **conn)
 
-    FlagRegistry.build_out(role, flags, role, **conn)
+    RoleFlagRegistry.build_out(role, flags, role, **conn)
     return modify(role, format=output)

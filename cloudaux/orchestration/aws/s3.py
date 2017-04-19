@@ -15,7 +15,7 @@ from cloudaux.aws.s3 import list_bucket_analytics_configurations
 from cloudaux.aws.s3 import list_bucket_metrics_configurations
 from cloudaux.aws.s3 import list_bucket_inventory_configurations
 from cloudaux.orchestration import modify
-from cloudaux.orchestration.flag_registry import FlagRegistry as Registry
+from cloudaux.orchestration.flag_registry import FlagRegistry
 
 from botocore.exceptions import ClientError
 from bunch import Bunch
@@ -47,12 +47,12 @@ FLAGS=Bunch(
     ALL=32767)
 
 
-class FlagRegistry(Registry):
+class S3FlagRegistry(FlagRegistry):
     from collections import defaultdict
     r = defaultdict(list)
 
 
-@FlagRegistry.register(
+@S3FlagRegistry.register(
  flag=(FLAGS.GRANTS, FLAGS.GRANT_REFERENCES, FLAGS.OWNER),
  key=('grants', 'grant_references', 'owner'))
 def get_grants(bucket_name, include_owner=True, **conn):
@@ -90,7 +90,7 @@ def get_grants(bucket_name, include_owner=True, **conn):
     return grantees, grantee_ref
 
 
-@FlagRegistry.register(flag=FLAGS.LIFECYCLE, key='lifecycle_rules')
+@S3FlagRegistry.register(flag=FLAGS.LIFECYCLE, key='lifecycle_rules')
 def get_lifecycle(bucket_name, **conn):
     try:
         result = get_bucket_lifecycle_configuration(Bucket=bucket_name, **conn)
@@ -142,7 +142,7 @@ def get_lifecycle(bucket_name, **conn):
     return lifecycle_rules
 
 
-@FlagRegistry.register(flag=FLAGS.LOGGING, key='logging')
+@S3FlagRegistry.register(flag=FLAGS.LOGGING, key='logging')
 def get_logging(bucket_name, **conn):
     result = get_bucket_logging(Bucket=bucket_name, **conn)
 
@@ -172,7 +172,7 @@ def get_logging(bucket_name, **conn):
     return logging_dict
 
 
-@FlagRegistry.register(flag=FLAGS.POLICY, key='policy')
+@S3FlagRegistry.register(flag=FLAGS.POLICY, key='policy')
 def get_policy(bucket_name, **conn):
     try:
         result = get_bucket_policy(Bucket=bucket_name, **conn)
@@ -183,7 +183,7 @@ def get_policy(bucket_name, **conn):
         return None
 
 
-@FlagRegistry.register(flag=FLAGS.TAGS, key='tags')
+@S3FlagRegistry.register(flag=FLAGS.TAGS, key='tags')
 def get_tags(bucket_name, **conn):
     try:
         result = get_bucket_tagging(Bucket=bucket_name, **conn)
@@ -195,7 +195,7 @@ def get_tags(bucket_name, **conn):
     return {tag['Key']: tag['Value'] for tag in result['TagSet']}
 
 
-@FlagRegistry.register(flag=FLAGS.VERSIONING, key='versioning')
+@S3FlagRegistry.register(flag=FLAGS.VERSIONING, key='versioning')
 def get_versioning(bucket_name, **conn):
     result = get_bucket_versioning(Bucket=bucket_name, **conn)
     versioning = {}
@@ -207,7 +207,7 @@ def get_versioning(bucket_name, **conn):
     return versioning
 
 
-@FlagRegistry.register(flag=FLAGS.WEBSITE, key='website')
+@S3FlagRegistry.register(flag=FLAGS.WEBSITE, key='website')
 def get_website(bucket_name, **conn):
     try:
         result = get_bucket_website(Bucket=bucket_name, **conn)
@@ -229,7 +229,7 @@ def get_website(bucket_name, **conn):
     return website
 
 
-@FlagRegistry.register(flag=FLAGS.CORS, key='cors')
+@S3FlagRegistry.register(flag=FLAGS.CORS, key='cors')
 def get_cors(bucket_name, **conn):
     try:
         result = get_bucket_cors(Bucket=bucket_name, **conn)
@@ -257,7 +257,7 @@ def get_cors(bucket_name, **conn):
     return cors
 
 
-@FlagRegistry.register(flag=FLAGS.NOTIFICATIONS, key='notifications')
+@S3FlagRegistry.register(flag=FLAGS.NOTIFICATIONS, key='notifications')
 def get_notifications(bucket_name, **conn):
     result = get_bucket_notification_configuration(Bucket=bucket_name, **conn)
 
@@ -274,13 +274,13 @@ def get_notifications(bucket_name, **conn):
     return notifications
 
 
-@FlagRegistry.register(flag=FLAGS.ACCELERATION, key='acceleration')
+@S3FlagRegistry.register(flag=FLAGS.ACCELERATION, key='acceleration')
 def get_acceleration(bucket_name, **conn):
     result = get_bucket_accelerate_configuration(Bucket=bucket_name, **conn)
     return result.get("Status")
 
 
-@FlagRegistry.register(flag=FLAGS.REPLICATION, key='replication')
+@S3FlagRegistry.register(flag=FLAGS.REPLICATION, key='replication')
 def get_replication(bucket_name, **conn):
     try:
         result = get_bucket_replication(Bucket=bucket_name, **conn)
@@ -291,23 +291,23 @@ def get_replication(bucket_name, **conn):
     return result["ReplicationConfiguration"]
 
 
-@FlagRegistry.register(flag=FLAGS.CREATED_DATE, key='created')
+@S3FlagRegistry.register(flag=FLAGS.CREATED_DATE, key='created')
 def get_bucket_created(bucket_name, **conn):
     bucket = get_bucket_resource(bucket_name, **conn)
     return str(bucket.creation_date)
 
 
-@FlagRegistry.register(flag=FLAGS.ANALYTICS, key='analytics_configurations')
+@S3FlagRegistry.register(flag=FLAGS.ANALYTICS, key='analytics_configurations')
 def get_bucket_analytics_configurations(bucket_name, **conn):
     return list_bucket_analytics_configurations(Bucket=bucket_name, **conn)
 
 
-@FlagRegistry.register(flag=FLAGS.METRICS, key='metrics_configurations')
+@S3FlagRegistry.register(flag=FLAGS.METRICS, key='metrics_configurations')
 def get_bucket_metrics_configurations(bucket_name, **conn):
     return list_bucket_metrics_configurations(Bucket=bucket_name, **conn)
 
 
-@FlagRegistry.register(flag=FLAGS.INVENTORY, key='inventory_configurations')
+@S3FlagRegistry.register(flag=FLAGS.INVENTORY, key='inventory_configurations')
 def get_bucket_inventory_configurations(bucket_name, **conn):
     return list_bucket_inventory_configurations(Bucket=bucket_name, **conn)
 
@@ -363,5 +363,5 @@ def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLA
         '_version': 5
     }
     
-    FlagRegistry.build_out(result, flags, bucket_name, **conn)
+    S3FlagRegistry.build_out(result, flags, bucket_name, **conn)
     return modify(result, format=output)
