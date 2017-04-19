@@ -17,6 +17,21 @@ class RoleFlagRegistry(FlagRegistry):
     r = defaultdict(list)
 
 
+@RoleFlagRegistry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
+def get_managed_policies(role, **conn):
+    return get_role_managed_policies(role, **conn)
+
+
+@RoleFlagRegistry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
+def get_inline_policies(role, **conn):
+    return get_role_inline_policies(role, **conn)
+
+
+@RoleFlagRegistry.register(flag=FLAGS.INSTANCE_PROFILES, key='instance_profiles')
+def get_instance_profiles(role, **conn):
+    return get_role_instance_profiles(role, **conn)
+
+
 def _get_base(role, **conn):
     """
     Determine whether the boto get_role call needs to be made or if we already have all that data
@@ -43,21 +58,6 @@ def _get_base(role, **conn):
     role['_version'] = 1
 
     return role
-
-
-@RoleFlagRegistry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
-def get_managed_policies(role, **conn):
-    return get_role_managed_policies(role, **conn)
-
-
-@RoleFlagRegistry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
-def get_inline_policies(role, **conn):
-    return get_role_inline_policies(role, **conn)
-
-
-@RoleFlagRegistry.register(flag=FLAGS.INSTANCE_PROFILES, key='instance_profiles')
-def get_instance_profiles(role, **conn):
-    return get_role_instance_profiles(role, **conn)
 
 
 def get_role(role, output='camelized', flags=FLAGS.ALL, **conn):
