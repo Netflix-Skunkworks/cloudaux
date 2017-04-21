@@ -14,6 +14,7 @@ Cloud Auxiliary has support for Google Cloud Platform.
  - client caching
  - general caching and stats decorators available
  - basic support for non-specified discovery-API services
+ - control which attributes are returned with flags. (Service Account only)
 
 ## Orchestration Supported Technologies
 
@@ -66,10 +67,12 @@ Cloud Auxiliary has support for Google Cloud Platform.
 
 ### IAM Service Account
 
-    from cloudaux.orchestration.gcp.iam.serviceaccount import get_serviceaccount_complete
+    from cloudaux.orchestration.gcp.iam.serviceaccount import get_serviceaccount_complete, FLAGS
     sa_name = 'projects/my-project-one/serviceAccounts/service-account-key@my-project-one.iam.gserviceaccount.com'
-    sa = get_serviceaccount_complete(sa_name, **conn_details)
+    sa = get_serviceaccount_complete(sa_name, flags=FLAGS.ALL, **conn_details)
     print(json.dumps(sa, indent=4, sort_keys=True))
+    
+    # Flag options for Service Accounts are KEYS, POLICY, ALL (default).
 
     {
       "DisplayName": "service-account", 

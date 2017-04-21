@@ -15,6 +15,7 @@ Cloud Auxiliary has support for Amazon Web Services.
  - rate limit handling, with exponential backoff.
  - multi-account sts:assumerole abstraction.
  - orchestrates all the calls required to fully describe an item.
+ - control which attributes are returned flags.
 
 ## Orchestration Supported Technologies
 
@@ -72,7 +73,7 @@ Cloud Auxiliary has support for Amazon Web Services.
 
 ### Role
 
-    from cloudaux.orchestration.aws.iam.role import get_role
+    from cloudaux.orchestration.aws.iam.role import get_role, FLAGS
     
     # account_number may be extracted from the ARN of the role passed to get_role
     # if not included in conn.
@@ -85,7 +86,14 @@ Cloud Auxiliary has support for Amazon Web Services.
     role = get_role(
         dict(arn='arn:aws:iam::000000000000:role/myRole', role_name='myRole'),
         output='camelized',  # optional: {camelized underscored}
+        flags=FLAGS.ALL,
         **conn)
+        
+    # The flags parameter is optional but allows the user to indicate that 
+    # only a subset of the full item description is required.
+    # IAM Role Flag Options:
+    #   MANAGED_POLICIES, INLINE_POLICIES, INSTANCE_PROFILES, ALL (default)
+    # For instance: flags=FLAGS.MANAGED_POLICIES | FLAGS.INSTANCE_PROFILES
 
     # cloudaux makes a number of calls to obtain a full description of the role
     print(json.dumps(role, indent=4, sort_keys=True))
@@ -105,11 +113,19 @@ Cloud Auxiliary has support for Amazon Web Services.
     
 ### User    
     
-    from cloudaux.orchestration.aws.iam.user import get_user
+    from cloudaux.orchestration.aws.iam.user import get_user, FLAGS
     
     user = get_user(
         dict(arn='arn:aws:iam::000000000000:user/myUser', role_name='myUser'),
+        flags=FLAGS.ALL,
         **conn)
+
+    # The flags parameter is optional but allows the user to indicate that 
+    # only a subset of the full item description is required.
+    # IAM User Flag Options:
+    #   ACCESS_KEYS, INLINE_POLICIES, MANAGED_POLICIES       
+    #   MFA_DEVICES, LOGIN_PROFILE, SIGNING_CERTIFICATES, ALL (default)
+    # For instance: flags=FLAGS.ACCESS_KEYS | FLAGS.MFA_DEVICES | FLAGS.LOGIN_PROFILE
     
     print(json.dumps(user, indent=2, sort_keys=True))
     
@@ -141,13 +157,21 @@ Cloud Auxiliary has support for Amazon Web Services.
 
 ### S3
 
-    from cloudaux.orchestration.aws.s3 import get_bucket
+    from cloudaux.orchestration.aws.s3 import get_bucket, FLAGS
     
     conn = dict(
         account_number='000000000000',
         assume_role='SecurityMonkey')
     
-    bucket = get_bucket('MyS3Bucket', **conn)
+    bucket = get_bucket('MyS3Bucket', flags=FLAGS.ALL, **conn)
+    
+    # The flags parameter is optional but allows the user to indicate that 
+    # only a subset of the full item description is required.
+    # S3 Flag Options are:
+    #   GRANTS, GRANT_REFERENCES, OWNER, LIFECYCLE, LOGGING, POLICY, TAGS
+    #   VERSIONING, WEBSITE, CORS, NOTIFICATIONS, ACCELERATION, REPLICATION
+    #   ANALYTICS, METRICS, INVENTORY, CREATED_DATE, ALL (default)
+    # For instance: flags=FLAGS.WEBSITE | FLAGS.CORS | FLAGS.POLICY
     
     print(json.dumps(bucket, indent=2, sort_keys=True))
     
