@@ -15,10 +15,9 @@ from cloudaux.aws.s3 import list_bucket_analytics_configurations
 from cloudaux.aws.s3 import list_bucket_metrics_configurations
 from cloudaux.aws.s3 import list_bucket_inventory_configurations
 from cloudaux.orchestration import modify
-from cloudaux.orchestration.flag_registry import FlagRegistry
+from cloudaux.orchestration.flag_registry import FlagRegistry, Flags
 
 from botocore.exceptions import ClientError
-from bunch import Bunch
 import logging
 import json
 
@@ -26,30 +25,15 @@ import json
 logger = logging.getLogger('cloudaux')
 
 
-FLAGS=Bunch(
-    GRANTS=1,
-    GRANT_REFERENCES=2,
-    OWNER=4,
-    LIFECYCLE=8,
-    LOGGING=16,
-    POLICY=32,
-    TAGS=64,
-    VERSIONING=128,
-    WEBSITE=256,
-    CORS=512,
-    NOTIFICATIONS=1024,
-    ACCELERATION=2048,
-    REPLICATION=4096,
-    ANALYTICS=8192,
-    METRICS=16384,
-    INVENTORY=32768,
-    CREATED_DATE=65536,
-    ALL=131071)
-
-
 class S3FlagRegistry(FlagRegistry):
     from collections import defaultdict
     r = defaultdict(list)
+
+
+FLAGS = Flags('BASE', 'GRANTS', 'GRANT_REFERENCES', 'OWNER', 'LIFECYCLE',
+    'LOGGING', 'POLICY', 'TAGS', 'VERSIONING', 'WEBSITE', 'CORS',
+    'NOTIFICATIONS', 'ACCELERATION', 'REPLICATION', 'ANALYTICS',
+    'METRICS', 'INVENTORY', 'CREATED_DATE')
 
 
 @S3FlagRegistry.register(
@@ -312,6 +296,15 @@ def get_bucket_inventory_configurations(bucket_name, **conn):
     return list_bucket_inventory_configurations(Bucket=bucket_name, **conn)
 
 
+@S3FlagRegistry.register(flag=FLAGS.BASE)
+def get_base(bucket_name, **conn):
+    return {
+        'arn': "arn:aws:s3:::{name}".format(name=bucket_name),
+        'region': conn.get('region'),
+        '_version': 5
+    }
+
+
 def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLAGS.ALL, **conn):
     """
     Orchestrates all the calls required to fully build out an S3 bucket in the following format:
@@ -356,12 +349,6 @@ def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLA
         return modify(dict(Error='Unauthorized'), format=output)
 
     conn['region'] = region
-
-    result = {
-        'arn': "arn:aws:s3:::{name}".format(name=bucket_name),
-        'region': region,
-        '_version': 5
-    }
-    
+    result = dict()
     S3FlagRegistry.build_out(result, flags, bucket_name, **conn)
     return modify(result, format=output)

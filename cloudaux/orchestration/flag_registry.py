@@ -5,7 +5,7 @@ class FlagRegistry:
     r = defaultdict(list)
 
     @classmethod
-    def register(cls, flag, key):
+    def register(cls, flag, key=None):
         """
         optional methods must register their flag with the FlagRegistry.
         
@@ -66,4 +66,24 @@ class FlagRegistry:
                 else:
                     key_retval = retval
                 if flags & entry['flag']:
-                    result.update({entry['key']: key_retval})
+                    if entry['key']:
+                        result.update({entry['key']: key_retval})
+                    else:
+                        result.update(key_retval)
+
+
+class Flags(object):
+    def __init__(self, *flags):
+        from collections import OrderedDict
+        self.flags = OrderedDict()
+        self._idx = 0
+        for flag in flags:
+            self.flags[flag] = 2**self._idx
+            self._idx += 1
+        self.flags['ALL'] = 2**self._idx-1
+    
+    def __getattr__(self, k):
+        return self.flags[k]
+    
+    def __repr__(self):
+        return json.dumps(self.flags, indent=2)

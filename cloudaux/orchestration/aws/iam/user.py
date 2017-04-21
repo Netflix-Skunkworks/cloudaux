@@ -7,22 +7,15 @@ from cloudaux.aws.iam import get_user_mfa_devices
 from cloudaux.aws.iam import get_user_signing_certificates
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
 from cloudaux.orchestration import modify
-from cloudaux.orchestration.flag_registry import FlagRegistry
-from bunch import Bunch
+from cloudaux.orchestration.flag_registry import FlagRegistry, Flags
 
-
-FLAGS=Bunch(
-    ACCESS_KEYS=1,
-    INLINE_POLICIES=2,
-    MANAGED_POLICIES=4,
-    MFA_DEVICES=8,
-    LOGIN_PROFILE=16,
-    SIGNING_CERTIFICATES=32,
-    ALL=63)
 
 class UserFlagRegistry(FlagRegistry):
     from collections import defaultdict
     r = defaultdict(list)
+
+
+FLAGS = Flags('BASE', 'ACCESS_KEYS', 'INLINE_POLICIES', 'MANAGED_POLICIES', 'MFA_DEVICES', 'LOGIN_PROFILE', 'SIGNING_CERTIFICATES')
 
 
 @UserFlagRegistry.register(flag=FLAGS.ACCESS_KEYS, key='access_keys')
@@ -55,6 +48,7 @@ def get_signing_certificates(user, **conn):
     return get_user_signing_certificates(user, **conn)
 
 
+@UserFlagRegistry.register(flag=FLAGS.BASE)
 def _get_base(user, **conn):
     base_fields = frozenset(['Arn', 'CreateDate', 'Path', 'UserId', 'UserName'])
     needs_base = False
@@ -102,6 +96,5 @@ def get_user(user, output='camelized', flags=FLAGS.ALL, **conn):
     """
     user = modify(user, 'camelized')
     _conn_from_args(user, conn)
-    user = _get_base(user, **conn)
     UserFlagRegistry.build_out(user, flags, user, **conn)
     return modify(user, format=output)
