@@ -86,13 +86,13 @@ Cloud Auxiliary has support for Amazon Web Services.
     role = get_role(
         dict(arn='arn:aws:iam::000000000000:role/myRole', role_name='myRole'),
         output='camelized',  # optional: {camelized underscored}
-        flags=FLAGS.ALL,
+        flags=FLAGS.ALL,  # optional
         **conn)
         
     # The flags parameter is optional but allows the user to indicate that 
     # only a subset of the full item description is required.
     # IAM Role Flag Options:
-    #   MANAGED_POLICIES, INLINE_POLICIES, INSTANCE_PROFILES, ALL (default)
+    #   BASE, MANAGED_POLICIES, INLINE_POLICIES, INSTANCE_PROFILES, ALL (default)
     # For instance: flags=FLAGS.MANAGED_POLICIES | FLAGS.INSTANCE_PROFILES
 
     # cloudaux makes a number of calls to obtain a full description of the role
@@ -123,7 +123,7 @@ Cloud Auxiliary has support for Amazon Web Services.
     # The flags parameter is optional but allows the user to indicate that 
     # only a subset of the full item description is required.
     # IAM User Flag Options:
-    #   ACCESS_KEYS, INLINE_POLICIES, MANAGED_POLICIES       
+    #   BASE, ACCESS_KEYS, INLINE_POLICIES, MANAGED_POLICIES       
     #   MFA_DEVICES, LOGIN_PROFILE, SIGNING_CERTIFICATES, ALL (default)
     # For instance: flags=FLAGS.ACCESS_KEYS | FLAGS.MFA_DEVICES | FLAGS.LOGIN_PROFILE
     
@@ -168,7 +168,7 @@ Cloud Auxiliary has support for Amazon Web Services.
     # The flags parameter is optional but allows the user to indicate that 
     # only a subset of the full item description is required.
     # S3 Flag Options are:
-    #   GRANTS, GRANT_REFERENCES, OWNER, LIFECYCLE, LOGGING, POLICY, TAGS
+    #   BASE, GRANTS, GRANT_REFERENCES, OWNER, LIFECYCLE, LOGGING, POLICY, TAGS
     #   VERSIONING, WEBSITE, CORS, NOTIFICATIONS, ACCELERATION, REPLICATION
     #   ANALYTICS, METRICS, INVENTORY, CREATED_DATE, ALL (default)
     # For instance: flags=FLAGS.WEBSITE | FLAGS.CORS | FLAGS.POLICY

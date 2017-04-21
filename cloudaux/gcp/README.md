@@ -14,7 +14,7 @@ Cloud Auxiliary has support for Google Cloud Platform.
  - client caching
  - general caching and stats decorators available
  - basic support for non-specified discovery-API services
- - control which attributes are returned with flags. (Service Account only)
+ - control which attributes are returned with flags.
 
 ## Orchestration Supported Technologies
 
@@ -72,7 +72,7 @@ Cloud Auxiliary has support for Google Cloud Platform.
     sa = get_serviceaccount_complete(sa_name, flags=FLAGS.ALL, **conn_details)
     print(json.dumps(sa, indent=4, sort_keys=True))
     
-    # Flag options for Service Accounts are KEYS, POLICY, ALL (default).
+    # Flag options for Service Accounts are BASE, KEYS, POLICY, ALL (default).
 
     {
       "DisplayName": "service-account", 
@@ -106,6 +106,9 @@ Cloud Auxiliary has support for Google Cloud Platform.
     net_subnet = get_network_and_subnetworks(network=NETWORK, **conn_details)
     print(json.dumps(net_subnet, indent=4, sort_keys=True))
 
+    # Flag options for Service Accounts are BASE, ALL (default).
+    # BASE and ALL are equivelant for this service.
+
     {
       "AutoCreateSubnetworks": true, 
       "CreationTimestamp": "2016-05-09T11:15:47.434-07:00", 
@@ -134,6 +137,9 @@ Cloud Auxiliary has support for Google Cloud Platform.
     from cloudaux.orchestration.gcp.gcs.bucket import get_bucket
     b = get_bucket(bucket_name=BUCKET, **conn_details)
     print(json.dumps(b, indent=4, sort_keys=True))
+
+    # Flag options for Service Accounts are BASE, ALL (default).
+    # BASE and ALL are equivelant for this service.
 
     {
 	"Acl": [

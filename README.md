@@ -31,7 +31,7 @@ GCP:
  - client caching
  - general caching and stats decorators available
  - basic support for non-specified discovery-API services
- - control which attributes are returned with flags. (Service Account only)
+ - control which attributes are returned with flags.
 
 ## Orchestration Supported Technologies
 
@@ -144,8 +144,14 @@ GCP:
     role = get_role(
         dict(arn='arn:aws:iam::000000000000:role/myRole', role_name='myRole'),
         output='camelized',  # optional: {camelized underscored}
-        flags=FLAGS.ALL,  # options - MANAGED_POLICIES, INLINE_POLICIES, INSTANCE_PROFILES, ALL (default)
+        flags=FLAGS.ALL,  # optional
         **conn)
+
+    # The flags parameter is optional but allows the user to indicate that 
+    # only a subset of the full item description is required.
+    # IAM Role Flag Options:
+    #   BASE, MANAGED_POLICIES, INLINE_POLICIES, INSTANCE_PROFILES, ALL (default)
+    # For instance: flags=FLAGS.MANAGED_POLICIES | FLAGS.INSTANCE_PROFILES
 
     # cloudaux makes a number of calls to obtain a full description of the role
     print(json.dumps(role, indent=4, sort_keys=True))
@@ -170,7 +176,7 @@ GCP:
     sa = get_serviceaccount_complete(sa_name, flags=FLAGS.ALL, **conn_details)
     print(json.dumps(sa, indent=4, sort_keys=True))
 
-    # Flag options for Service Accounts are KEYS, POLICY, ALL (default).
+    # Flag options for Service Accounts are BASE, KEYS, POLICY, ALL (default).
     
     {
       "DisplayName": "service-account", 
