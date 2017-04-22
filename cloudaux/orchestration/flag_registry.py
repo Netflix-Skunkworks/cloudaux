@@ -59,6 +59,16 @@ class FlagRegistry:
         :return: None.  Mutates the results dictionary.
         """
         for method, entries in cls.r.items():
+            
+            # determine if the method should be called by inspecting the flags.
+            method_flag = 0
+            for entry in entries:
+                method_flag = method_flag | entry['flag']
+            
+            if not flags & method_flag:
+                continue
+            
+            # At least one of the return values is required. Call the method.
             retval = method(*args, **kwargs)
             for entry in entries:
                 if len(entries) > 1:
@@ -86,4 +96,4 @@ class Flags(object):
         return self.flags[k]
     
     def __repr__(self):
-        return json.dumps(self.flags, indent=2)
+        return str(self.flags)
