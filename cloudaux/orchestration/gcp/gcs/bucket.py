@@ -43,7 +43,7 @@ def _get_base(bucket_name, **conn):
     return result
 
 
-def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLAGS.ALL, **conn):
+def get_bucket(bucket_name, output='camelized', flags=FLAGS.ALL, **conn):
     result = dict()
     GCSFlagRegistry.build_out(result, flags, bucket_name, **conn)
     return modify(result, format=output)
