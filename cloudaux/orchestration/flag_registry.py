@@ -59,15 +59,14 @@ class FlagRegistry:
         :return: None.  Mutates the results dictionary.
         """
         for method, entries in cls.r.items():
-            
             # determine if the method should be called by inspecting the flags.
             method_flag = 0
             for entry in entries:
                 method_flag = method_flag | entry['flag']
-            
+
             if not flags & method_flag:
                 continue
-            
+
             # At least one of the return values is required. Call the method.
             retval = method(*args, **kwargs)
             for entry in entries:
