@@ -17,6 +17,7 @@ from cloudaux.aws.s3 import list_bucket_inventory_configurations
 from cloudaux.orchestration import modify
 
 from botocore.exceptions import ClientError
+from bunch import Bunch
 import logging
 import json
 
@@ -271,8 +272,27 @@ def get_bucket_metrics_configurations(bucket_name, **conn):
 def get_bucket_inventory_configurations(bucket_name, **conn):
     return list_bucket_inventory_configurations(Bucket=bucket_name, **conn)
 
+FLAGS=Bunch(
+    GRANTS=1,
+    GRANT_REFERENCES=1,
+    OWNER=1,
+    LIFECYCLE=2,
+    LOGGING=4,
+    POLICY=8,
+    TAGS=16,
+    VERSIONING=32,
+    WEBSITE=64,
+    CORS=128,
+    NOTIFICATIONS=256,
+    ACCELERATION=512,
+    REPLICATION=1024,
+    ANALYTICS=2048,
+    METRICS=4096,
+    INVENTORY=8192,
+    ALL=16383)
 
-def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
+
+def get_bucket(bucket_name, output='camelized', include_created=False, flags=FLAGS.ALL, **conn):
     """
     Orchestrates all the calls required to fully build out an S3 bucket in the following format:
     
@@ -313,29 +333,57 @@ def get_bucket(bucket_name, output='camelized', include_created=False, **conn):
 
     conn['region'] = region
 
-    grants, grant_refs, owner = get_grants(bucket_name, include_owner=True, **conn)
-
     result = {
         'arn': "arn:aws:s3:::{name}".format(name=bucket_name),
-        'grants': grants,
-        'grant_references': grant_refs,
-        'owner': owner,
-        'lifecycle_rules': get_lifecycle(bucket_name, **conn),
-        'logging': get_logging(bucket_name, **conn),
-        'policy': get_policy(bucket_name, **conn),
         'region': region,
-        'tags': get_tags(bucket_name, **conn),
-        'versioning': get_versioning(bucket_name, **conn),
-        'website': get_website(bucket_name, **conn),
-        'cors': get_cors(bucket_name, **conn),
-        'notifications': get_notifications(bucket_name, **conn),
-        'acceleration': get_acceleration(bucket_name, **conn),
-        'replication': get_replication(bucket_name, **conn),
-        'analytics_configurations': get_bucket_analytics_configurations(bucket_name, **conn),
-        'metrics_configurations': get_bucket_metrics_configurations(bucket_name, **conn),
-        'inventory_configurations': get_bucket_inventory_configurations(bucket_name, **conn),
         '_version': 5
     }
+
+    if flags & FLAGS.GRANTS:
+        grants, grant_refs, owner = get_grants(bucket_name, include_owner=True, **conn)
+        result.update(dict(
+            grants=grants,
+            grant_references=grant_refs,
+            owner=owner))
+
+    if flags & FLAGS.LIFECYCLE:
+        result.update(dict(lifecycle_rules=get_lifecycle(bucket_name, **conn)))
+
+    if flags & FLAGS.LOGGING:
+        result.update(dict(logging=get_logging(bucket_name, **conn)))
+
+    if flags & FLAGS.POLICY:
+        result.update(dict(policy=get_policy(bucket_name, **conn)))
+
+    if flags & FLAGS.TAGS:
+        result.update(dict(tags=get_tags(bucket_name, **conn)))
+
+    if flags & FLAGS.VERSIONING:
+        result.update(dict(versioning=get_versioning(bucket_name, **conn)))
+
+    if flags & FLAGS.WEBSITE:
+        result.update(dict(website=get_website(bucket_name, **conn)))
+
+    if flags & FLAGS.CORS:
+        result.update(dict(cors=get_cors(bucket_name, **conn)))
+
+    if flags & FLAGS.NOTIFICATIONS:
+        result.update(dict(notifications=get_notifications(bucket_name, **conn)))
+
+    if flags & FLAGS.ACCELERATION:
+        result.update(dict(acceleration=get_acceleration(bucket_name, **conn)))
+
+    if flags & FLAGS.REPLICATION:
+        result.update(dict(replication=get_replication(bucket_name, **conn)))
+
+    if flags & FLAGS.ANALYTICS:
+        result.update(dict(analytics_configurations=get_bucket_analytics_configurations(bucket_name, **conn)))
+
+    if flags & FLAGS.METRICS:
+        result.update(dict(metrics_configurations=get_bucket_metrics_configurations(bucket_name, **conn)))
+
+    if flags & FLAGS.INVENTORY:
+        result.update(dict(inventory_configurations=get_bucket_inventory_configurations(bucket_name, **conn)))
 
     if include_created:
         result["Created"] = get_bucket_created(bucket_name, **conn)
