@@ -119,6 +119,9 @@ GCP:
     # To use default credentials, omit the key_file argument
     # @iter_project(projects=projects)
     
+    from cloudaux.gcp.iam import list_serviceaccounts
+    from cloudaux.orchestration.gcp.iam.serviceaccount import get_serviceaccount_complete
+    
     @iter_project(projects=projects, key_file='/path/to/key.json')
     def test_iter(**kwargs):
        accounts = list_serviceaccounts(**kwargs)
