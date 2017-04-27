@@ -24,12 +24,14 @@ AWS:
  - rate limit handling, with exponential backoff.
  - multi-account sts:assumerole abstraction.
  - orchestrates all the calls required to fully describe an item.
+ - control which attributes are returned with flags.
 
 GCP:
  - choosing the best client based on service
  - client caching
  - general caching and stats decorators available
  - basic support for non-specified discovery-API services
+ - control which attributes are returned with flags.
 
 ## Orchestration Supported Technologies
 
@@ -129,7 +131,7 @@ GCP:
 
 ### AWS IAM Role
 
-    from cloudaux.orchestration.aws.iam.role import get_role
+    from cloudaux.orchestration.aws.iam.role import get_role, FLAGS
     
     # account_number may be extracted from the ARN of the role passed to get_role
     # if not included in conn.
@@ -142,7 +144,14 @@ GCP:
     role = get_role(
         dict(arn='arn:aws:iam::000000000000:role/myRole', role_name='myRole'),
         output='camelized',  # optional: {camelized underscored}
+        flags=FLAGS.ALL,  # optional
         **conn)
+
+    # The flags parameter is optional but allows the user to indicate that 
+    # only a subset of the full item description is required.
+    # IAM Role Flag Options:
+    #   BASE, MANAGED_POLICIES, INLINE_POLICIES, INSTANCE_PROFILES, ALL (default)
+    # For instance: flags=FLAGS.MANAGED_POLICIES | FLAGS.INSTANCE_PROFILES
 
     # cloudaux makes a number of calls to obtain a full description of the role
     print(json.dumps(role, indent=4, sort_keys=True))
@@ -162,11 +171,13 @@ GCP:
     
 ### GCP IAM Service Account
 
-    from cloudaux.orchestration.gcp.iam.serviceaccount import get_serviceaccount_complete
+    from cloudaux.orchestration.gcp.iam.serviceaccount import get_serviceaccount_complete, FLAGS
     sa_name = 'projects/my-project-one/serviceAccounts/service-account-key@my-project-one.iam.gserviceaccount.com'
-    sa = get_serviceaccount_complete(sa_name, **conn_details)
+    sa = get_serviceaccount_complete(sa_name, flags=FLAGS.ALL, **conn_details)
     print(json.dumps(sa, indent=4, sort_keys=True))
 
+    # Flag options for Service Accounts are BASE, KEYS, POLICY, ALL (default).
+    
     {
       "DisplayName": "service-account", 
       "Email": "service-account@my-project-one.iam.gserviceaccount.com", 
