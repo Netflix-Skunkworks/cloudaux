@@ -30,7 +30,7 @@ install_requires = [
     'joblib>=0.9.4',
     'inflection',
     'google-api-python-client>=1.6.1',
-    'google-cloud-storage'
+    'google-cloud-storage==0.22.0'
 ]
 
 tests_require = [
