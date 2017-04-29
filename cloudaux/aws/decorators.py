@@ -59,7 +59,7 @@ def paginated(response_key, request_pagination_marker="Marker", response_paginat
                 response = func(*args, **kwargs)
                 results.extend(response[response_key])
 
-                if response['IsTruncated']:
+                if ('NextMarker' in response) or ('IsTruncated' in response and response['IsTruncated']):
                     kwargs.update({request_pagination_marker: response[response_pagination_marker]})
                 else:
                     break
