@@ -39,6 +39,7 @@ AWS:
  - IAM Role
  - IAM User
  - S3
+ - ELB (v1)
 
 GCP:
  - IAM Service Accounts

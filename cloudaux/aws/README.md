@@ -22,6 +22,7 @@ Cloud Auxiliary has support for Amazon Web Services.
  - IAM Role
  - IAM User
  - S3
+ - ELB (v1)
 
 ## Install
 
@@ -338,3 +339,109 @@ Cloud Auxiliary has support for Amazon Web Services.
     }
     
     **NOTE: "GrantReferences" is an ephemeral field -- it is not guaranteed to be consistent - do not base logic off of it**
+
+## ELB (v1)
+
+    from cloudaux.orchestration.aws.elb import get_load_balancer, FLAGS
+    
+    conn = dict(
+        account_number='000000000000',
+        assume_role='SecurityMonkey')
+    
+    load_balancer = get_load_balancer('MyELB', flags=FLAGS.ALL, **conn)
+    
+    # The flags parameter is optional but allows the user to indicate that 
+    # only a subset of the full item description is required.
+    # S3 Flag Options are:
+    #   BASE, ATTRIBUTES, TAGS
+    # For instance: flags=FLAGS.BASE | FLAGS.TAGS
+    
+    print(json.dumps(load_balancer, indent=2, sort_keys=True))
+    
+    {
+      "Arn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:loadbalancer/MyELB",
+      "Attributes": {
+        "AccessLog": {
+          "EmitInterval": 5,
+          "Enabled": true,
+          "S3BucketName": "elb-log-bucket",
+          "S3BucketPrefix": "MyELB"
+        },
+        "ConnectionDraining": {
+          "Enabled": false,
+          "Timeout": 300
+        },
+        "ConnectionSettings": {
+          "IdleTimeout": 60
+        },
+        "CrossZoneLoadBalancing": {
+          "Enabled": false
+        }
+      },
+      "AvailabilityZones": [
+        "us-east-1b"
+      ],
+      "BackendServerDescriptions": [],
+      "CanonicalHostedZoneNameID": "ZXXXXXXXXXXXXX",
+      "CreatedTime": "2015-07-07 19:15:06.490000+00:00",
+      "DNSName": "internal-MyELB-1800000000.us-east-1.elb.amazonaws.com",
+      "HealthCheck": {
+        "HealthyThreshold": 2,
+        "Interval": 30,
+        "Target": "HTTP:80/health",
+        "Timeout": 5,
+        "UnhealthyThreshold": 2
+      },
+      "Instances": [],
+      "ListenerDescriptions": [
+        {
+          "Listener": {
+            "InstancePort": 443,
+            "InstanceProtocol": "TCP",
+            "LoadBalancerPort": 443,
+            "Protocol": "TCP"
+          },
+          "PolicyNames": []
+        },
+        {
+          "Listener": {
+            "InstancePort": 80,
+            "InstanceProtocol": "HTTP",
+            "LoadBalancerPort": 80,
+            "Protocol": "HTTP"
+          },
+          "PolicyNames": []
+        }
+      ],
+      "LoadBalancerName": "MyELB",
+      "Policies": {
+        "AppCookieStickinessPolicies": [],
+        "LBCookieStickinessPolicies": [],
+        "OtherPolicies": []
+      },
+      "Region": "us-east-1",
+      "Scheme": "internal",
+      "SecurityGroups": [
+        "sg-19999999"
+      ],
+      "SourceSecurityGroup": {
+        "GroupName": "MyELB-SecurityGroup",
+        "OwnerAlias": "000000000000"
+      },
+      "Subnets": [
+        "subnet-19999999"
+      ],
+      "Tags": [
+        {
+          "LoadBalancerName": "MyELB",
+          "Tags": [
+            {
+              "Key": "tagkey",
+              "Value": "tagvalue"
+            }
+          ]
+        }
+      ],
+      "VPCId": "vpc-49999999",
+      "_version": 1
+    }
