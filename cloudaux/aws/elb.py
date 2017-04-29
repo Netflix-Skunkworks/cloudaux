@@ -6,7 +6,6 @@
 .. moduleauthor:: Patrick Kelley <patrick@netflix.com>
 """
 from cloudaux.aws.sts import sts_conn
-from cloudaux.exceptions import CloudAuxException
 from cloudaux.aws.decorators import rate_limited
 from cloudaux.aws.decorators import paginated
 
