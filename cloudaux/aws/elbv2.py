@@ -7,6 +7,9 @@ from cloudaux.aws.decorators import paginated
 @sts_conn('elbv2')
 @rate_limited()
 def describe_load_balancers(arns=None, names=None, client=None):
+    """
+    Permission: elasticloadbalancing:DescribeLoadBalancers
+    """
     kwargs = dict()
     if arns:
         kwargs.update(dict(LoadBalancerArns=arns))
@@ -20,7 +23,7 @@ def describe_load_balancers(arns=None, names=None, client=None):
 @rate_limited()
 def describe_listeners(load_balancer_arn=None, listener_arns=None, client=None):
     """
-    Requires permission: elasticloadbalancing:DescribeListeners
+    Permission: elasticloadbalancing:DescribeListeners
     """
     kwargs = dict()
     if load_balancer_arn:
@@ -33,6 +36,9 @@ def describe_listeners(load_balancer_arn=None, listener_arns=None, client=None):
 @sts_conn('elbv2')
 @rate_limited()
 def describe_load_balancer_attributes(arn, client=None):
+    """
+    Permission: elasticloadbalancing:DescribeLoadBalancerAttributes
+    """
     return client.describe_load_balancer_attributes(
         LoadBalancerArn=arn)['Attributes']
 
@@ -40,6 +46,9 @@ def describe_load_balancer_attributes(arn, client=None):
 @sts_conn('elbv2')
 @rate_limited()
 def describe_rules(listener_arn=None, rule_arns=None, client=None):
+    """
+    Permission: elasticloadbalancing:DescribeRules
+    """
     kwargs = dict()
     if listener_arn:
         kwargs.update(dict(ListenerArn=listener_arn))
@@ -67,6 +76,9 @@ def describe_tags(arns, client=None):
 @sts_conn('elbv2')
 @rate_limited()
 def describe_target_group_attributes(arn, client=None):
+    """
+    Permission: elasticloadbalancing:DescribeTargetGroupAttributes
+    """
     return client.describe_target_group_attributes(TargetGroupArn=arn)['Attributes']
 
 
@@ -90,6 +102,9 @@ def describe_target_groups(load_balancer_arn=None, target_group_arns=None, names
 @sts_conn('elbv2')
 @rate_limited()
 def describe_target_health(target_group_arn, targets=None, client=None):
+    """
+    Permission: elasticloadbalancing:DescribeTargetHealth
+    """
     kwargs = dict(TargetGroupArn=target_group_arn)
     if targets:
         kwargs.update(Targets=targets)
