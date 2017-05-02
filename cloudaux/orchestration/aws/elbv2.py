@@ -72,8 +72,7 @@ def get_elbv2(alb_name, output='camelized', flags=FLAGS.ALL, **conn):
     result['CreatedTime'] = str(result['CreatedTime'])
 
     # Rename LoadBalancerArn to just Arn
-    result['Arn'] = result['LoadBalancerArn']
-    del result['LoadBalancerArn']
+    result['Arn'] = result.pop('LoadBalancerArn')
 
     ALBFlagRegistry.build_out(result, flags, result, **conn)
     return modify(result, format=output)
