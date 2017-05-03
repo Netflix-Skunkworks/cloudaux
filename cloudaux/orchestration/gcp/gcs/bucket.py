@@ -8,23 +8,20 @@
 from cloudaux.gcp.gcs import get_bucket as fetch_bucket
 from cloudaux.gcp.utils import strdate
 from cloudaux.orchestration import modify
-from cloudaux.orchestration.flag_registry import FlagRegistry, Flags
+from flagpole import FlagRegistry, Flags
 
 
-class GCSFlagRegistry(FlagRegistry):
-    from collections import defaultdict
-    r = defaultdict(list)
-
-
+registry = FlagRegistry()
 FLAGS = Flags('BASE')
 
 
-@GCSFlagRegistry.register(flag=FLAGS.BASE)
+@registry.register(flag=FLAGS.BASE)
 def _get_base(bucket_name, **conn):
     bucket = fetch_bucket(Bucket=bucket_name, **conn)
     if not bucket:
-        return modify(dict(Error='Unauthorized'), format=output)
+        return dict(Error='Unauthorized')
 
+    result = dict()
     result['acl'] = list(bucket.acl)
     result['default_object_acl'] = list(bucket.default_object_acl)
     result['cors'] = bucket.cors
@@ -45,5 +42,5 @@ def _get_base(bucket_name, **conn):
 
 def get_bucket(bucket_name, output='camelized', flags=FLAGS.ALL, **conn):
     result = dict()
-    GCSFlagRegistry.build_out(result, flags, bucket_name, **conn)
+    registry.build_out(result, flags, bucket_name, **conn)
     return modify(result, format=output)

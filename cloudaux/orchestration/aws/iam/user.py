@@ -7,48 +7,44 @@ from cloudaux.aws.iam import get_user_mfa_devices
 from cloudaux.aws.iam import get_user_signing_certificates
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
 from cloudaux.orchestration import modify
-from cloudaux.orchestration.flag_registry import FlagRegistry, Flags
+from flagpole import FlagRegistry, Flags
 
 
-class UserFlagRegistry(FlagRegistry):
-    from collections import defaultdict
-    r = defaultdict(list)
-
-
+registry = FlagRegistry()
 FLAGS = Flags('BASE', 'ACCESS_KEYS', 'INLINE_POLICIES', 'MANAGED_POLICIES', 'MFA_DEVICES', 'LOGIN_PROFILE', 'SIGNING_CERTIFICATES')
 
 
-@UserFlagRegistry.register(flag=FLAGS.ACCESS_KEYS, key='access_keys')
+@registry.register(flag=FLAGS.ACCESS_KEYS, key='access_keys')
 def get_access_keys(user, **conn):
     return get_user_access_keys(user, **conn)
 
 
-@UserFlagRegistry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
+@registry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
 def get_inline_policies(user, **conn):
     return get_user_inline_policies(user, **conn)
 
 
-@UserFlagRegistry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
+@registry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
 def get_managed_policies(user, **conn):
     return get_user_managed_policies(user, **conn)
 
 
-@UserFlagRegistry.register(flag=FLAGS.MFA_DEVICES, key='mfa_devices')
+@registry.register(flag=FLAGS.MFA_DEVICES, key='mfa_devices')
 def get_mfa_devices(user, **conn):
     return get_user_mfa_devices(user, **conn)
 
 
-@UserFlagRegistry.register(flag=FLAGS.LOGIN_PROFILE, key='login_profile')
+@registry.register(flag=FLAGS.LOGIN_PROFILE, key='login_profile')
 def get_login_profile(user, **conn):
     return get_user_login_profile(user, **conn)
 
 
-@UserFlagRegistry.register(flag=FLAGS.SIGNING_CERTIFICATES, key='signing_certificates')
+@registry.register(flag=FLAGS.SIGNING_CERTIFICATES, key='signing_certificates')
 def get_signing_certificates(user, **conn):
     return get_user_signing_certificates(user, **conn)
 
 
-@UserFlagRegistry.register(flag=FLAGS.BASE)
+@registry.register(flag=FLAGS.BASE)
 def _get_base(user, **conn):
     base_fields = frozenset(['Arn', 'CreateDate', 'Path', 'UserId', 'UserName'])
     needs_base = False
@@ -96,5 +92,5 @@ def get_user(user, output='camelized', flags=FLAGS.ALL, **conn):
     """
     user = modify(user, 'camelized')
     _conn_from_args(user, conn)
-    UserFlagRegistry.build_out(user, flags, user, **conn)
+    registry.build_out(user, flags, user, **conn)
     return modify(user, format=output)

@@ -2,33 +2,29 @@ from cloudaux import CloudAux
 from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
 from cloudaux.orchestration import modify
-from cloudaux.orchestration.flag_registry import FlagRegistry, Flags
+from flagpole import FlagRegistry, Flags
 
 
-class RoleFlagRegistry(FlagRegistry):
-    from collections import defaultdict
-    r = defaultdict(list)
-
-
+registry = FlagRegistry()
 FLAGS = Flags('BASE', 'MANAGED_POLICIES', 'INLINE_POLICIES', 'INSTANCE_PROFILES')
 
 
-@RoleFlagRegistry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
+@registry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
 def get_managed_policies(role, **conn):
     return get_role_managed_policies(role, **conn)
 
 
-@RoleFlagRegistry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
+@registry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
 def get_inline_policies(role, **conn):
     return get_role_inline_policies(role, **conn)
 
 
-@RoleFlagRegistry.register(flag=FLAGS.INSTANCE_PROFILES, key='instance_profiles')
+@registry.register(flag=FLAGS.INSTANCE_PROFILES, key='instance_profiles')
 def get_instance_profiles(role, **conn):
     return get_role_instance_profiles(role, **conn)
 
 
-@RoleFlagRegistry.register(flag=FLAGS.BASE)
+@registry.register(flag=FLAGS.BASE)
 def _get_base(role, **conn):
     """
     Determine whether the boto get_role call needs to be made or if we already have all that data
@@ -81,5 +77,5 @@ def get_role(role, output='camelized', flags=FLAGS.ALL, **conn):
     """
     role = modify(role, 'camelized')
     _conn_from_args(role, conn)
-    RoleFlagRegistry.build_out(role, flags, role, **conn)
+    registry.build_out(role, flags, role, **conn)
     return modify(role, format=output)

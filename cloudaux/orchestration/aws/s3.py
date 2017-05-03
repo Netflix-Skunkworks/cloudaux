@@ -15,7 +15,7 @@ from cloudaux.aws.s3 import list_bucket_analytics_configurations
 from cloudaux.aws.s3 import list_bucket_metrics_configurations
 from cloudaux.aws.s3 import list_bucket_inventory_configurations
 from cloudaux.orchestration import modify
-from cloudaux.orchestration.flag_registry import FlagRegistry, Flags
+from flagpole import FlagRegistry, Flags
 
 from botocore.exceptions import ClientError
 import logging
@@ -25,18 +25,14 @@ import json
 logger = logging.getLogger('cloudaux')
 
 
-class S3FlagRegistry(FlagRegistry):
-    from collections import defaultdict
-    r = defaultdict(list)
-
-
+registry = FlagRegistry()
 FLAGS = Flags('BASE', 'GRANTS', 'GRANT_REFERENCES', 'OWNER', 'LIFECYCLE',
     'LOGGING', 'POLICY', 'TAGS', 'VERSIONING', 'WEBSITE', 'CORS',
     'NOTIFICATIONS', 'ACCELERATION', 'REPLICATION', 'ANALYTICS',
     'METRICS', 'INVENTORY', 'CREATED_DATE')
 
 
-@S3FlagRegistry.register(
+@registry.register(
  flag=(FLAGS.GRANTS, FLAGS.GRANT_REFERENCES, FLAGS.OWNER),
  key=('grants', 'grant_references', 'owner'))
 def get_grants(bucket_name, include_owner=True, **conn):
@@ -74,7 +70,7 @@ def get_grants(bucket_name, include_owner=True, **conn):
     return grantees, grantee_ref
 
 
-@S3FlagRegistry.register(flag=FLAGS.LIFECYCLE, key='lifecycle_rules')
+@registry.register(flag=FLAGS.LIFECYCLE, key='lifecycle_rules')
 def get_lifecycle(bucket_name, **conn):
     try:
         result = get_bucket_lifecycle_configuration(Bucket=bucket_name, **conn)
@@ -126,7 +122,7 @@ def get_lifecycle(bucket_name, **conn):
     return lifecycle_rules
 
 
-@S3FlagRegistry.register(flag=FLAGS.LOGGING, key='logging')
+@registry.register(flag=FLAGS.LOGGING, key='logging')
 def get_logging(bucket_name, **conn):
     result = get_bucket_logging(Bucket=bucket_name, **conn)
 
@@ -156,7 +152,7 @@ def get_logging(bucket_name, **conn):
     return logging_dict
 
 
-@S3FlagRegistry.register(flag=FLAGS.POLICY, key='policy')
+@registry.register(flag=FLAGS.POLICY, key='policy')
 def get_policy(bucket_name, **conn):
     try:
         result = get_bucket_policy(Bucket=bucket_name, **conn)
@@ -167,7 +163,7 @@ def get_policy(bucket_name, **conn):
         return None
 
 
-@S3FlagRegistry.register(flag=FLAGS.TAGS, key='tags')
+@registry.register(flag=FLAGS.TAGS, key='tags')
 def get_tags(bucket_name, **conn):
     try:
         result = get_bucket_tagging(Bucket=bucket_name, **conn)
@@ -179,7 +175,7 @@ def get_tags(bucket_name, **conn):
     return {tag['Key']: tag['Value'] for tag in result['TagSet']}
 
 
-@S3FlagRegistry.register(flag=FLAGS.VERSIONING, key='versioning')
+@registry.register(flag=FLAGS.VERSIONING, key='versioning')
 def get_versioning(bucket_name, **conn):
     result = get_bucket_versioning(Bucket=bucket_name, **conn)
     versioning = {}
@@ -191,7 +187,7 @@ def get_versioning(bucket_name, **conn):
     return versioning
 
 
-@S3FlagRegistry.register(flag=FLAGS.WEBSITE, key='website')
+@registry.register(flag=FLAGS.WEBSITE, key='website')
 def get_website(bucket_name, **conn):
     try:
         result = get_bucket_website(Bucket=bucket_name, **conn)
@@ -213,7 +209,7 @@ def get_website(bucket_name, **conn):
     return website
 
 
-@S3FlagRegistry.register(flag=FLAGS.CORS, key='cors')
+@registry.register(flag=FLAGS.CORS, key='cors')
 def get_cors(bucket_name, **conn):
     try:
         result = get_bucket_cors(Bucket=bucket_name, **conn)
@@ -241,7 +237,7 @@ def get_cors(bucket_name, **conn):
     return cors
 
 
-@S3FlagRegistry.register(flag=FLAGS.NOTIFICATIONS, key='notifications')
+@registry.register(flag=FLAGS.NOTIFICATIONS, key='notifications')
 def get_notifications(bucket_name, **conn):
     result = get_bucket_notification_configuration(Bucket=bucket_name, **conn)
 
@@ -258,13 +254,13 @@ def get_notifications(bucket_name, **conn):
     return notifications
 
 
-@S3FlagRegistry.register(flag=FLAGS.ACCELERATION, key='acceleration')
+@registry.register(flag=FLAGS.ACCELERATION, key='acceleration')
 def get_acceleration(bucket_name, **conn):
     result = get_bucket_accelerate_configuration(Bucket=bucket_name, **conn)
     return result.get("Status")
 
 
-@S3FlagRegistry.register(flag=FLAGS.REPLICATION, key='replication')
+@registry.register(flag=FLAGS.REPLICATION, key='replication')
 def get_replication(bucket_name, **conn):
     try:
         result = get_bucket_replication(Bucket=bucket_name, **conn)
@@ -275,28 +271,28 @@ def get_replication(bucket_name, **conn):
     return result["ReplicationConfiguration"]
 
 
-@S3FlagRegistry.register(flag=FLAGS.CREATED_DATE, key='created')
+@registry.register(flag=FLAGS.CREATED_DATE, key='created')
 def get_bucket_created(bucket_name, **conn):
     bucket = get_bucket_resource(bucket_name, **conn)
     return str(bucket.creation_date)
 
 
-@S3FlagRegistry.register(flag=FLAGS.ANALYTICS, key='analytics_configurations')
+@registry.register(flag=FLAGS.ANALYTICS, key='analytics_configurations')
 def get_bucket_analytics_configurations(bucket_name, **conn):
     return list_bucket_analytics_configurations(Bucket=bucket_name, **conn)
 
 
-@S3FlagRegistry.register(flag=FLAGS.METRICS, key='metrics_configurations')
+@registry.register(flag=FLAGS.METRICS, key='metrics_configurations')
 def get_bucket_metrics_configurations(bucket_name, **conn):
     return list_bucket_metrics_configurations(Bucket=bucket_name, **conn)
 
 
-@S3FlagRegistry.register(flag=FLAGS.INVENTORY, key='inventory_configurations')
+@registry.register(flag=FLAGS.INVENTORY, key='inventory_configurations')
 def get_bucket_inventory_configurations(bucket_name, **conn):
     return list_bucket_inventory_configurations(Bucket=bucket_name, **conn)
 
 
-@S3FlagRegistry.register(flag=FLAGS.BASE)
+@registry.register(flag=FLAGS.BASE)
 def get_base(bucket_name, **conn):
     return {
         'arn': "arn:aws:s3:::{name}".format(name=bucket_name),
@@ -354,5 +350,5 @@ def get_bucket(bucket_name, output='camelized', include_created=None, flags=FLAG
 
     conn['region'] = region
     result = dict()
-    S3FlagRegistry.build_out(result, flags, bucket_name, **conn)
+    registry.build_out(result, flags, bucket_name, **conn)
     return modify(result, format=output)
