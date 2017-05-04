@@ -2,33 +2,30 @@ from cloudaux import CloudAux
 from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
 from cloudaux.orchestration import modify
-from cloudaux.orchestration.flag_registry import FlagRegistry, Flags
+from cloudaux.decorators import modify_output
+from flagpole import FlagRegistry, Flags
 
 
-class RoleFlagRegistry(FlagRegistry):
-    from collections import defaultdict
-    r = defaultdict(list)
-
-
+registry = FlagRegistry()
 FLAGS = Flags('BASE', 'MANAGED_POLICIES', 'INLINE_POLICIES', 'INSTANCE_PROFILES')
 
 
-@RoleFlagRegistry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
+@registry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
 def get_managed_policies(role, **conn):
     return get_role_managed_policies(role, **conn)
 
 
-@RoleFlagRegistry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
+@registry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
 def get_inline_policies(role, **conn):
     return get_role_inline_policies(role, **conn)
 
 
-@RoleFlagRegistry.register(flag=FLAGS.INSTANCE_PROFILES, key='instance_profiles')
+@registry.register(flag=FLAGS.INSTANCE_PROFILES, key='instance_profiles')
 def get_instance_profiles(role, **conn):
     return get_role_instance_profiles(role, **conn)
 
 
-@RoleFlagRegistry.register(flag=FLAGS.BASE)
+@registry.register(flag=FLAGS.BASE)
 def _get_base(role, **conn):
     """
     Determine whether the boto get_role call needs to be made or if we already have all that data
@@ -57,7 +54,8 @@ def _get_base(role, **conn):
     return role
 
 
-def get_role(role, output='camelized', flags=FLAGS.ALL, **conn):
+@modify_output
+def get_role(role, flags=FLAGS.ALL, **conn):
     """
     Orchestrates all the calls required to fully build out an IAM Role in the following format:
 
@@ -79,7 +77,6 @@ def get_role(role, output='camelized', flags=FLAGS.ALL, **conn):
     Must at least have 'assume_role' key.
     :return: dict containing a fully built out role.
     """
-    role = modify(role, 'camelized')
+    role = modify(role, output='camelized')
     _conn_from_args(role, conn)
-    RoleFlagRegistry.build_out(role, flags, role, **conn)
-    return modify(role, format=output)
+    return registry.build_out(flags, start_with=role, pass_datastructure=True, **conn)

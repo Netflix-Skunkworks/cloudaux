@@ -10,6 +10,7 @@
 import functools
 from itertools import product
 from cloudaux.aws.sts import boto3_cached_conn
+from cloudaux.orchestration import modify
 
 from cloudaux import CloudAux
 
@@ -45,3 +46,12 @@ def iter_account_region(service, service_type='client', accounts=None, regions=N
             return result
         return decorated_function
     return decorator
+
+
+def modify_output(func):
+    @functools.wraps(func)
+    def decorated_function(*args, **kwargs):
+        output = kwargs.pop('output', 'camelized')
+        result = func(*args, **kwargs)
+        return modify(result, output=output)
+    return decorated_function

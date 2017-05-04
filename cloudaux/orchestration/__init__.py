@@ -1,32 +1,31 @@
 from inflection import camelize, underscore
 
 
-def _modify(role, func):
+def _modify(item, func):
     """
-    Modifies each role.keys() string based on the func passed in.
+    Modifies each item.keys() string based on the func passed in.
     Often used with inflection's camelize or underscore methods.
 
-    :param role: dictionary representing role to be modified
+    :param item: dictionary representing item to be modified
     :param func: function to run on each key string
     :return: dictionary where each key has been modified by func.
     """
-    for key in role:
+    for key in item:
         new_key = func(key)
         if key != new_key:
-            role[new_key] = role[key]
-            del role[key]
-    return role
+            item[new_key] = item.pop(key)
+    return item
 
 
-def modify(role, format='camelized'):
+def modify(item, output='camelized'):
     """
     Calls _modify and either passes the inflection.camelize method or the inflection.underscore method.
 
-    :param role: dictionary representing role to be modified
-    :param format: string 'camelized' or 'underscored'
+    :param item: dictionary representing item to be modified
+    :param output: string 'camelized' or 'underscored'
     :return:
     """
-    if format == 'camelized':
-        return _modify(role, camelize)
-    elif format == 'underscored':
-        return _modify(role, underscore)
+    if output == 'camelized':
+        return _modify(item, camelize)
+    elif output == 'underscored':
+        return _modify(item, underscore)

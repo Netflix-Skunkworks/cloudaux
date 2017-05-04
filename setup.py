@@ -29,6 +29,7 @@ install_requires = [
     'boto>=2.41.0',
     'joblib>=0.9.4',
     'inflection',
+    'flagpole>=1.0.1',
     'google-api-python-client>=1.6.1',
     'google-cloud-storage==0.22.0'
 ]
