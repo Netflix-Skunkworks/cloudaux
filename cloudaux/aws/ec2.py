@@ -26,14 +26,6 @@ def create_group(group, account_number=None, region=None, assume_role=None, clie
                 Description=group.description
         )['GroupId']
 
-    # by default if we have a vpc sg we will allow all out bound
-    client.authorize_security_group_egress(
-            GroupId=group_id,
-            IpProtocol='tcp',
-            FromPort=0,
-            ToPort=65535,
-            CidrIp='0.0.0.0/0'
-    )
     return group_id
 
 
