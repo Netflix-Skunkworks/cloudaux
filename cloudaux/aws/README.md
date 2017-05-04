@@ -23,6 +23,7 @@ Cloud Auxiliary has support for Amazon Web Services.
  - IAM User
  - S3
  - ELB (v1)
+ - ELBv2 (ALB)
 
 ## Install
 
@@ -443,5 +444,167 @@ Cloud Auxiliary has support for Amazon Web Services.
         }
       ],
       "VPCId": "vpc-49999999",
+      "_version": 1
+    }
+
+## ELBv2 (ALB)
+
+    from cloudaux.orchestration.aws.elbv2 import get_elbv2, FLAGS
+
+    conn = dict(
+        account_number='000000000000',
+        assume_role='SecurityMonkey')
+
+    alb = get_elbv2('MyALB', flags=FLAGS.ALL, **conn)
+
+    # The flags parameter is optional but allows the user to indicate that
+    # only a subset of the full item description is required.
+    # S3 Flag Options are:
+    #   BASE LISTENERS RULES ATTRIBUTES TAGS
+    #   TARGET_GROUPS TARGET_GROUP_ATTRIBUTES TARGET_GROUP_HEALTH
+    # For instance: flags=FLAGS.BASE | FLAGS.TARGET_GROUPS
+
+    print(json.dumps(alb, indent=2, sort_keys=True))
+
+    {
+      "Arn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:loadbalancer/app/MyALB/0000000000000000", 
+      "Attributes": [
+        {
+          "Key": "access_logs.s3.enabled", 
+          "Value": "false"
+        }, 
+        {
+          "Key": "idle_timeout.timeout_seconds", 
+          "Value": "60"
+        }, 
+        {
+          "Key": "access_logs.s3.prefix", 
+          "Value": ""
+        }, 
+        {
+          "Key": "deletion_protection.enabled", 
+          "Value": "false"
+        }, 
+        {
+          "Key": "access_logs.s3.bucket", 
+          "Value": ""
+        }
+      ], 
+      "AvailabilityZones": [
+        {
+          "SubnetId": "subnet-00000000", 
+          "ZoneName": "us-east-1d"
+        }, 
+        {
+          "SubnetId": "subnet-00000000", 
+          "ZoneName": "us-east-1c"
+        }, 
+        {
+          "SubnetId": "subnet-00000000", 
+          "ZoneName": "us-east-1e"
+        }
+      ], 
+      "CanonicalHostedZoneId": "Z0000000000000", 
+      "CreatedTime": "2016-08-18 01:11:45.430000+00:00", 
+      "DNSName": "MyALB-000000000.us-east-1.elb.amazonaws.com", 
+      "IpAddressType": "ipv4", 
+      "Listeners": [
+        {
+          "Certificates": [
+            {
+              "CertificateArn": "arn:aws:iam::000000000000:server-certificate/Blah"
+            }
+          ], 
+          "DefaultActions": [
+            {
+              "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:targetgroup/.../0000000000000000", 
+              "Type": "forward"
+            }
+          ], 
+          "ListenerArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:listener/app/MyALB/0000000000000000/0000000000000000", 
+          "LoadBalancerArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:loadbalancer/app/MyALB/0000000000000000", 
+          "Port": 443, 
+          "Protocol": "HTTPS", 
+          "SslPolicy": "ELBSecurityPolicy-2015-05"
+        }
+      ], 
+      "LoadBalancerName": "MyALB", 
+      "Region": "us-east-1", 
+      "Rules": [
+        [
+          {
+            "Actions": [
+              {
+                "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:targetgroup/targets/0000000000000000", 
+                "Type": "forward"
+              }
+            ], 
+            "Conditions": [], 
+            "IsDefault": true, 
+            "Priority": "default", 
+            "RuleArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:listener-rule/app/.../0000000000000000/0000000000000000/0000000000000000"
+          }
+        ]
+      ], 
+      "Scheme": "internet-facing", 
+      "SecurityGroups": [
+        "sg-00000000" 
+      ], 
+      "State": {
+        "Code": "active"
+      }, 
+      "Tags": [
+        {
+          "ResourceArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:loadbalancer/app/.../0000000000000000", 
+          "Tags": []
+        }
+      ], 
+      "TargetGroupAttributes": [
+        [
+          {
+            "Key": "stickiness.enabled", 
+            "Value": "false"
+          }, 
+          {
+            "Key": "deregistration_delay.timeout_seconds", 
+            "Value": "300"
+          }, 
+          {
+            "Key": "stickiness.type", 
+            "Value": "lb_cookie"
+          }, 
+          {
+            "Key": "stickiness.lb_cookie.duration_seconds", 
+            "Value": "86400"
+          }
+        ]
+      ], 
+      "TargetGroupHealth": [
+        []
+      ], 
+      "TargetGroups": [
+        {
+          "HealthCheckIntervalSeconds": 30, 
+          "HealthCheckPath": "/healthcheck", 
+          "HealthCheckPort": "traffic-port", 
+          "HealthCheckProtocol": "HTTP", 
+          "HealthCheckTimeoutSeconds": 5, 
+          "HealthyThresholdCount": 2, 
+          "LoadBalancerArns": [
+            "arn:aws:elasticloadbalancing:us-east-1:000000000000:loadbalancer/app/.../0000000000000000"
+          ], 
+          "Matcher": {
+            "HttpCode": "200"
+          }, 
+          "Port": 7001, 
+          "Protocol": "HTTP", 
+          "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:targetgroup/targets/0000000000000000", 
+          "TargetGroupName": "targets", 
+          "UnhealthyThresholdCount": 2, 
+          "VpcId": "vpc-00000000"
+        }
+      ], 
+      "Type": "application", 
+      "VpcId": "vpc-00000000", 
       "_version": 1
     }
