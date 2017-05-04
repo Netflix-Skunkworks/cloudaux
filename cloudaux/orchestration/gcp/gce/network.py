@@ -1,5 +1,5 @@
 from cloudaux.gcp.gce.network import get_network, list_subnetworks
-from cloudaux.orchestration import modify
+from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
 
@@ -16,8 +16,6 @@ def _get_base(network, **conn):
     result['_version'] = 1
     return result
 
-
-def get_network_and_subnetworks(network, output='camelized', flags=FLAGS.ALL, **conn):
-    result = dict()
-    registry.build_out(result, flags, network, **conn)
-    return modify(result, format=output)
+@modify_output
+def get_network_and_subnetworks(network, flags=FLAGS.ALL, **conn):
+    return registry.build_out(flags, network, **conn)

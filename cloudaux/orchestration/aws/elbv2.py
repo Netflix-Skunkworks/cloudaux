@@ -1,5 +1,5 @@
 from cloudaux.aws.elbv2 import *
-from cloudaux.orchestration import modify
+from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
 
@@ -63,12 +63,12 @@ def get_base(alb, **conn):
 
 # TODO: As elbv2 has no list method, we should really be taking a dictionary
 # as an input instead of the name.
-def get_elbv2(alb_name, output='camelized', flags=FLAGS.ALL, **conn):
-    result = describe_load_balancers(names=[alb_name], **conn)[0]
-    result['CreatedTime'] = str(result['CreatedTime'])
+@modify_output
+def get_elbv2(alb_name, flags=FLAGS.ALL, **conn):
+    alb = describe_load_balancers(names=[alb_name], **conn)[0]
+    alb['CreatedTime'] = str(alb['CreatedTime'])
 
     # Rename LoadBalancerArn to just Arn
-    result['Arn'] = result.pop('LoadBalancerArn')
+    alb['Arn'] = alb.pop('LoadBalancerArn')
 
-    registry.build_out(result, flags, result, **conn)
-    return modify(result, format=output)
+    return registry.build_out(flags, start_with=alb, pass_datastructure=True, **conn)

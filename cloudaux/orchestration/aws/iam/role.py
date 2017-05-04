@@ -2,6 +2,7 @@ from cloudaux import CloudAux
 from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
 from cloudaux.orchestration import modify
+from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
 
@@ -53,7 +54,8 @@ def _get_base(role, **conn):
     return role
 
 
-def get_role(role, output='camelized', flags=FLAGS.ALL, **conn):
+@modify_output
+def get_role(role, flags=FLAGS.ALL, **conn):
     """
     Orchestrates all the calls required to fully build out an IAM Role in the following format:
 
@@ -75,7 +77,6 @@ def get_role(role, output='camelized', flags=FLAGS.ALL, **conn):
     Must at least have 'assume_role' key.
     :return: dict containing a fully built out role.
     """
-    role = modify(role, 'camelized')
+    role = modify(role, output='camelized')
     _conn_from_args(role, conn)
-    registry.build_out(role, flags, role, **conn)
-    return modify(role, format=output)
+    return registry.build_out(flags, start_with=role, pass_datastructure=True, **conn)

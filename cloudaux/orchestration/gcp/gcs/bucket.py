@@ -7,7 +7,7 @@
 """
 from cloudaux.gcp.gcs import get_bucket as fetch_bucket
 from cloudaux.gcp.utils import strdate
-from cloudaux.orchestration import modify
+from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
 
@@ -40,7 +40,6 @@ def _get_base(bucket_name, **conn):
     return result
 
 
-def get_bucket(bucket_name, output='camelized', flags=FLAGS.ALL, **conn):
-    result = dict()
-    registry.build_out(result, flags, bucket_name, **conn)
-    return modify(result, format=output)
+@modify_output
+def get_bucket(bucket_name, flags=FLAGS.ALL, **conn):
+    return registry.build_out(flags, bucket_name, **conn)

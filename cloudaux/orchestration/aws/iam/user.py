@@ -7,6 +7,7 @@ from cloudaux.aws.iam import get_user_mfa_devices
 from cloudaux.aws.iam import get_user_signing_certificates
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
 from cloudaux.orchestration import modify
+from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
 
@@ -67,7 +68,8 @@ def _get_base(user, **conn):
     return user
 
 
-def get_user(user, output='camelized', flags=FLAGS.ALL, **conn):
+@modify_output
+def get_user(user, flags=FLAGS.ALL, **conn):
     """
     Orchestrates all the calls required to fully build out an IAM User in the following format:
 
@@ -90,7 +92,6 @@ def get_user(user, output='camelized', flags=FLAGS.ALL, **conn):
     Must at least have 'assume_role' key.
     :return: dict containing fully built out user.
     """
-    user = modify(user, 'camelized')
+    user = modify(user, output='camelized')
     _conn_from_args(user, conn)
-    registry.build_out(user, flags, user, **conn)
-    return modify(user, format=output)
+    return registry.build_out(flags, start_with=user, pass_datastructure=True, **conn)

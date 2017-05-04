@@ -14,7 +14,7 @@ from cloudaux.aws.s3 import get_bucket_resource
 from cloudaux.aws.s3 import list_bucket_analytics_configurations
 from cloudaux.aws.s3 import list_bucket_metrics_configurations
 from cloudaux.aws.s3 import list_bucket_inventory_configurations
-from cloudaux.orchestration import modify
+from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
 from botocore.exceptions import ClientError
@@ -301,7 +301,8 @@ def get_base(bucket_name, **conn):
     }
 
 
-def get_bucket(bucket_name, output='camelized', include_created=None, flags=FLAGS.ALL ^ FLAGS.CREATED_DATE, **conn):
+@modify_output
+def get_bucket(bucket_name, include_created=None, flags=FLAGS.ALL ^ FLAGS.CREATED_DATE, **conn):
     """
     Orchestrates all the calls required to fully build out an S3 bucket in the following format:
     
@@ -346,9 +347,7 @@ def get_bucket(bucket_name, output='camelized', include_created=None, flags=FLAG
 
     region = get_bucket_region(Bucket=bucket_name, **conn)
     if not region:
-        return modify(dict(Error='Unauthorized'), format=output)
+        return dict(Error='Unauthorized')
 
     conn['region'] = region
-    result = dict()
-    registry.build_out(result, flags, bucket_name, **conn)
-    return modify(result, format=output)
+    return registry.build_out(flags, bucket_name, **conn)

@@ -1,5 +1,5 @@
 from cloudaux.gcp.iam import get_iam_policy, get_serviceaccount, get_serviceaccount_keys
-from cloudaux.orchestration import modify
+from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
 
@@ -24,7 +24,6 @@ def _get_base(service_account, **conn):
     return sa
 
 
-def get_serviceaccount_complete(service_account, output='camelized', flags=FLAGS.ALL, **conn):
-    result = dict()
-    registry.build_out(result, flags, service_account, **conn)
-    return modify(result, format=output)
+@modify_output
+def get_serviceaccount_complete(service_account, flags=FLAGS.ALL, **conn):
+    return registry.build_out(flags, service_account, **conn)
