@@ -296,8 +296,9 @@ def get_bucket_inventory_configurations(bucket_name, **conn):
 def get_base(bucket_name, **conn):
     return {
         'arn': "arn:aws:s3:::{name}".format(name=bucket_name),
+        'name': bucket_name,
         'region': conn.get('region'),
-        '_version': 5
+        '_version': 6
     }
 
 
@@ -308,6 +309,7 @@ def get_bucket(bucket_name, include_created=None, flags=FLAGS.ALL ^ FLAGS.CREATE
     
     {
         "Arn": ...,
+        "Name": ...,
         "Owner": ...,
         "Grants": ...,
         "GrantReferences": ...,
@@ -325,7 +327,7 @@ def get_bucket(bucket_name, include_created=None, flags=FLAGS.ALL ^ FLAGS.CREATE
         "AnalyticsConfigurations": ...,
         "MetricsConfigurations": ...,
         "InventoryConfigurations": ...,
-        "_version": 5
+        "_version": 6
     }
 
     NOTE: "GrantReferences" is an ephemeral field that is not guaranteed to be consistent -- do not base logic off of it
