@@ -8,9 +8,9 @@ FLAGS = Flags('BASE', 'LISTENERS', 'RULES', 'ATTRIBUTES', 'TAGS',
     'TARGET_GROUPS', 'TARGET_GROUP_ATTRIBUTES', 'TARGET_GROUP_HEALTH')
 
 
-@registry.register(flag=FLAGS.LISTENERS, key='listeners')
+@registry.register(flag=FLAGS.LISTENERS, depends_on=FLAGS.BASE, key='listeners')
 def get_listeners(alb, **conn):
-    return describe_listeners(load_balancer_arn=alb['Arn'], **conn)
+    return describe_listeners(load_balancer_arn=alb['LoadBalancerArn'], **conn)
 
 
 @registry.register(flag=FLAGS.RULES, depends_on=FLAGS.LISTENERS, key='rules')
@@ -21,19 +21,19 @@ def get_rules(alb, **conn):
     return rules
 
 
-@registry.register(flag=FLAGS.ATTRIBUTES, key='attributes')
+@registry.register(flag=FLAGS.ATTRIBUTES, depends_on=FLAGS.BASE, key='attributes')
 def get_attributes(alb, **conn):
-    return describe_load_balancer_attributes(alb['Arn'], **conn)
+    return describe_load_balancer_attributes(alb['LoadBalancerArn'], **conn)
 
 
-@registry.register(flag=FLAGS.TAGS, key='tags')
+@registry.register(flag=FLAGS.TAGS, depends_on=FLAGS.BASE, key='tags')
 def get_tags(alb, **conn):
-    return describe_tags([alb['Arn']], **conn)
+    return describe_tags([alb['LoadBalancerArn']], **conn)
 
 
-@registry.register(flag=FLAGS.TARGET_GROUPS, key='target_groups')
+@registry.register(flag=FLAGS.TARGET_GROUPS, depends_on=FLAGS.BASE, key='target_groups')
 def get_target_groups(alb, **conn):
-    return describe_target_groups(load_balancer_arn=alb['Arn'], **conn)
+    return describe_target_groups(load_balancer_arn=alb['LoadBalancerArn'], **conn)
 
 
 @registry.register(flag=FLAGS.TARGET_GROUP_ATTRIBUTES, depends_on=FLAGS.TARGET_GROUPS, key='target_group_attributes')
@@ -55,20 +55,48 @@ def _get_target_group_health(alb, **conn):
 
 @registry.register(flag=FLAGS.BASE)
 def get_base(alb, **conn):
-    return {
+    base_fields = frozenset(['LoadBalancerArn', 'State', 'DNSName', 'CreatedTime', 'Scheme', 'Type', 'IpAddressType', 'VpcId', 'CanonicalHostedZoneId', 'SecurityGroups', 'LoadBalancerName', 'AvailabilityZones'])
+    needs_base = False
+
+    for field in base_fields:
+        if field not in alb:
+            needs_base = True
+            break
+
+    if needs_base:
+        if 'LoadBalancerName' in alb:
+            alb = describe_load_balancers(names=[alb['LoadBalancerName']], **conn)
+        elif 'LoadBalancerArn' in alb:
+            alb = describe_load_balancers(arns=[alb['LoadBalancerArn']], **conn)
+        alb = alb[0]
+
+    if not isinstance(alb['CreatedTime'], basestring):
+        alb['CreatedTime'] = str(alb['CreatedTime'])
+
+    # Copy LoadBalancerArn to just Arn
+    alb['Arn'] = alb.get('LoadBalancerArn')
+    alb.update({
         '_version': 1,
-        'region': conn.get('region')
-    }
+        'region': conn.get('region')})
+    return alb
 
 
-# TODO: As elbv2 has no list method, we should really be taking a dictionary
-# as an input instead of the name.
 @modify_output
-def get_elbv2(alb_name, flags=FLAGS.ALL, **conn):
-    alb = describe_load_balancers(names=[alb_name], **conn)[0]
-    alb['CreatedTime'] = str(alb['CreatedTime'])
+def get_elbv2(alb, flags=FLAGS.ALL, **conn):
+    """
+    Fully describes an ALB (ELBv2).
 
-    # Rename LoadBalancerArn to just Arn
-    alb['Arn'] = alb.pop('LoadBalancerArn')
+    :param alb: Could be an ALB Name, ALB ARN, or a dictionary. Likely the return value from a previous call to describe_load_balancers. At a minimum, must contain a key titled 'LoadBalancerArn'.
+    :param flags: Flags describing which sections should be included in the return value. Default is FLAGS.ALL.
+    :return: Returns a dictionary describing the ALB with the fields described in the flags parameter.
+    """
+
+    if isinstance(alb, basestring):
+        from cloudaux.orchestration.aws.arn import ARN
+        alb_arn = ARN(alb)
+        if alb_arn.error:
+            alb = dict(LoadBalancerName=alb)
+        else:
+            alb = dict(LoadBalancerArn=alb)
 
     return registry.build_out(flags, start_with=alb, pass_datastructure=True, **conn)
