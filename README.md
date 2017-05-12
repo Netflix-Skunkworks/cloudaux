@@ -38,6 +38,7 @@ GCP:
 AWS:
  - IAM Role
  - IAM User
+ - IAM SAML Provider
  - S3
  - ELB (v1)
  - ELBv2 (ALB)

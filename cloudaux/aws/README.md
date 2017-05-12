@@ -21,6 +21,7 @@ Cloud Auxiliary has support for Amazon Web Services.
 
  - IAM Role
  - IAM User
+ - IAM SAML Provider
  - S3
  - ELB (v1)
  - ELBv2 (ALB)
@@ -396,21 +397,17 @@ Cloud Auxiliary has support for Amazon Web Services.
       "Instances": [],
       "ListenerDescriptions": [
         {
-          "Listener": {
-            "InstancePort": 443,
-            "InstanceProtocol": "TCP",
-            "LoadBalancerPort": 443,
-            "Protocol": "TCP"
-          },
+          "InstancePort": 443,
+          "InstanceProtocol": "TCP",
+          "LoadBalancerPort": 443,
+          "Protocol": "TCP"
           "PolicyNames": []
         },
         {
-          "Listener": {
-            "InstancePort": 80,
-            "InstanceProtocol": "HTTP",
-            "LoadBalancerPort": 80,
-            "Protocol": "HTTP"
-          },
+          "InstancePort": 80,
+          "InstanceProtocol": "HTTP",
+          "LoadBalancerPort": 80,
+          "Protocol": "HTTP"
           "PolicyNames": []
         }
       ],
@@ -434,17 +431,12 @@ Cloud Auxiliary has support for Amazon Web Services.
       ],
       "Tags": [
         {
-          "LoadBalancerName": "MyELB",
-          "Tags": [
-            {
               "Key": "tagkey",
               "Value": "tagvalue"
-            }
-          ]
         }
       ],
       "VPCId": "vpc-49999999",
-      "_version": 1
+      "_version": 2
     }
 
 ## ELBv2 (ALB)
@@ -607,4 +599,32 @@ Cloud Auxiliary has support for Amazon Web Services.
       "Type": "application", 
       "VpcId": "vpc-00000000", 
       "_version": 1
+    }
+
+
+## IAM SAML Provider
+
+    from cloudaux.orchestration.aws.iam.saml_provider import get_saml_provider
+
+    conn = dict(
+        account_number='000000000000',
+        assume_role='SecurityMonkey')
+
+    provider = get_saml_provider('arn:aws:iam::111111111111:saml-provider/MySAMLProvider', **conn)
+    
+    or
+    
+    provider = get_saml_provider(dict(Arn='arn:aws:iam::111111111111:saml-provider/MySAMLProvider'), **conn)
+
+    print(json.dumps(provider, indent=2, sort_keys=True))
+    
+    {
+      "Arn": "arn:aws:iam::111111111111:saml-provider/MySAMLProvider", 
+      "Company": "Acme, Inc.", 
+      "CreateDate": "2017-03-06 21:27:03+00:00", 
+      "Email": "identity@acme.com", 
+      "GivenName": "Identity", 
+      "Name": "https://identity.acme.com", 
+      "ValidUntil": "2018-03-06 21:27:03.086000+00:00", 
+      "X510": "MIIDXx...xx="
     }
