@@ -30,6 +30,7 @@ install_requires = [
     'joblib>=0.9.4',
     'inflection',
     'flagpole>=1.0.1',
+    'defusedxml==0.5.0',
     'google-api-python-client>=1.6.1',
     'google-cloud-storage==0.22.0'
 ]

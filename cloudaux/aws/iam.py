@@ -7,6 +7,18 @@ import botocore.exceptions
 
 @sts_conn('iam')
 @rate_limited()
+def list_saml_providers(client=None, **kwargs):
+    return client.list_saml_providers()['SAMLProviderList']
+
+
+@sts_conn('iam')
+@rate_limited()
+def get_saml_provider(arn, client=None, **kwargs):
+    return client.get_saml_provider(SAMLProviderArn=arn)
+
+
+@sts_conn('iam')
+@rate_limited()
 def list_roles(**kwargs):
     client = kwargs['client']
     roles = []
