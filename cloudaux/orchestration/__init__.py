@@ -10,11 +10,10 @@ def _modify(item, func):
     :param func: function to run on each key string
     :return: dictionary where each key has been modified by func.
     """
+    result = dict()
     for key in item:
-        new_key = func(key)
-        if key != new_key:
-            item[new_key] = item.pop(key)
-    return item
+        result[func(key)] = item[key]
+    return result
 
 
 def modify(item, output='camelized'):

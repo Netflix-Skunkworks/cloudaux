@@ -34,14 +34,13 @@ def get_base(provider, **conn):
 
 
     return {
-        'name': root.attrib['entityID'],
-        # 'arn': provider['Arn'],
-        'create_date': str(saml_provider['CreateDate']),
-        'valid_until': str(saml_provider['ValidUntil']),
-        'x509': saml_x509,
-        'company': company,
-        'given_name': given_name,
-        'email': email_address
+        'Name': root.attrib['entityID'],
+        'CreateDate': str(saml_provider['CreateDate']),
+        'ValidUntil': str(saml_provider['ValidUntil']),
+        'X509': saml_x509,
+        'Company': company,
+        'GivenName': given_name,
+        'Email': email_address
     }
 
 
