@@ -21,7 +21,7 @@ def get_base(provider, **conn):
     given_name = ''
     email_address = ''
 
-    for parent in root.getiterator():
+    for parent in root.iter():
         for child in parent:
             if 'X509Certificate' in child.tag:
                 saml_x509 = child.text
