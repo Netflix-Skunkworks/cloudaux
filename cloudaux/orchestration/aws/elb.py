@@ -21,7 +21,7 @@ def _reformat_policy(policy):
     attrs = policy['PolicyAttributeDescriptions']
 
     if ret['type'] != 'SSLNegotiationPolicyType':
-        return ret
+        return policy_name, ret
 
     attributes = dict()
     for attr in attrs:
