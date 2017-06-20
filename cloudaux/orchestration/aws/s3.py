@@ -78,49 +78,8 @@ def get_lifecycle(bucket_name, **conn):
         if 'NoSuchLifecycleConfiguration' not in str(e):
             raise e
         return []
-    
-    lifecycle_rules = []
-    rules = result['Rules']
-    for rule in rules:
-        rule_dict = {
-            'id': rule['ID'],
-            'status': rule['Status'],
-            'prefix': rule.get('Prefix'),
-        }
 
-        if rule.get('Transitions'):
-            transition_list = []
-            for transition in rule['Transitions']:
-                transition_dict = {}
-                if transition.get('Days'):
-                    transition_dict['days'] = transition['Days']
-                if transition.get('Date'):
-                    transition_dict['date'] = transition['Date'].strftime('%Y-%m-%dT%H:%M:%SZ')
-                transition_dict['storage_class'] = transition['StorageClass']
-                transition_list.append(transition_dict)
-
-            rule_dict['transitions'] = transition_list
-
-        if rule.get('Expiration'):
-            expiration_dict = {}
-            expiration = rule['Expiration']
-            if expiration.get('Days'):
-                expiration_dict['days'] = expiration['Days']
-            if expiration.get('Date'):
-                expiration_dict['date'] = expiration['Date'].strftime('%Y-%m-%dT%H:%M:%SZ')
-
-            rule_dict['expiration'] = expiration_dict
-
-        if rule.get('AbortIncompleteMultipartUpload'):
-            abort_multipart_dict = {}
-            abort_multipart = rule['AbortIncompleteMultipartUpload']
-            if abort_multipart.get('DaysAfterInitiation'):
-                abort_multipart_dict['days'] = abort_multipart['DaysAfterInitiation']
-            rule_dict['abort_multipart'] = abort_multipart_dict
-
-        lifecycle_rules.append(rule_dict)
-    return lifecycle_rules
-
+    return result['Rules']
 
 @registry.register(flag=FLAGS.LOGGING, key='logging')
 def get_logging(bucket_name, **conn):
@@ -298,7 +257,7 @@ def get_base(bucket_name, **conn):
         'arn': "arn:aws:s3:::{name}".format(name=bucket_name),
         'name': bucket_name,
         'region': conn.get('region'),
-        '_version': 6
+        '_version': 7
     }
 
 
