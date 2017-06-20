@@ -89,6 +89,11 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     role = None
     if assume_role:
         sts = boto3.client('sts')
+
+        # prevent malformed ARN
+        if not all([account_number, assume_role]):
+            raise ValueError("Account number and role to assume are both required")
+
         arn = 'arn:aws:iam::{0}:role/{1}'.format(
             account_number,
             assume_role
