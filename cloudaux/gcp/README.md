@@ -26,6 +26,10 @@ Cloud Auxiliary has support for Google Cloud Platform.
 
     pip install cloudaux
 
+For GCP support run:
+
+    pip install cloudaux\[gcp\]
+
 ## Authentication/Authorization
 
  - Default Credentials (if running on GCE)
