@@ -31,6 +31,9 @@ install_requires = [
     'inflection',
     'flagpole>=1.0.1',
     'defusedxml==0.5.0',
+]
+
+gcp_require = [
     'google-api-python-client>=1.6.1',
     'google-cloud-storage==0.22.0'
 ]
@@ -57,6 +60,7 @@ setup(
     zip_safe=False,
     install_requires=install_requires,
     extras_require={
+        'gcp': gcp_require,
         'tests': tests_require,
         'docs': docs_require,
         'dev': dev_require

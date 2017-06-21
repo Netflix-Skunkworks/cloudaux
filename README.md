@@ -51,7 +51,11 @@ GCP:
 ## Install
 
     pip install cloudaux
-    
+
+For GCP support run:
+
+    pip install cloudaux\[gcp\]
+
 ## Examples
 
 

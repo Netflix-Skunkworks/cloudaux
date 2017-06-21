@@ -30,6 +30,10 @@ Cloud Auxiliary has support for Amazon Web Services.
 
     pip install cloudaux
 
+For GCP support run:
+
+    pip install cloudaux\[gcp\]
+
 ## Example
 
     # Using wrapper methods:

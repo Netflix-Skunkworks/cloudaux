@@ -15,7 +15,8 @@ env:
     - GOOGLE_APPLICATION_CREDENTIALS=$TRAVIS_BUILD_DIR/tests/gcp/fixtures/testkey.json
 
 before_script:
-  - python setup.py develop
+# - python setup.py develop
+  - pip install -e .\[gcp\]
   - pip install pytest
   - pip install mock
   - pip install coveralls
