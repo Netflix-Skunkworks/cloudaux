@@ -527,20 +527,18 @@ For GCP support run:
       "LoadBalancerName": "MyALB", 
       "Region": "us-east-1", 
       "Rules": [
-        [
-          {
-            "Actions": [
-              {
-                "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:targetgroup/targets/0000000000000000", 
-                "Type": "forward"
-              }
-            ], 
-            "Conditions": [], 
-            "IsDefault": true, 
-            "Priority": "default", 
-            "RuleArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:listener-rule/app/.../0000000000000000/0000000000000000/0000000000000000"
-          }
-        ]
+        {
+          "Actions": [
+            {
+              "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:targetgroup/targets/0000000000000000", 
+              "Type": "forward"
+            }
+          ], 
+          "Conditions": [], 
+          "IsDefault": true, 
+          "Priority": "default", 
+          "RuleArn": "arn:aws:elasticloadbalancing:us-east-1:000000000000:listener-rule/app/.../0000000000000000/0000000000000000/0000000000000000"
+        }
       ], 
       "Scheme": "internet-facing", 
       "SecurityGroups": [
@@ -556,28 +554,24 @@ For GCP support run:
         }
       ], 
       "TargetGroupAttributes": [
-        [
-          {
-            "Key": "stickiness.enabled", 
-            "Value": "false"
-          }, 
-          {
-            "Key": "deregistration_delay.timeout_seconds", 
-            "Value": "300"
-          }, 
-          {
-            "Key": "stickiness.type", 
-            "Value": "lb_cookie"
-          }, 
-          {
-            "Key": "stickiness.lb_cookie.duration_seconds", 
-            "Value": "86400"
-          }
-        ]
+        {
+          "Key": "stickiness.enabled", 
+          "Value": "false"
+        }, 
+        {
+          "Key": "deregistration_delay.timeout_seconds", 
+          "Value": "300"
+        }, 
+        {
+          "Key": "stickiness.type", 
+          "Value": "lb_cookie"
+        }, 
+        {
+          "Key": "stickiness.lb_cookie.duration_seconds", 
+          "Value": "86400"
+        }
       ], 
-      "TargetGroupHealth": [
-        []
-      ], 
+      "TargetGroupHealth": [],
       "TargetGroups": [
         {
           "HealthCheckIntervalSeconds": 30, 
@@ -602,7 +596,7 @@ For GCP support run:
       ], 
       "Type": "application", 
       "VpcId": "vpc-00000000", 
-      "_version": 1
+      "_version": 2
     }
 
 
