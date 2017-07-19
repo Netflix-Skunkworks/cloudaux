@@ -17,7 +17,7 @@ def get_listeners(alb, **conn):
 def get_rules(alb, **conn):
     rules = list()
     for listener in alb['listeners']:
-        rules.append(describe_rules(listener_arn=listener['ListenerArn'], **conn))
+        rules.extend(describe_rules(listener_arn=listener['ListenerArn'], **conn))
     return rules
 
 
@@ -40,7 +40,7 @@ def get_target_groups(alb, **conn):
 def _get_target_group_attributes(alb, **conn):
     target_group_attributes = list()
     for target_group in alb['target_groups']:
-        target_group_attributes.append(
+        target_group_attributes.extend(
             describe_target_group_attributes(target_group['TargetGroupArn'], **conn))
     return target_group_attributes
 
@@ -49,7 +49,7 @@ def _get_target_group_attributes(alb, **conn):
 def _get_target_group_health(alb, **conn):
     target_group_health = list()
     for target_group in alb['target_groups']:
-        target_group_health.append(describe_target_health(target_group['TargetGroupArn'], **conn))
+        target_group_health.extend(describe_target_health(target_group['TargetGroupArn'], **conn))
     return target_group_health
 
 
@@ -76,7 +76,7 @@ def get_base(alb, **conn):
     # Copy LoadBalancerArn to just Arn
     alb['Arn'] = alb.get('LoadBalancerArn')
     alb.update({
-        '_version': 1,
+        '_version': 2,
         'region': conn.get('region')})
     return alb
 
