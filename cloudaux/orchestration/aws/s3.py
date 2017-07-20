@@ -79,6 +79,14 @@ def get_lifecycle(bucket_name, **conn):
             raise e
         return []
 
+    for rule in result['Rules']:
+        for transition in rule.get('Transitions', []):
+            if 'Date' in transition:
+                transition['Date'] = str(transition['Date'])
+        for expiration in rule.get('Expiration', []):
+            if 'Date' in expiration:
+                expiration['Date'] = str(expiration['Date'])
+
     return result['Rules']
 
 @registry.register(flag=FLAGS.LOGGING, key='logging')
