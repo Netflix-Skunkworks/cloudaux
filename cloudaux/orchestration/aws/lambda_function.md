@@ -1,4 +1,4 @@
-# cloudaux AWS Lambda Function
+# CloudAux AWS Lambda Function
 
 CloudAux can build out a JSON object describing an AWS Lambda Function.
 
@@ -44,13 +44,13 @@ The `get_lambda_function` command accepts flags describing what parts of the str
 
 If not provided, `get_lambda_function` assumes `FLAGS.ALL`.
 
-- [BASE](#flags-base)
-- [ALIASES](#flags-aliases)
-- [EVENT_SOURCE_MAPPINGS](#flags-event-source-mappings)
-- [VERSIONS](#flags-versions)
-- [TAGS](#flags-tags)
-- [POLICY](#flags-policy)
-- [ALL](#flags-all)
+- [BASE](#flagsbase)
+- [ALIASES](#flagsaliases)
+- [EVENT_SOURCE_MAPPINGS](#flagsevent-source-mappings)
+- [VERSIONS](#flagsversions)
+- [TAGS](#flagstags)
+- [POLICY](#flagspolicy)
+- [ALL](#flagsall)
 
 
 ### FLAGS.BASE
@@ -118,7 +118,7 @@ In this example, there is an alias called `stable` pointing to function version 
 
 ### FLAGS.EVENT_SOURCE_MAPPINGS
 
-Calls boto3's [`client.list_event_source_mappings](http://boto3.readthedocs.io/en/latest/reference/services/lambda.html#Lambda.Client.list_event_source_mappings).
+Calls boto3's [`client.list_event_source_mappings`](http://boto3.readthedocs.io/en/latest/reference/services/lambda.html#Lambda.Client.list_event_source_mappings).
 
     "EventSourceMappings": [
         {
@@ -135,7 +135,7 @@ Calls boto3's [`client.list_event_source_mappings](http://boto3.readthedocs.io/e
 
 ### FLAGS.VERSIONS
 
-Calls boto3's [`client.list_versions_by_function](http://boto3.readthedocs.io/en/latest/reference/services/lambda.html#Lambda.Client.list_versions_by_function).
+Calls boto3's [`client.list_versions_by_function`](http://boto3.readthedocs.io/en/latest/reference/services/lambda.html#Lambda.Client.list_versions_by_function).
 
     'Versions': [
         {
