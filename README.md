@@ -42,6 +42,7 @@ AWS:
  - S3
  - ELB (v1)
  - ELBv2 (ALB)
+ - [Lambda Functions](orchestration/aws/lambda_function.md)
 
 GCP:
  - IAM Service Accounts

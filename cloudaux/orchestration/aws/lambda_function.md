@@ -126,7 +126,7 @@ Calls boto3's [`client.list_event_source_mappings`](http://boto3.readthedocs.io/
             'BatchSize': 123,
             'EventSourceArn': 'string',
             'FunctionArn': 'string',
-            'LastModified': datetime(2015, 1, 1),
+            'LastModified': str(datetime(2015, 1, 1)),
             'LastProcessingResult': 'string',
             'State': 'string',
             'StateTransitionReason': 'string'
@@ -263,7 +263,7 @@ Returns a datastructure like this:
         }
       ],
       "Arn": "arn:aws:lambda:us-east-1:111111111111:function:MyLambdaFunction",
-      "CodeSha256": "qdckFmOzIR1G2GSwD+0S3GQJK2+HyocjHj8UdqPzQkU=",
+      "CodeSha256": "string",
       "CodeSize": 11571373,
       "Description": "",
       "EventSourceMappings": [],
@@ -330,7 +330,7 @@ Returns a datastructure like this:
       "Version": "$LATEST",
       "Versions": [
         {
-          "CodeSha256": "qdckFmOzIR1G2GSwD+0S3GQJK2+HyocjHj8UdqPzQkU=",
+          "CodeSha256": "string",
           "CodeSize": 11571373,
           "Description": "",
           "FunctionArn": "arn:aws:lambda:us-east-1:111111111111:function:MyLambdaFunction:$LATEST",
@@ -351,7 +351,7 @@ Returns a datastructure like this:
           }
         },
         {
-          "CodeSha256": "qdckFmOzIR1G2GSwD+0S3GQJK2+HyocjHj8UdqPzQkU=",
+          "CodeSha256": "string",
           "CodeSize": 11571373,
           "Description": "1",
           "FunctionArn": "arn:aws:lambda:us-east-1:111111111111:function:MyLambdaFunction:4",
