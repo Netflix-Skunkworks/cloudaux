@@ -23,14 +23,17 @@ CloudAux can build out a JSON object describing an AWS Lambda Function.
 
     # By ARN
     lambda_function = get_lambda_function('arn:aws:lambda:us-east-1:111111111111:function:MyLambdaFunction', **conn)
+    # Note: get_lambda_function will extract the region and account number from the ARN
+    # so you don't need to include them in the conn dict.
 
     # Pass in datastructure
     lambda_function = dict(FunctionName='MyLambdaFunction')
     lambda_function = get_lambda_function(lambda_function, **conn)
 
     # Iterate over output from list_functions and add policy info.
+    all_functions = list()
     for function in functions:
-        function = get_lambda_function(function, flags=FLAGS.POLICY, **conn)
+        all_functions.append(get_lambda_function(function, flags=FLAGS.POLICY, **conn))
 
 
 ## Flags
@@ -55,7 +58,7 @@ If not provided, `get_lambda_function` assumes `FLAGS.ALL`.
 
 ### FLAGS.BASE
 
-Call boto3's [`client.get_function`](http://boto3.readthedocs.io/en/latest/reference/services/lambda.html#Lambda.Client.get_function).
+Call boto3's [`client.get_function_configuration`](http://boto3.readthedocs.io/en/latest/reference/services/lambda.html#Lambda.Client.get_function_configuration).
 
     {
         'FunctionName': 'string',

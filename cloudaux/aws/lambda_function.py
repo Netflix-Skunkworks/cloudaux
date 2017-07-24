@@ -31,8 +31,8 @@ def list_tags(client=None, **kwargs):
 
 @sts_conn('lambda')
 @rate_limited()
-def get_function(client=None, **kwargs):
-    return client.get_function(**kwargs)['Configuration']
+def get_function_configuration(client=None, **kwargs):
+    return client.get_function_configuration(**kwargs)
 
 
 @sts_conn('lambda')

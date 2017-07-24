@@ -16,23 +16,31 @@ def _get_policy(lambda_function, **conn):
     a version, and there is also a default policy.
     
     This method attempts to gather all three types.
+    
+    AWS returns an exception if the policy requested does not exist.  We catch and ignore these exceptions.
     """
-    policies = dict(Versions=dict(), Aliases=dict())
+    policies = dict(Versions=dict(), Aliases=dict(), DEFAULT=dict())
 
     for version in [v['Version'] for v in lambda_function['versions']]:
         try:
             policies['Versions'][version] = get_policy(FunctionName=lambda_function['FunctionName'], Qualifier=version, **conn)
-        except:
+            policies['Versions'][version] = json.loads(policies['Versions'][version])
+        except Exception as e:
             pass
 
     for alias in [v['Name'] for v in lambda_function['aliases']]:
         try:
-            policies['Aliases'][alias] = json.loads(
-                get_policy(FunctionName=lambda_function['FunctionName'], Qualifier=alias, **conn))
+            policies['Aliases'][alias] = get_policy(FunctionName=lambda_function['FunctionName'], Qualifier=alias, **conn)
+            policies['Aliases'][alias] = json.loads(policies['Aliases'][alias])
         except Exception as e:
             pass
 
-    policies['DEFAULT'] = json.loads(get_policy(FunctionName=lambda_function['FunctionName'], **conn))
+    try:
+        policies['DEFAULT'] = get_policy(FunctionName=lambda_function['FunctionName'], **conn)
+        policies['DEFAULT'] = json.loads(policies['DEFAULT'])
+    except Exception as e:
+        pass
+
     return policies
 
 
@@ -64,15 +72,16 @@ def get_base(lambda_function, **conn):
         'CodeSha256', 'Version', 'VpcConfig', 'DeadLetterConfig', 'Environment',
         'KMSKeyArn', 'TracingConfig', 'MasterArn'])
     needs_base = False
-    
+
     for field in base_fields:
         if field not in lambda_function:
             needs_base = True
             break
-    
+
     if needs_base:
-        lambda_function = get_function(FunctionName=lambda_function['FunctionName'], **conn)
-        
+        lambda_function = get_function_configuration(FunctionName=lambda_function['FunctionName'], **conn)
+        lambda_function.pop('ResponseMetadata', None)
+
     # Copy FunctionArn to just Arn
     lambda_function.update({
         'Arn': lambda_function.get('FunctionArn'),
@@ -92,12 +101,23 @@ def get_lambda_function(lambda_function, flags=FLAGS.ALL, **conn):
     Returns:
         dictionary describing the requested lambda function.
     """
+    from cloudaux.orchestration.aws.arn import ARN
+
+    # If STR is passed in, determine if it's a name or ARN and built a dict.
     if isinstance(lambda_function, basestring):
-        from cloudaux.orchestration.aws.arn import ARN
         lambda_function_arn = ARN(lambda_function)
         if lambda_function_arn.error:
             lambda_function = dict(FunctionName=lambda_function)
         else:
-            lambda_function = dict(FunctionName=lambda_function_arn.name)
+            lambda_function = dict(FunctionName=lambda_function_arn.name, FunctionArn=lambda_function)
+
+    # If an ARN is available, override the account_number/region from the conn dict.
+    if 'FunctionArn' in lambda_function:
+        lambda_function_arn = ARN(lambda_function['FunctionArn'])
+        if not lambda_function_arn.error:
+            if lambda_function_arn.account_number:
+                conn['account_number'] = lambda_function_arn.account_number
+            if lambda_function_arn.region:
+                conn['region'] = lambda_function_arn.region
 
     return registry.build_out(flags, start_with=lambda_function, pass_datastructure=True, **conn)
