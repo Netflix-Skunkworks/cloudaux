@@ -61,7 +61,11 @@ def _get_versions(lambda_function, **conn):
 
 @registry.register(flag=FLAGS.EVENT_SOURCE_MAPPINGS, key='event_source_mappings')
 def _get_event_source_mappings(lambda_function, **conn):
-    return list_event_source_mappings(FunctionName=lambda_function['FunctionName'], **conn)
+    mappings = list_event_source_mappings(FunctionName=lambda_function['FunctionName'], **conn)
+    for mapping in mappings:
+        if 'LastModified' in mapping:
+            mapping['LastModified'] = str(mapping['LastModified'])
+    return mappings
 
 
 @registry.register(flag=FLAGS.BASE)
