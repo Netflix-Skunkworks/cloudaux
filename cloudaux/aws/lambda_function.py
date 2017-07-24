@@ -39,3 +39,10 @@ def get_function(client=None, **kwargs):
 @rate_limited()
 def get_policy(client=None, **kwargs):
     return client.get_policy(**kwargs)['Policy']
+
+
+@sts_conn('lambda')
+@paginated('Functions')
+@rate_limited()
+def list_functions(client=None, **kwargs):
+    return client.list_functions(**kwargs)
