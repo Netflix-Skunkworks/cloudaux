@@ -96,7 +96,7 @@ def get_topic_attributes(client=None, **kwargs):
 @sts_conn('sns')
 @paginated('Endpoints', request_pagination_marker="NextToken", response_pagination_marker="NextToken")
 @rate_limited()
-def get_topic_attributes(client=None, **kwargs):
+def list_endpoints_by_platform_application(client=None, **kwargs):
     return client.list_endpoints_by_platform_application(**kwargs)
 
 
