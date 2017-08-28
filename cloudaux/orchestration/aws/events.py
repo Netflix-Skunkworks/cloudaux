@@ -1,6 +1,5 @@
 from cloudaux.aws.events import describe_rule
 from cloudaux.aws.events import list_targets_by_rule
-from cloudaux.aws.events_bus import describe_event_bus
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
@@ -13,7 +12,13 @@ logger = logging.getLogger('cloudaux')
 
 
 registry = FlagRegistry()
-FLAGS = Flags('BASE', 'DESCRIBE')
+FLAGS = Flags('BASE', 'DESCRIBE', 'TARGETS')
+
+
+@registry.register(flag=FLAGS.TARGETS, key='targets')
+def list_targets(rule_name, **conn):
+    return list_targets_by_rule(Rule=rule_name, **conn)
+
 
 @registry.register(flag=FLAGS.DESCRIBE)
 def get_rule_description(rule_name, **conn):
@@ -32,6 +37,7 @@ def get_rule_description(rule_name, **conn):
         'rule': rule_detail
     }
 
+
 @registry.register(flag=FLAGS.BASE)
 def get_base(rule_name, **conn):
     return {
@@ -43,6 +49,7 @@ def get_base(rule_name, **conn):
         'region': conn.get('region'),
         '_version': 1
     }
+
 
 @modify_output
 def get_event(rule_name, flags=FLAGS.ALL, **conn):
@@ -58,8 +65,6 @@ def get_event(rule_name, flags=FLAGS.ALL, **conn):
         "Rule": ...,
         "_version": 1
     }
-
-    NOTE: "GrantReferences" is an ephemeral field that is not guaranteed to be consistent -- do not base logic off of it
 
     :param rule_name: str cloudwatch event name
     :param flags: By default, set to ALL fields
