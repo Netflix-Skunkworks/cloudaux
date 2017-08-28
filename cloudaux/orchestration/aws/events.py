@@ -63,6 +63,7 @@ def get_event(rule_name, flags=FLAGS.ALL, **conn):
         "Description": ...,
         "State": ...,
         "Rule": ...,
+        "Targets" ...,
         "_version": 1
     }
 
