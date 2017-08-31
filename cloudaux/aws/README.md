@@ -26,6 +26,7 @@ Cloud Auxiliary has support for Amazon Web Services.
  - ELB (v1)
  - ELBv2 (ALB)
  - [Lambda Functions](../orchestration/aws/lambda_function.md)
+ - [Glacier Vaults](../orchestration/aws/glacier.md)
 
 ## Install
 
