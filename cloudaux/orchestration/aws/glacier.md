@@ -15,6 +15,7 @@ CloudAux can build out a JSON object describing an AWS Glacier Vault.
     print(json.dumps(provider, indent=2, sort_keys=True))
 
     {
+      "ARN": "arn:aws:glacier:us-east-1:111111111111:vaults/MyVault",
       "CreationDate": "2014-01-27T18:31:49.143Z",
       "LastInventoryDate": "",
       "NumberOfArchives": 0,
