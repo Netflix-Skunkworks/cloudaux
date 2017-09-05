@@ -43,6 +43,7 @@ AWS:
  - ELB (v1)
  - ELBv2 (ALB)
  - [Lambda Functions](cloudaux/orchestration/aws/lambda_function.md)
+ - [Glacier](cloudaux/orchestration/aws/glacier.md)
 
 GCP:
  - IAM Service Accounts
