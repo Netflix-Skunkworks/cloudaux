@@ -42,4 +42,4 @@ def list_tags_for_vault(vault_name, client=None, **kwargs):
     try:
         return client.list_tags_for_vault(vaultName=vault_name)['Tags']
     except KeyError:
-        return ''
+        return None
