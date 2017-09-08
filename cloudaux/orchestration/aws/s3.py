@@ -80,12 +80,13 @@ def get_lifecycle(bucket_name, **conn):
         return []
 
     for rule in result['Rules']:
+        # Save all dates as a Proper ISO 8601 String:
         for transition in rule.get('Transitions', []):
             if 'Date' in transition:
-                transition['Date'] = str(transition['Date'])
+                transition['Date'] = transition["Date"].replace(tzinfo=None, microsecond=0).isoformat() + "Z"
         for expiration in rule.get('Expiration', []):
             if 'Date' in expiration:
-                expiration['Date'] = str(expiration['Date'])
+                expiration['Date'] = expiration["Date"].replace(tzinfo=None, microsecond=0).isoformat() + "Z"
 
     return result['Rules']
 
@@ -280,6 +281,7 @@ def get_bucket(bucket_name, include_created=None, flags=FLAGS.ALL ^ FLAGS.CREATE
     {
         "Arn": ...,
         "Name": ...,
+        "Region": ...,
         "Owner": ...,
         "Grants": ...,
         "GrantReferences": ...,
@@ -297,7 +299,7 @@ def get_bucket(bucket_name, include_created=None, flags=FLAGS.ALL ^ FLAGS.CREATE
         "AnalyticsConfigurations": ...,
         "MetricsConfigurations": ...,
         "InventoryConfigurations": ...,
-        "_version": 8
+        "_version": 9
     }
 
     NOTE: "GrantReferences" is an ephemeral field that is not guaranteed to be consistent -- do not base logic off of it
