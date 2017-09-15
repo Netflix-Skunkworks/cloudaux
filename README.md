@@ -15,6 +15,7 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
  - [CloudAux](README.md "CloudAux Readme") [THIS FILE]
  - [AWS](cloudaux/aws/README.md "Amazon Web Services Docs")
  - [GCP](cloudaux/gcp/README.md "Google Cloud Platform Docs")
+ - [OpenStack](cloudaux/openstack/README.md "OpenStack Docs")
 
 ## Features
 
@@ -33,6 +34,12 @@ GCP:
  - basic support for non-specified discovery-API services
  - control which attributes are returned with flags.
 
+OpenStack:
+ - intelligent connection caching.
+ - generalized OpenStack SDK generator usage.
+ - orchestrates all the calls required to fully describe an item.
+ - control which attributes are returned flags.
+
 ## Orchestration Supported Technologies
 
 AWS:
@@ -50,6 +57,14 @@ GCP:
  - Network/Subnetworks
  - Storage Buckets
 
+OpenStack:
+ - Network/Subnet
+ - Floating IP/Router/Port
+ - User
+ - Instance/Image
+ - Load Balancer
+ - Object Storage Container
+
 ## Install
 
     pip install cloudaux
@@ -57,6 +72,10 @@ GCP:
 For GCP support run:
 
     pip install cloudaux\[gcp\]
+
+For OpenStack support run:
+
+    pip install cloudaux\[openstack\]
 
 ## Examples
 
@@ -139,6 +158,19 @@ For GCP support run:
          ret.append(get_serviceaccount_complete(service_account=account['name']))
        return ret
 
+### OpenStack Example
+
+    from cloudaux.openstack.decorators import _connect
+    conn = _connect(cloud_name, region, yaml_file):
+
+    # Over your entire environment:
+    from cloudaux.openstack.decorators import iter_account_region, get_regions
+
+    @iter_account_region(account_regions=get_regions())
+    def list_networks(conn=None, service='network', generator='security_groups'):
+        from cloudaux.openstack.utils import list_items
+        list_items(**kwargs)
+
 ## Orchestration Example
 
 ### AWS IAM Role
@@ -215,4 +247,54 @@ For GCP support run:
       ], 
       "ProjectId": "my-project-one", 
       "UniqueId": "115386704809902483492"
+    }
+
+### OpenStack Security Group
+
+    from cloudaux.orchestration.openstack.security_group import get_security_group, FLAGS
+
+    secgroup = get_security_group(result, flags=flags, **kwargs)
+
+    # The flags parameter is optional but allows the user to indicate that
+    # only a subset of the full item description is required.
+    # Security Group Flag Options:
+    #   RULES, INSTANCES (default)
+    # For instance: flags=FLAGS.RULES | FLAGS.INSTANCES
+
+    print(json.dumps(secgroup, indent=4, sort_keys=True))
+
+    {
+        "assigned_to": [
+            {
+               "instance_id": "..."
+            }
+        ],
+        "created_at": "...",
+        "description": "...",
+        "id": "...",
+        "location": "...",
+        "name": "...",
+        "project_id": "...",
+        "revision_number": 3,
+        "rules": [
+            {
+                "rule_type": "...",
+                "remote_group_id": "...",
+                "from_port": "...",
+                "description": "...",
+                "tags": [],
+                "to_port": "...",
+                "ethertype": "...",
+                "created_at": "...",
+                "updated_at": "...",
+                "security_group_id": "...",
+                "revision_number": 0,
+                "tenant_id": "...",
+                "project_id": "..."",
+                "id": "...",
+                "cidr_ip": "...",
+                "ip_protocol": "..."
+            },
+        ],
+        "updated_at": "..."
     }
