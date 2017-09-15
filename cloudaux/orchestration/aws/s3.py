@@ -89,6 +89,7 @@ def get_lifecycle(bucket_name, **conn):
 
     return result['Rules']
 
+
 @registry.register(flag=FLAGS.LOGGING, key='logging')
 def get_logging(bucket_name, **conn):
     result = get_bucket_logging(Bucket=bucket_name, **conn)
@@ -238,10 +239,12 @@ def get_replication(bucket_name, **conn):
     return result["ReplicationConfiguration"]
 
 
-@registry.register(flag=FLAGS.CREATED_DATE, key='created')
+@registry.register(flag=FLAGS.CREATED_DATE, key='creation_date')
 def get_bucket_created(bucket_name, **conn):
     bucket = get_bucket_resource(bucket_name, **conn)
-    return str(bucket.creation_date)
+
+    # Return the creation date as a Proper ISO 8601 String:
+    return bucket.creation_date.replace(tzinfo=None, microsecond=0).isoformat() + "Z"
 
 
 @registry.register(flag=FLAGS.ANALYTICS, key='analytics_configurations')
@@ -265,7 +268,7 @@ def get_base(bucket_name, **conn):
         'arn': "arn:aws:s3:::{name}".format(name=bucket_name),
         'name': bucket_name,
         'region': conn.get('region'),
-        '_version': 7
+        '_version': 8
     }
 
 
@@ -290,11 +293,11 @@ def get_bucket(bucket_name, include_created=None, flags=FLAGS.ALL ^ FLAGS.CREATE
         "Notifications": ...,
         "Acceleration": ...,
         "Replication": ...,
-        "Created": ...,
+        "CreationDate": ...,
         "AnalyticsConfigurations": ...,
         "MetricsConfigurations": ...,
         "InventoryConfigurations": ...,
-        "_version": 6
+        "_version": 8
     }
 
     NOTE: "GrantReferences" is an ephemeral field that is not guaranteed to be consistent -- do not base logic off of it
