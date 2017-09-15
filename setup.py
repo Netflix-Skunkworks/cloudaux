@@ -38,9 +38,14 @@ gcp_require = [
     'google-cloud-storage==0.22.0'
 ]
 
+openstack_require = [
+    'openstacksdk==0.9.18'
+]
+
 tests_require = [
     'pytest',
-    'mock'
+    'mock',
+    'testtool'
 ]
 
 docs_require = []
@@ -61,6 +66,7 @@ setup(
     install_requires=install_requires,
     extras_require={
         'gcp': gcp_require,
+        'openstack': openstack_require,
         'tests': tests_require,
         'docs': docs_require,
         'dev': dev_require
