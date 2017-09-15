@@ -5,11 +5,6 @@
     :license: Apache, see LICENSE for more details.
 .. moduleauthor:: Michael Stair <mstair@att.com>
 """
-import time
-import dateutil.tz
-import datetime
-import inspect
-
 from functools import wraps
 
 from os_client_config import OpenStackConfig
