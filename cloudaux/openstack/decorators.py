@@ -49,7 +49,7 @@ def keystone_cached_conn(cloud_name, region, yaml_file):
     try:
         _cloud_name, conn = _connect(cloud_name, region, yaml_file)
     except Exception as e:
-        print 'keyston_cached_conn',e
+        raise e
 
     CACHE[key] = (_cloud_name, conn)
     return conn
