@@ -21,20 +21,18 @@ from botocore.exceptions import ClientError
 import logging
 import json
 
-
 logger = logging.getLogger('cloudaux')
-
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE', 'GRANTS', 'GRANT_REFERENCES', 'OWNER', 'LIFECYCLE',
-    'LOGGING', 'POLICY', 'TAGS', 'VERSIONING', 'WEBSITE', 'CORS',
-    'NOTIFICATIONS', 'ACCELERATION', 'REPLICATION', 'ANALYTICS',
-    'METRICS', 'INVENTORY', 'CREATED_DATE')
+              'LOGGING', 'POLICY', 'TAGS', 'VERSIONING', 'WEBSITE', 'CORS',
+              'NOTIFICATIONS', 'ACCELERATION', 'REPLICATION', 'ANALYTICS',
+              'METRICS', 'INVENTORY', 'CREATED_DATE')
 
 
 @registry.register(
- flag=(FLAGS.GRANTS, FLAGS.GRANT_REFERENCES, FLAGS.OWNER),
- key=('grants', 'grant_references', 'owner'))
+    flag=(FLAGS.GRANTS, FLAGS.GRANT_REFERENCES, FLAGS.OWNER),
+    key=('grants', 'grant_references', 'owner'))
 def get_grants(bucket_name, include_owner=True, **conn):
     acl = get_bucket_acl(Bucket=bucket_name, **conn)
     grantees = {}
@@ -84,9 +82,11 @@ def get_lifecycle(bucket_name, **conn):
         for transition in rule.get('Transitions', []):
             if 'Date' in transition:
                 transition['Date'] = transition["Date"].replace(tzinfo=None, microsecond=0).isoformat() + "Z"
-        for expiration in rule.get('Expiration', []):
-            if 'Date' in expiration:
-                expiration['Date'] = expiration["Date"].replace(tzinfo=None, microsecond=0).isoformat() + "Z"
+
+        if rule.get("Expiration"):
+            if 'Date' in rule["Expiration"]:
+                rule["Expiration"]["Date"] = \
+                    rule["Expiration"]["Date"].replace(tzinfo=None, microsecond=0).isoformat() + "Z"
 
     return result['Rules']
 
