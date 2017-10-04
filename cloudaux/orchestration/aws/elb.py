@@ -25,7 +25,12 @@ def _reformat_policy(policy):
 
     attributes = dict()
     for attr in attrs:
-        attributes[attr['AttributeName']] = attr['AttributeValue']
+        if attr['AttributeValue'] == "true":
+            attributes[attr['AttributeName']] = True
+        elif attr['AttributeValue'] == "false":
+            attributes[attr['AttributeName']] = False
+        else:
+            attributes[attr['AttributeName']] = attr['AttributeValue']
 
     ret['protocols'] = dict()
     ret['protocols']['sslv2'] = bool(attributes.get('Protocol-SSLv2'))
