@@ -3,6 +3,7 @@ from cloudaux.aws.events import list_targets_by_rule
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
+from cloudaux.orchestration.aws import ARN
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE', 'DESCRIBE', 'TARGETS')
@@ -10,15 +11,11 @@ FLAGS = Flags('BASE', 'DESCRIBE', 'TARGETS')
 
 @registry.register(flag=FLAGS.TARGETS, key='targets')
 def list_targets(rule, **conn):
-    return list_targets_by_rule(Rule=rule['name'], **conn)
+    return list_targets_by_rule(Rule=rule['Name'], **conn)
 
 
 @registry.register(flag=FLAGS.DESCRIBE)
 def get_rule_description(rule, **conn):
-    rule = describe_rule(Name=rule['name'], **conn)
-
-    rule_detail = None
-
     if rule.get('ScheduleExpression', None):
         rule_detail = rule['ScheduleExpression']
     else:
@@ -34,11 +31,8 @@ def get_rule_description(rule, **conn):
 @registry.register(flag=FLAGS.BASE)
 def get_base(rule, **conn):
     return {
-        'arn': "arn:aws:events:{region}:{account}:rule/{name}".format(
-            region=conn.get('region'),
-            account=conn.get('account'),
-            name=rule['name']),
-        'name': rule['name'],
+        'arn': rule["Arn"],
+        'name': rule['Name'],
         'region': conn.get('region'),
         '_version': 1
     }
@@ -66,12 +60,20 @@ def get_event(rule, flags=FLAGS.ALL, **conn):
     Must at least have 'assume_role' key.
     :return: dict containing a fully built out event rule with targets.
     """
-    # If STR is passed in, determine if it's a name or ARN and built a dict.
+    # Python 2 and 3 support:
+    try:
+        basestring
+    except NameError as _:
+        basestring = str
+
+    # If string is passed in, determine if it's a name or ARN. Build a dict.
     if isinstance(rule, basestring):
         rule_arn = ARN(rule)
         if rule_arn.error:
-            rule = dict(name=rule)
+            rule_name = rule
         else:
-            rule = dict(name=rule_arn.name, arn=rule)
+            rule_name = rule_arn.name
+
+    rule = describe_rule(Name=rule_name, **conn)
 
     return registry.build_out(flags, rule, **conn)
