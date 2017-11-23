@@ -307,9 +307,10 @@ def get_bucket(bucket_name, include_created=None, flags=FLAGS.ALL ^ FLAGS.CREATE
     :param include_created: legacy param moved to FLAGS.
     :param bucket_name: str bucket name
     :param output: Determines whether keys should be returned camelized or underscored.
-    :param flags: By default, set to ALL fields except for FLAGS.CREATED_DATE as obtaining that information is a slow and expensive process.
-    :param conn: dict containing enough information to make a connection to the desired account.
-    Must at least have 'assume_role' key.
+    :param flags: By default, set to ALL fields except for FLAGS.CREATED_DATE as obtaining that information is a slow
+                  and expensive process.
+    :param conn: dict containing enough information to make a connection to the desired account. Must at least have
+                 'assume_role' key.
     :return: dict containing a fully built out bucket.
     """
     if type(include_created) is bool:
