@@ -52,6 +52,7 @@ AWS:
  - [Lambda Functions](cloudaux/orchestration/aws/lambda_function.md)
  - [Glacier](cloudaux/orchestration/aws/glacier.md)
  - [EC2 Image](cloudaux/orchestration/aws/image.md)
+ - [Cloudwatch Events](cloudaux/orchestration/aws/events.md)
 
 GCP:
  - IAM Service Accounts
