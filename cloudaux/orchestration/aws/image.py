@@ -86,17 +86,3 @@ def get_image(image_id, flags=FLAGS.ALL, **conn):
     image = dict(ImageId=image_id)
     conn['region'] = conn.get('region', 'us-east-1')
     return registry.build_out(flags, image, **conn)
-
-
-# Shared:
-# "LaunchPermissions": [
-#     {
-#       "UserId": "179727101194"
-#     }, 
-#     {
-#       "UserId": "679593333241"
-#     }
-# ], 
-  
-# Internet Accessible:
-# "Public": false,
