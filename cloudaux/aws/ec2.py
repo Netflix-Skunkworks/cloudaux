@@ -93,6 +93,18 @@ def describe_instances(**kwargs):
 
 @sts_conn('ec2')
 @rate_limited()
+def describe_images(**kwargs):
+    return kwargs.pop('client').describe_images(**kwargs)['Images']
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_image_attribute(**kwargs):
+    return kwargs.pop('client').describe_image_attribute(**kwargs)
+
+
+@sts_conn('ec2')
+@rate_limited()
 def describe_security_groups(**kwargs):
     return kwargs.pop('client').describe_security_groups(**kwargs)
 

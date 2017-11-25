@@ -46,11 +46,12 @@ AWS:
  - IAM Role
  - IAM User
  - IAM SAML Provider
- - S3
+ - [S3](cloudaux/orchestration/aws/s3.md)
  - ELB (v1)
  - ELBv2 (ALB)
  - [Lambda Functions](cloudaux/orchestration/aws/lambda_function.md)
  - [Glacier](cloudaux/orchestration/aws/glacier.md)
+ - [EC2 Image](cloudaux/orchestration/aws/image.md)
 
 GCP:
  - IAM Service Accounts

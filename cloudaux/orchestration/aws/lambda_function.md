@@ -42,7 +42,7 @@ The `get_lambda_function` command accepts flags describing what parts of the str
 
     from cloudaux.orchestration.aws.lambda_function import FLAGS
 
-    desired_fields = FLAGS.BASE | FLAGS.TAGS
+    desired_flags = FLAGS.BASE | FLAGS.TAGS
     lambda_function = get_lambda_function('MyLambdaFunction', flags=desired_flags, **conn)
 
 If not provided, `get_lambda_function` assumes `FLAGS.ALL`.
