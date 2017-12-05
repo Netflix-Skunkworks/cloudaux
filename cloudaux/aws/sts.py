@@ -29,14 +29,14 @@ def _conn_kwargs(region, role):
 
 
 def _client(service, region, role):
-    return boto3.client(
+    return boto3.session.Session().client(
         service,
         **_conn_kwargs(region, role)
     )
 
 
 def _resource(service, region, role):
-    return boto3.resource(
+    return boto3.session.Session().resource(
         service,
         **_conn_kwargs(region, role)
     )
@@ -88,7 +88,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
 
     role = None
     if assume_role:
-        sts = boto3.client('sts')
+        sts = boto3.session.Session().client('sts')
 
         # prevent malformed ARN
         if not all([account_number, assume_role]):
