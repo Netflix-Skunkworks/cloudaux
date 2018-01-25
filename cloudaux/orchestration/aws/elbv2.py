@@ -2,10 +2,9 @@ from cloudaux.aws.elbv2 import *
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
-
 registry = FlagRegistry()
 FLAGS = Flags('BASE', 'LISTENERS', 'RULES', 'ATTRIBUTES', 'TAGS',
-    'TARGET_GROUPS', 'TARGET_GROUP_ATTRIBUTES', 'TARGET_GROUP_HEALTH')
+              'TARGET_GROUPS', 'TARGET_GROUP_ATTRIBUTES', 'TARGET_GROUP_HEALTH')
 
 
 @registry.register(flag=FLAGS.LISTENERS, depends_on=FLAGS.BASE, key='listeners')
@@ -55,7 +54,9 @@ def _get_target_group_health(alb, **conn):
 
 @registry.register(flag=FLAGS.BASE)
 def get_base(alb, **conn):
-    base_fields = frozenset(['LoadBalancerArn', 'State', 'DNSName', 'CreatedTime', 'Scheme', 'Type', 'IpAddressType', 'VpcId', 'CanonicalHostedZoneId', 'SecurityGroups', 'LoadBalancerName', 'AvailabilityZones'])
+    base_fields = frozenset(
+        ['LoadBalancerArn', 'State', 'DNSName', 'CreatedTime', 'Scheme', 'Type', 'IpAddressType', 'VpcId',
+         'CanonicalHostedZoneId', 'SecurityGroups', 'LoadBalancerName', 'AvailabilityZones'])
     needs_base = False
 
     for field in base_fields:
@@ -90,6 +91,11 @@ def get_elbv2(alb, flags=FLAGS.ALL, **conn):
     :param flags: Flags describing which sections should be included in the return value. Default is FLAGS.ALL.
     :return: Returns a dictionary describing the ALB with the fields described in the flags parameter.
     """
+    # Python 2 and 3 support:
+    try:
+        basestring
+    except NameError as _:
+        basestring = str
 
     if isinstance(alb, basestring):
         from cloudaux.orchestration.aws.arn import ARN

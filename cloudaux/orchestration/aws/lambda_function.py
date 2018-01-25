@@ -3,6 +3,7 @@ from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 import json
 
+from cloudaux.orchestration.aws import ARN
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE', 'ALIASES', 'EVENT_SOURCE_MAPPINGS', 'VERSIONS', 'TAGS', 'POLICY')
@@ -105,7 +106,11 @@ def get_lambda_function(lambda_function, flags=FLAGS.ALL, **conn):
     Returns:
         dictionary describing the requested lambda function.
     """
-    from cloudaux.orchestration.aws.arn import ARN
+    # Python 2 and 3 support:
+    try:
+        basestring
+    except NameError as _:
+        basestring = str
 
     # If STR is passed in, determine if it's a name or ARN and built a dict.
     if isinstance(lambda_function, basestring):

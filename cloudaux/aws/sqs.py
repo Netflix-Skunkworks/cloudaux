@@ -6,6 +6,8 @@
 .. moduleauthor:: Kevin Glisson <kglisson@netflix.com>
 .. moduleauthor:: Patrick Kelley <patrick@netflix.com>
 """
+import json
+
 from cloudaux.aws.sts import sts_conn
 from cloudaux.aws.decorators import rate_limited
 
@@ -49,7 +51,13 @@ def delete_queue(client=None, **kwargs):
 @sts_conn('sqs')
 @rate_limited()
 def get_queue_attributes(client=None, **kwargs):
-    return client.get_queue_attributes(**kwargs)['Attributes']
+    attributes = client.get_queue_attributes(**kwargs)['Attributes']
+
+    if attributes.get("Policy"):
+        policy = json.loads(attributes["Policy"])
+        attributes["Policy"] = policy
+
+    return attributes
 
 
 @sts_conn('sqs')
@@ -61,7 +69,25 @@ def get_queue_url(client=None, **kwargs):
 @sts_conn('sqs')
 @rate_limited()
 def list_dead_letter_source_queues(client=None, **kwargs):
-    return client.list_dead_letter_source_queues(**kwargs)['queueUrls']
+    return client.list_dead_letter_source_queues(**kwargs).get('queueUrls', [])
+
+
+@sts_conn('sqs')
+@rate_limited()
+def list_queue_tags(client=None, **kwargs):
+    return client.list_queue_tags(**kwargs).get('Tags', [])
+
+
+@sts_conn('sqs')
+@rate_limited()
+def tag_queue(client=None, **kwargs):
+    client.tag_queue(**kwargs)
+
+
+@sts_conn('sqs')
+@rate_limited()
+def untag_queue(client=None, **kwargs):
+    client.untag_queue(**kwargs)
 
 
 @sts_conn('sqs')
