@@ -53,6 +53,7 @@ AWS:
  - [Glacier](cloudaux/orchestration/aws/glacier.md)
  - [EC2 Image](cloudaux/orchestration/aws/image.md)
  - [Cloudwatch Events](cloudaux/orchestration/aws/events.md)
+ - [SQS](cloudaux/orchestration/aws/sqs.md)
 
 GCP:
  - IAM Service Accounts

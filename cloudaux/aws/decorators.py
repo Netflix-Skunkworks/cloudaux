@@ -4,7 +4,7 @@ import time
 import boto
 import botocore
 
-RATE_LIMITING_ERRORS = ['Throttling', 'RequestLimitExceeded']
+RATE_LIMITING_ERRORS = ['Throttling', 'RequestLimitExceeded', 'SlowDown', 'RequestThrottled']
 
 
 def rate_limited(max_attempts=None, max_delay=4):

@@ -172,6 +172,11 @@ def get_load_balancer(load_balancer, flags=FLAGS.ALL ^ FLAGS.POLICY_TYPES, **con
     :param flags: Flags describing which sections should be included in the return value. Default is FLAGS.ALL minus FLAGS.POLICY_TYPES.
     :return: Returns a dictionary describing the ELB with the fields described in the flags parameter.
     """
+    # Python 2 and 3 support:
+    try:
+        basestring
+    except NameError as _:
+        basestring = str
 
     if isinstance(load_balancer, basestring):
         load_balancer = dict(LoadBalancerName=load_balancer)
