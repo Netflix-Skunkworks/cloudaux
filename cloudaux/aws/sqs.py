@@ -93,7 +93,7 @@ def untag_queue(client=None, **kwargs):
 @sts_conn('sqs')
 @rate_limited()
 def list_queues(client=None, **kwargs):
-    return client.list_queues(**kwargs)['QueueUrls']
+    return client.list_queues(**kwargs).get('QueueUrls', [])
 
 
 @sts_conn('sqs')
