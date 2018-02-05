@@ -99,6 +99,12 @@ def describe_vpcs(**kwargs):
 
 @sts_conn('ec2')
 @rate_limited()
+def describe_vpn_connections(**kwargs):
+    return kwargs.pop('client').describe_vpn_connections(**kwargs).get("VpnConnections", [])
+
+
+@sts_conn('ec2')
+@rate_limited()
 def describe_images(**kwargs):
     return kwargs.pop('client').describe_images(**kwargs)['Images']
 
