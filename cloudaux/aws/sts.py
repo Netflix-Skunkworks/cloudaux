@@ -42,8 +42,27 @@ def _resource(service, region, role):
     )
 
 
+def _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials):
+    role = CACHE[key]
+    now = datetime.datetime.now(dateutil.tz.tzutc()) + datetime.timedelta(minutes=future_expiration_minutes)
+    if role["Credentials"]["Expiration"] > now:
+        if service_type == 'client':
+            conn = _client(service, region, role)
+        else:
+            conn = _resource(service, region, role)
+
+        if return_credentials:
+            return conn, role
+
+        return conn
+
+    else:
+        del CACHE[key]
+
+
 @rate_limited()
-def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None, assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False):
+def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None,
+                      assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False):
     """
     Used to obtain a boto3 client or resource connection.
     For cross account, provide both account_number and assume_role.
@@ -68,6 +87,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     :param assume_role:  Name of the role to assume into for account described by account_number.
     :param session_name: Session name to attach to requests. [Default 'cloudaux']
     :param region: Region name for connection. [Default us-east-1]
+    :param return_credentials: Indicates if the STS credentials should be returned with the client [Default False]
     :return: boto3 client or resource connection
     """
     key = (
@@ -79,12 +99,9 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         service)
 
     if key in CACHE:
-        (conn, exp) = CACHE[key]
-        now = datetime.datetime.now(dateutil.tz.tzutc()) + datetime.timedelta(minutes=future_expiration_minutes)
-        if exp > now:
-            return conn
-        else:
-            del CACHE[key]
+        retval = _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials)
+        if retval:
+            return retval
 
     role = None
     if assume_role:
@@ -106,7 +123,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         conn = _resource(service, region, role)
 
     if role:
-        CACHE[key] = (conn, role['Credentials']['Expiration'])
+        CACHE[key] = role
 
     if return_credentials:
         return conn, role['Credentials']
