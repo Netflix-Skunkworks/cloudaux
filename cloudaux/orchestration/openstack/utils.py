@@ -31,7 +31,10 @@ def get_item(item, **kwargs):
 """ from security_monkey.common.utils. Need to convert any embedded OpenStack classes 
 			to their string/JSON representation """
 
-prims = [int, str, unicode, bool, float, type(None)]
+try:               # Python 2
+    prims = [int, str, unicode, bool, float, type(None)]
+except NameError:  # Python 3
+    prims = [int, str, bool, float, type(None)]
 
 def sub_list(l):
     """
