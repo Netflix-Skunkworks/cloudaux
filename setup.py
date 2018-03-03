@@ -31,6 +31,7 @@ install_requires = [
     'inflection',
     'flagpole>=1.0.1',
     'defusedxml==0.5.0',
+    'six>=1.11.0',
 ]
 
 gcp_require = [

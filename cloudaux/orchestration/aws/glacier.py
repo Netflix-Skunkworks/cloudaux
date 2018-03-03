@@ -2,6 +2,7 @@ from cloudaux.aws.glacier import describe_vault, get_vault_access_policy, list_t
 from cloudaux.decorators import modify_output
 from cloudaux.orchestration.aws.arn import ARN
 from flagpole import FlagRegistry, Flags
+from six import string_types
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE', 'POLICY', 'TAGS')
@@ -52,7 +53,7 @@ def get_vault(vault_obj, flags=FLAGS.ALL, **conn):
     Returns:
         dictionary describing the requested Vault
     """
-    if isinstance(vault_obj, basestring):
+    if isinstance(vault_obj, string_types):
         vault_arn = ARN(vault_obj)
         if vault_arn.error:
             vault_obj = {'VaultName': vault_obj}

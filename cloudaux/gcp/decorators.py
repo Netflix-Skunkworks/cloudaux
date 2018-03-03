@@ -6,8 +6,9 @@
 .. moduleauthor:: Tom Melendez (@supertom) <supertom@google.com>
 """
 import time
-
 from functools import wraps
+
+from six import string_types
 
 from cloudaux.gcp.gcpcache import GCPCache
 from cloudaux.gcp.utils import get_creds_from_kwargs, rewrite_kwargs
@@ -48,7 +49,7 @@ def gcp_conn(service, service_type='client', future_expiration_minutes=15):
 def gcp_stats():
     """
     Collect stats
-    
+
     Specifically, time function calls
     :returns: function response
     :rtype: varies
@@ -102,10 +103,10 @@ def iter_project(projects, key_file=None):
     Note: the function 'decorated' is expected to return a value plus a dictionary of exceptions.
 
     If item in list is a dictionary, we look for a 'project' and 'key_file' entry, respectively.
-    If item in list is of type basestring, we assume it is the project string. Default credentials
+    If item in list is of type string_types, we assume it is the project string. Default credentials
     will be used by the underlying client library.
 
-    :param projects: list of project strings or list of dictionaries 
+    :param projects: list of project strings or list of dictionaries
                      Example: {'project':..., 'keyfile':...}. Required.
     :type projects: ``list`` of ``str`` or ``list`` of ``dict``
 
@@ -122,7 +123,7 @@ def iter_project(projects, key_file=None):
             item_list = []
             exception_map = {}
             for project in projects:
-                if isinstance(project, basestring):
+                if isinstance(project, string_types):
                     kwargs['project'] = project
                     if key_file:
                         kwargs['key_file'] = key_file

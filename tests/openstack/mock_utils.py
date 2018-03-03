@@ -17,7 +17,7 @@ def mock_list_items(conn=None, **kwargs):
         generator = kwargs['generator']
         f = 'mock_list_%s'%generator
 
-	return globals()[f](conn, **kwargs)
+        return globals()[f](conn, **kwargs)
 
 def mock_list_networks(conn=None, **kwargs):
     with patch('openstack.connection.Connection'):
@@ -41,7 +41,7 @@ def mock_list_subnets(conn=None, **kwargs):
     with patch('openstack.connection.Connection'):
          from openstack.network.v2.subnet import Subnet
          from openstack.tests.unit.network.v2.test_subnet import EXAMPLE
-   
+
          conn = connection.Connection()
          conn.network.subnets.side_effect = [ [Subnet(**EXAMPLE)] ]
          return [x for x in conn.network.subnets()]
