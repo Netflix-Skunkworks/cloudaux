@@ -23,6 +23,15 @@ about = {}
 with open(os.path.join(ROOT, "cloudaux", "__about__.py")) as f:
     exec(f.read(), about)
 
+classifiers = [
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+]
+
 install_requires = [
     'boto3>=1.5.20',
     'botocore>=1.8.34',
@@ -65,6 +74,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=install_requires,
+    classifiers=classifiers,
     extras_require={
         'gcp': gcp_require,
         'openstack': openstack_require,
