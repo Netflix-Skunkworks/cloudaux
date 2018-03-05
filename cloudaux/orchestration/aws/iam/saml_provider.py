@@ -2,6 +2,7 @@ from cloudaux.aws.iam import get_saml_provider as boto_get_saml_provider
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 import defusedxml.ElementTree as ET
+from six import string_types
 
 
 registry = FlagRegistry()
@@ -48,7 +49,7 @@ def get_base(provider, **conn):
 def get_saml_provider(provider, flags=FLAGS.ALL, **conn):
 
     # If provided an ARN, cast to a dict
-    if isinstance(provider, basestring):
+    if isinstance(provider, string_types):
         provider = dict(Arn=provider)
 
     return registry.build_out(flags, start_with=provider, pass_datastructure=True, **conn)

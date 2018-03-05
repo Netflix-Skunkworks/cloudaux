@@ -9,7 +9,7 @@ from functools import wraps
 
 from os_client_config import OpenStackConfig
 from openstack import connection
-
+from six.http.client import HTTPException
 
 """ this is mix of the aws and gcp decorator conventions """
 
@@ -37,7 +37,7 @@ def keystone_cached_conn(cloud_name, region, yaml_file):
         _cloud_name, conn = CACHE[key]
         try:
             conn.authorize()
-        except HttpException:
+        except HTTPException:
             del CACHE[key]
         else:
             return conn
@@ -53,7 +53,7 @@ def openstack_conn():
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            kwargs['conn'] = keystone_cached_conn( 
+            kwargs['conn'] = keystone_cached_conn(
 				kwargs.pop('cloud_name'), kwargs.pop('region'), kwargs.pop('yaml_file') )
             return f(*args, **kwargs)
 

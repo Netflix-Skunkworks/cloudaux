@@ -7,8 +7,10 @@
 """
 import inspect
 
+from six import text_type
+
 """ global ignore_list for OpenStack SDK service object members """
-ignore_list = [ 'allow_create', 'allow_delete', 'allow_get', 'allow_head', 
+ignore_list = [ 'allow_create', 'allow_delete', 'allow_get', 'allow_head',
 		'allow_list', 'allow_update', 'patch_update', 'put_create',
 		'service', 'base_path', 'resource_key', 'resources_key' ]
 
@@ -17,7 +19,7 @@ def get_item(item, **kwargs):
     API versioning for each OpenStack service is independent. Generically capture
         the public members (non-routine and non-private) of the OpenStack SDK objects.
 
-    Note the lack of the modify_output decorator. Preserving the field naming allows 
+    Note the lack of the modify_output decorator. Preserving the field naming allows
         us to reconstruct objects and orchestrate from stored items.
     """
     _item = {}
@@ -28,13 +30,10 @@ def get_item(item, **kwargs):
     return sub_dict(_item)
 
 
-""" from security_monkey.common.utils. Need to convert any embedded OpenStack classes 
+""" from security_monkey.common.utils. Need to convert any embedded OpenStack classes
 			to their string/JSON representation """
 
-try:               # Python 2
-    prims = [int, str, unicode, bool, float, type(None)]
-except NameError:  # Python 3
-    prims = [int, str, bool, float, type(None)]
+prims = [int, str, text_type, bool, float, type(None)]
 
 def sub_list(l):
     """
