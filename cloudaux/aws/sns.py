@@ -129,7 +129,7 @@ def list_subscriptions_by_topic(client=None, **kwargs):
 
 
 @sts_conn('sns')
-@pagiated('Topics', request_pagination_marker="NextToken", response_pagination_marker="NextToken")
+@paginated('Topics', request_pagination_marker="NextToken", response_pagination_marker="NextToken")
 @rate_limited()
 def list_topics(client=None, **kwargs):
     return client.list_topics(**kwargs)
