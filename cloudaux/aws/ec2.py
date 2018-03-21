@@ -131,3 +131,9 @@ def authorize_security_group_ingress(**kwargs):
 @rate_limited()
 def authorize_security_group_egress(**kwargs):
     return kwargs.pop('client').authorize_security_group_egress(**kwargs)
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_auto_scaling_groups(**kwargs):
+    return kwargs.pop('client').describe_auto_scaling_groups(**kwargs)
