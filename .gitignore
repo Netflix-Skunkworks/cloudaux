@@ -91,3 +91,6 @@ venv
 
 # IntelliJ/PyCharm
 .idea/
+
+.pytest_cache/
+.coverage

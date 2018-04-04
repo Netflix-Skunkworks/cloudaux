@@ -20,7 +20,7 @@ class TestAuth(unittest.TestCase):
 
     def setUp(self):
         self.base_dir = os.getcwd()
-        self.fixtures_dir = 'tests/gcp/fixtures'
+        self.fixtures_dir = 'cloudaux/tests/gcp/fixtures'
 
     def _get_fixture(self, file_name):
         return os.path.join(self.base_dir,
