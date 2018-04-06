@@ -3,12 +3,13 @@
     :platform: Unix
     :copyright: (c) 2015 by Netflix Inc., see AUTHORS for more
     :license: Apache, see LICENSE for more details.
+.. moduleauthor:: Mike Grima <mgrima@netflix.com>
 .. moduleauthor:: Kevin Glisson <kglisson@netflix.com>
 .. moduleauthor:: Patrick Kelley <patrick@netflix.com>
 """
 from cloudaux.aws.sts import sts_conn
 from cloudaux.exceptions import CloudAuxException
-from cloudaux.aws.decorators import rate_limited
+from cloudaux.aws.decorators import rate_limited, paginated
 
 
 @sts_conn('ec2')
@@ -93,12 +94,6 @@ def describe_instances(**kwargs):
 
 @sts_conn('ec2')
 @rate_limited()
-def describe_vpcs(**kwargs):
-    return kwargs.pop('client').describe_vpcs(**kwargs)
-
-
-@sts_conn('ec2')
-@rate_limited()
 def describe_vpn_connections(**kwargs):
     return kwargs.pop('client').describe_vpn_connections(**kwargs).get("VpnConnections", [])
 
@@ -143,3 +138,69 @@ def authorize_security_group_egress(**kwargs):
 @rate_limited()
 def describe_auto_scaling_groups(**kwargs):
     return kwargs.pop('client').describe_auto_scaling_groups(**kwargs)
+
+
+# ------------------ #
+# VPC is part of EC2 #
+# ------------------ #
+@sts_conn('ec2')
+@rate_limited()
+def describe_vpcs(**kwargs):
+    return kwargs.pop('client').describe_vpcs(**kwargs).get("Vpcs", [])
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_dhcp_options(**kwargs):
+    return kwargs.pop('client').describe_dhcp_options(**kwargs).get("DhcpOptions", [])
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_internet_gateways(**kwargs):
+    return kwargs.pop('client').describe_internet_gateways(**kwargs).get("InternetGateways", [])
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_vpc_classic_link(**kwargs):
+    return kwargs.pop('client').describe_vpc_classic_link(**kwargs).get("Vpcs", [])
+
+
+@paginated('Vpcs', response_pagination_marker='NextToken')
+@sts_conn('ec2')
+@rate_limited()
+def describe_vpc_classic_link_dns_support(**kwargs):
+    return kwargs.pop('client').describe_vpc_classic_link_dns_support(**kwargs)
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_vpc_peering_connections(**kwargs):
+    return kwargs.pop('client').describe_vpc_peering_connections(**kwargs).get("VpcPeeringConnections", [])
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_subnets(**kwargs):
+    return kwargs.pop('client').describe_subnets(**kwargs).get("Subnets", [])
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_route_tables(**kwargs):
+    return kwargs.pop('client').describe_route_tables(**kwargs).get("RouteTables", [])
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_network_acls(**kwargs):
+    return kwargs.pop('client').describe_network_acls(**kwargs).get("NetworkAcls", [])
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_vpc_attribute(**kwargs):
+    return kwargs.pop('client').describe_vpc_attribute(**kwargs)
+# ------------------ #
+

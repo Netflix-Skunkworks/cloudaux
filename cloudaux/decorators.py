@@ -15,7 +15,8 @@ from cloudaux.orchestration import modify
 from cloudaux import CloudAux
 
 
-def iter_account_region(service, service_type='client', accounts=None, regions=None, assume_role=None, session_name='cloudaux', conn_type='cloudaux'):
+def iter_account_region(service, service_type='client', accounts=None, regions=None, assume_role=None,
+                        session_name='cloudaux', conn_type='cloudaux'):
     def decorator(func):
         @functools.wraps(func)
         def decorated_function(*args, **kwargs):

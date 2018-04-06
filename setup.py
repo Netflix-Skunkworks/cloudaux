@@ -54,8 +54,12 @@ openstack_require = [
 
 tests_require = [
     'pytest',
+    'pytest-cov',
+    'moto',
     'mock',
-    'testtool'
+    'coveralls',
+    'tox',
+    'flake8'
 ]
 
 docs_require = []
