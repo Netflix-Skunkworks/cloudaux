@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 
 from cloudaux.aws.ec2 import describe_vpcs, describe_dhcp_options, describe_vpc_classic_link, \
     describe_vpc_classic_link_dns_support, describe_internet_gateways, describe_vpc_peering_connections, \
-    describe_subnets, describe_route_tables, describe_network_acls, describe_vpc_attribute
+    describe_subnets, describe_route_tables, describe_network_acls, describe_vpc_attribute, describe_flow_logs
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
@@ -20,9 +20,21 @@ FLAGS = Flags('BASE', 'INTERNET_GATEWAY', 'CLASSIC_LINK', 'VPC_PEERING_CONNECTIO
               'NETWORK_ACLS', 'FLOW_LOGS')
 
 
+@registry.register(flag=FLAGS.FLOW_LOGS, depends_on=FLAGS.BASE, key="flow_logs")
+def get_vpc_flow_logs(vpc, **conn):
+    """Gets the VPC Flow Logs for a VPC"""
+    fl_result = describe_flow_logs(Filters=[{"Name": "resource-id", "Values": [vpc["id"]]}], **conn)
+
+    fl_ids = []
+    for fl in fl_result:
+        fl_ids.append(fl["FlowLogId"])
+
+    return fl_ids
+
+
 @registry.register(flag=FLAGS.CLASSIC_LINK, depends_on=FLAGS.BASE, key="classic_link")
 def get_classic_link(vpc, **conn):
-    """"Gets the Classic Link details about a VPC"""
+    """Gets the Classic Link details about a VPC"""
     result = {}
 
     try:
@@ -197,6 +209,7 @@ def get_vpc(vpc_id, flags=FLAGS.ALL, **conn):
         "FlowLogs": ...,
         "Subnets": ...,
         "Attributes": ...,
+        "FlowLogs": ...,
         "_version": 1
     }
 
