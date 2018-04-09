@@ -37,7 +37,7 @@ def get_classic_link(vpc, **conn):
 def get_internet_gateway(vpc, **conn):
     """Gets the Internet Gateway details about a VPC"""
     result = {}
-    ig_result = describe_internet_gateways(Filters=[{"Name": "attachment.vpc-id", "Values": [vpc["id"]]}])
+    ig_result = describe_internet_gateways(Filters=[{"Name": "attachment.vpc-id", "Values": [vpc["id"]]}], **conn)
 
     if ig_result:
         # Only 1 IG can be attached to a VPC:
@@ -54,10 +54,10 @@ def get_internet_gateway(vpc, **conn):
 def get_vpc_peering_connections(vpc, **conn):
     """Gets the Internet Gateway details about a VPC"""
     accepter_result = describe_vpc_peering_connections(Filters=[{"Name": "accepter-vpc-info.vpc-id",
-                                                                 "Values": [vpc["id"]]}])
+                                                                 "Values": [vpc["id"]]}], **conn)
 
     requester_result = describe_vpc_peering_connections(Filters=[{"Name": "requester-vpc-info.vpc-id",
-                                                                 "Values": [vpc["id"]]}])
+                                                                 "Values": [vpc["id"]]}], **conn)
 
     # Assuming that there will be no duplicates:
     peer_ids = []
@@ -70,7 +70,7 @@ def get_vpc_peering_connections(vpc, **conn):
 @registry.register(flag=FLAGS.SUBNETS, depends_on=FLAGS.BASE, key="subnets")
 def get_subnets(vpc, **conn):
     """Gets the VPC Subnets"""
-    subnets = describe_subnets(Filters=[{"Name": "vpc-id", "Values": [vpc["id"]]}])
+    subnets = describe_subnets(Filters=[{"Name": "vpc-id", "Values": [vpc["id"]]}], **conn)
 
     s_ids = []
     for s in subnets:
@@ -82,7 +82,7 @@ def get_subnets(vpc, **conn):
 @registry.register(flag=FLAGS.ROUTE_TABLES, depends_on=FLAGS.BASE, key="route_tables")
 def get_route_tables(vpc, **conn):
     """Gets the VPC Route Tables"""
-    route_tables = describe_route_tables(Filters=[{"Name": "vpc-id", "Values": [vpc["id"]]}])
+    route_tables = describe_route_tables(Filters=[{"Name": "vpc-id", "Values": [vpc["id"]]}], **conn)
 
     rt_ids = []
     for r in route_tables:
@@ -94,7 +94,7 @@ def get_route_tables(vpc, **conn):
 @registry.register(flag=FLAGS.NETWORK_ACLS, depends_on=FLAGS.BASE, key="network_acls")
 def get_network_acls(vpc, **conn):
     """Gets the VPC Network ACLs"""
-    route_tables = describe_network_acls(Filters=[{"Name": "vpc-id", "Values": [vpc["id"]]}])
+    route_tables = describe_network_acls(Filters=[{"Name": "vpc-id", "Values": [vpc["id"]]}], **conn)
 
     nacl_ids = []
     for r in route_tables:
@@ -126,7 +126,7 @@ def get_base(vpc, **conn):
     :return:
     """
     # Get the base:
-    base_result = describe_vpcs(VpcIds=[vpc["id"]])[0]
+    base_result = describe_vpcs(VpcIds=[vpc["id"]], **conn)[0]
 
     # The name of the VPC is in the tags:
     vpc_name = None
@@ -138,7 +138,7 @@ def get_base(vpc, **conn):
     # Get the DHCP Options:
     if base_result.get("DhcpOptionsId"):
         # There should only be exactly 1 attached to a VPC:
-        dhcp_opts = describe_dhcp_options(DhcpOptionsIds=[base_result["DhcpOptionsId"]])[0]["DhcpOptionsId"]
+        dhcp_opts = describe_dhcp_options(DhcpOptionsIds=[base_result["DhcpOptionsId"]], **conn)[0]["DhcpOptionsId"]
 
     # Get the Attributes:
     attributes = {}
@@ -147,7 +147,7 @@ def get_base(vpc, **conn):
         ("EnableDnsSupport", "enableDnsSupport")
     ]
     for attr, query in attr_vals:
-        attributes[attr] = describe_vpc_attribute(VpcId=vpc["id"], Attribute=query)[attr]
+        attributes[attr] = describe_vpc_attribute(VpcId=vpc["id"], Attribute=query, **conn)[attr]
 
     vpc.update({
         'name': vpc_name,
