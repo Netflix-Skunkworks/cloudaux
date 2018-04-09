@@ -6,6 +6,7 @@
 .. moduleauthor:: Mike Grima <mgrima@netflix.com>
 """
 import pytest
+from botocore.exceptions import ClientError
 
 from cloudaux.exceptions import CloudAuxException
 
@@ -71,6 +72,41 @@ def test_get_classic_link(test_vpc, dhcp_options, mock_classic_link):
 
     assert result["ClassicLink"]["Enabled"]
     assert result["ClassicLink"]["DnsEnabled"]
+    perform_base_tests(test_vpc, dhcp_options, result)
+
+
+def test_get_vpc_flow_logs(test_vpc, dhcp_options, mock_vpc_flow_logs):
+    from cloudaux.orchestration.aws.vpc import get_vpc, get_vpc_flow_logs, FLAGS
+
+    result = get_vpc_flow_logs({"id": test_vpc["VpcId"]}, force_client=mock_vpc_flow_logs)
+    assert len(result) == 1
+    assert result[0] == "fl-xxxxxxxx"
+
+    # With BASE:
+    result = get_vpc(test_vpc["VpcId"], flags=FLAGS.FLOW_LOGS, account_number="012345678912", region="us-east-1",
+                     force_client=mock_vpc_flow_logs)
+
+    assert len(result["FlowLogs"]) == 1
+    assert result["FlowLogs"][0] == "fl-xxxxxxxx"
+    perform_base_tests(test_vpc, dhcp_options, result)
+
+
+def test_classic_link_exception(test_vpc, dhcp_options, mock_classic_link):
+    from cloudaux.orchestration.aws.vpc import get_vpc, get_classic_link, FLAGS
+
+    # Return an unsupported operation exception:
+    def raise_exception(**kwargs):
+        raise ClientError({"Error": {"Code": "UnsupportedOperation"}}, "DescribeVpcClassicLink")
+    mock_classic_link.describe_vpc_classic_link = raise_exception
+
+    result = get_classic_link({"id": test_vpc["VpcId"]}, force_client=mock_classic_link)
+    assert not result
+
+    # With BASE:
+    result = get_vpc(test_vpc["VpcId"], flags=FLAGS.CLASSIC_LINK, account_number="012345678912", region="us-east-1",
+                     force_client=mock_classic_link)
+
+    assert not result["ClassicLink"]
     perform_base_tests(test_vpc, dhcp_options, result)
 
 

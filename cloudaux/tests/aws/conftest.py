@@ -5,6 +5,8 @@
     :license: Apache, see LICENSE for more details.
 .. moduleauthor:: Mike Grima <mgrima@netflix.com>
 """
+from datetime import datetime
+
 import pytest
 
 from moto import mock_ec2, mock_sts
@@ -117,6 +119,41 @@ def network_acl(ec2, test_vpc):
     nacl_id = ec2.create_network_acl(VpcId=test_vpc["VpcId"])["NetworkAcl"]["NetworkAclId"]
 
     return ec2.describe_network_acls(NetworkAclIds=[nacl_id])["NetworkAcls"][0]
+
+
+@pytest.fixture(scope="function")
+def mock_vpc_flow_logs(ec2, test_vpc):
+    # VPC Flow Logs
+    conn = boto3_cached_conn(
+        "ec2",
+        service_type="client",
+        future_expiration_minutes=15,
+        account_number="012345678912",
+        region='us-east-1')
+
+    def describe_flow_logs(**kwargs):
+        """
+        # Too lazy to submit a PR to Moto -- Probably worth the trouble.
+        :param kwargs:
+        :return:
+        """
+        return {
+            "FlowLogs": [
+                {
+                    "CreationTime": datetime(2018, 4, 1),
+                    "DeliverLogsPermissionArn": "arn:aws:iam::012345678912:role/FlowLogRole",
+                    "FlowLogId": "fl-xxxxxxxx",
+                    "FlowLogStatus": "ACTIVE",
+                    "LogGroupName": "TheLogGroup",
+                    "ResourceId": test_vpc["VpcId"],
+                    "TrafficType": "ALL"
+                }
+            ]
+        }
+
+    setattr(conn, "describe_flow_logs", describe_flow_logs)
+
+    return conn
 
 
 @pytest.fixture(scope="function")

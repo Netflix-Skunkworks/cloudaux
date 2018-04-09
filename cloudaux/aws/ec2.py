@@ -202,5 +202,11 @@ def describe_network_acls(**kwargs):
 @rate_limited()
 def describe_vpc_attribute(**kwargs):
     return kwargs.pop('client').describe_vpc_attribute(**kwargs)
+
+
+@sts_conn('ec2')
+@rate_limited()
+def describe_flow_logs(**kwargs):
+    return kwargs.pop('client').describe_flow_logs(**kwargs).get("FlowLogs", [])
 # ------------------ #
 
