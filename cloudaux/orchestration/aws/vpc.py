@@ -5,6 +5,8 @@
     :license: Apache, see LICENSE for more details.
 .. moduleauthor:: Mike Grima <mgrima@netflix.com>
 """
+from botocore.exceptions import ClientError
+
 from cloudaux.aws.ec2 import describe_vpcs, describe_dhcp_options, describe_vpc_classic_link, \
     describe_vpc_classic_link_dns_support, describe_internet_gateways, describe_vpc_peering_connections, \
     describe_subnets, describe_route_tables, describe_network_acls, describe_vpc_attribute
@@ -23,12 +25,17 @@ def get_classic_link(vpc, **conn):
     """"Gets the Classic Link details about a VPC"""
     result = {}
 
-    cl_result = describe_vpc_classic_link(VpcIds=[vpc["id"]], **conn)[0]
-    result["Enabled"] = cl_result["ClassicLinkEnabled"]
+    try:
+        cl_result = describe_vpc_classic_link(VpcIds=[vpc["id"]], **conn)[0]
+        result["Enabled"] = cl_result["ClassicLinkEnabled"]
 
-    # Check for DNS as well:
-    dns_result = describe_vpc_classic_link_dns_support(VpcIds=[vpc["id"]], **conn)[0]
-    result["DnsEnabled"] = dns_result["ClassicLinkDnsSupported"]
+        # Check for DNS as well:
+        dns_result = describe_vpc_classic_link_dns_support(VpcIds=[vpc["id"]], **conn)[0]
+        result["DnsEnabled"] = dns_result["ClassicLinkDnsSupported"]
+    except ClientError as e:
+        # This is not supported for all regions.
+        if 'UnsupportedOperation' not in str(e):
+            raise e
 
     return result
 
