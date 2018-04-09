@@ -153,6 +153,8 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15):
         def decorated_function(*args, **kwargs):
             if kwargs.get("force_client"):
                 kwargs[service_type] = kwargs.pop("force_client")
+                kwargs.pop("account_number", None)
+                kwargs.pop("region", None)
             else:
                 kwargs[service_type] = boto3_cached_conn(
                     service,
