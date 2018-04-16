@@ -98,25 +98,25 @@ def get_logging(bucket_name, **conn):
     logging_dict = {}
     if result.get('LoggingEnabled'):
         logging = result['LoggingEnabled']
-        logging_dict['enabled'] = True
-        logging_dict['prefix'] = logging['TargetPrefix']
-        logging_dict['target'] = logging['TargetBucket']
+        logging_dict['Enabled'] = True
+        logging_dict['Prefix'] = logging['TargetPrefix']
+        logging_dict['Target'] = logging['TargetBucket']
         grant_list = []
         if logging.get('TargetGrants'):
             for grant in logging['TargetGrants']:
                 grant_dict = {}
-                grant_dict['permission'] = grant['Permission']
+                grant_dict['Permission'] = grant['Permission']
                 grantee = grant['Grantee']
-                grant_dict['type'] = grantee['Type']
+                grant_dict['Type'] = grantee['Type']
                 if grantee['Type'] == 'CanonicalUser':
-                    grant_dict['display_name'] = grantee['DisplayName']
+                    grant_dict['DisplayName'] = grantee['DisplayName']
                 elif grantee['Type'] == 'Group':
-                    grant_dict['group_uri'] = grantee['URI']
+                    grant_dict['GroupUri'] = grantee['URI']
                 else:
-                    grant_dict['email'] = grantee['EmailAddress']
+                    grant_dict['Email'] = grantee['EmailAddress']
             grant_list.append(grant_dict)
 
-        logging_dict['grants'] = grant_list
+        logging_dict['Grants'] = grant_list
 
     return logging_dict
 
@@ -269,7 +269,7 @@ def get_base(bucket_name, **conn):
         'arn': "arn:aws:s3:::{name}".format(name=bucket_name),
         'name': bucket_name,
         'region': conn.get('region'),
-        '_version': 8
+        '_version': 9
     }
 
 
