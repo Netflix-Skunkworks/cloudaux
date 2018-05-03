@@ -165,6 +165,28 @@ def get_role_instance_profiles(role, client=None, **kwargs):
 
 @sts_conn('iam', service_type='client')
 @rate_limited()
+def get_role_managed_policy_documents(role, client=None, **kwargs):
+    """Retrieve the currently active policy version document for every managed policy that is attached to the role."""
+    policies = get_role_managed_policies(role, **kwargs)
+
+    policy_names = (policy['name'] for policy in policies)
+    delayed_gmpd_calls = (delayed(get_managed_policy_document)(policy['arn'], **kwargs) for policy in policies)
+    policy_documents = Parallel(n_jobs=20, backend="threading")(delayed_gmpd_calls)
+
+    return dict(zip(policy_names, policy_documents))
+
+
+@sts_conn('iam', service_type='client')
+@rate_limited()
+def get_managed_policy_document(policy_arn, client=None, **kwargs):
+    """Retrieve the currently active (i.e. 'default') policy version document for a policy."""
+    policy_metadata = client.get_policy(PolicyArn=policy_arn)
+    policy_document = client.get_policy_version(PolicyArn=policy_arn,
+                                                VersionId=policy_metadata['Policy']['DefaultVersionId'])
+    return policy_document['PolicyVersion']['Document']
+
+@sts_conn('iam', service_type='client')
+@rate_limited()
 def get_role_managed_policies(role, client=None, **kwargs):
     marker = {}
     policies = []
