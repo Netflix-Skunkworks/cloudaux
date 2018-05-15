@@ -49,9 +49,6 @@ class ARN(object):
         # Handle the longer service level primitives like service roles
         # arn:aws:iam::123456789123:role/aws-service-role/elasticache.amazonaws.com/AWSServiceRoleForElastiCache
         if len(resource_list) == 2:
-            self.resource_type = ''
-            self.resource = arn_match.group(5)
-        elif len(resource_list) == 3:
             self.resource_type = resource_list[0]
             self.resource = resource_list[-1]
         else:
