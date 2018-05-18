@@ -43,6 +43,18 @@ class ARN(object):
         self.region = arn_match.group(3)
         self.account_number = arn_match.group(4)
         self.name = arn_match.group(5)
+
+        resource_list = arn_match.group(5).split('/')
+
+        # Handle the longer service level primitives like service roles
+        # arn:aws:iam::123456789123:role/aws-service-role/elasticache.amazonaws.com/AWSServiceRoleForElastiCache
+        if len(resource_list) == 2:
+            self.resource_type = resource_list[0]
+            self.resource = resource_list[-1]
+        else:
+            self.resource_type = resource_list[0]
+            self.resource = '/'.join(resource_list[1:])
+
         self.parsed_name = self.name.split('/')[-1]
 
     def _from_account_number(self, input):
