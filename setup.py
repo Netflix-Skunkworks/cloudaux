@@ -39,17 +39,17 @@ install_requires = [
     'joblib>=0.9.4',
     'inflection',
     'flagpole>=1.0.1',
-    'defusedxml==0.5.0',
+    'defusedxml',
     'six>=1.11.0',
 ]
 
 gcp_require = [
     'google-api-python-client>=1.6.1',
-    'google-cloud-storage==0.22.0'
+    'google-cloud-storage0.22.0'
 ]
 
 openstack_require = [
-    'openstacksdk==0.9.18'
+    'openstacksdk0.9.18'
 ]
 
 tests_require = [
