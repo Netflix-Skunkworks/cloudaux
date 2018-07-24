@@ -210,12 +210,12 @@ def mock_classic_link(ec2):
 
 
 @pytest.fixture(scope="function")
-def test_role(iam):
-    """Creates a test role"""
+def test_iam(iam):
+    """Creates and setups up IAM things"""
 
     role = iam.create_role(
         Path='/',
-        RoleName='testRoleName',
+        RoleName='testRoleCloudAuxName',
         AssumeRolePolicyDocument=json.dumps({
             "Version": "2012-10-17",
             "Statement": [
@@ -231,4 +231,31 @@ def test_role(iam):
         Description='Test Description'
     )
 
-    return {}
+    user = iam.create_user(
+        Path='/',
+        UserName='testCloudAuxUser'
+    )
+
+
+    group = iam.create_group(
+        Path='/',
+        GroupName='testCloudAuxGroup'
+    )
+
+    policy = iam.create_policy(
+        PolicyName='testCloudAuxPolicy',
+        Path='/',
+        PolicyDocument=json.dumps({
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "s3:ListBucket",
+                    "Resource": "*",
+                    "Effect": "Allow",
+                }
+            ]
+        }),
+        Description='Test CloudAux Policy'
+    )
+
+    return iam
