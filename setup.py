@@ -45,7 +45,8 @@ install_requires = [
 
 gcp_require = [
     'google-api-python-client>=1.6.1',
-    'google-cloud-storage==0.22.0'
+    'google-cloud-storage==0.22.0',
+    'oauth2client>=4.1.2'
 ]
 
 openstack_require = [
