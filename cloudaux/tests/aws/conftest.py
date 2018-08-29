@@ -6,10 +6,11 @@
 .. moduleauthor:: Mike Grima <mgrima@netflix.com>
 """
 from datetime import datetime
+import json
 
 import pytest
 
-from moto import mock_ec2, mock_sts
+from moto import mock_ec2, mock_iam, mock_sts
 import boto3
 
 from cloudaux.aws.sts import boto3_cached_conn
@@ -32,6 +33,12 @@ def sts(conn_dict):
 def ec2(sts, conn_dict):
     with mock_ec2():
         yield boto3_cached_conn("ec2", **conn_dict)
+
+
+@pytest.fixture(scope="function")
+def iam(sts, conn_dict):
+    with mock_iam():
+        yield boto3_cached_conn("iam", **conn_dict)
 
 
 @pytest.fixture(scope="function")
@@ -200,3 +207,55 @@ def mock_classic_link(ec2):
     setattr(conn, "describe_vpc_classic_link_dns_support", describe_vpc_classic_link_dns_support)
 
     return conn
+
+
+@pytest.fixture(scope="function")
+def test_iam(iam):
+    """Creates and setups up IAM things"""
+
+    role = iam.create_role(
+        Path='/',
+        RoleName='testRoleCloudAuxName',
+        AssumeRolePolicyDocument=json.dumps({
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "ec2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                }
+            ]
+        }),
+        Description='Test Description'
+    )
+
+    user = iam.create_user(
+        Path='/',
+        UserName='testCloudAuxUser'
+    )
+
+
+    group = iam.create_group(
+        Path='/',
+        GroupName='testCloudAuxGroup'
+    )
+
+    policy = iam.create_policy(
+        PolicyName='testCloudAuxPolicy',
+        Path='/',
+        PolicyDocument=json.dumps({
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "s3:ListBucket",
+                    "Resource": "*",
+                    "Effect": "Allow",
+                }
+            ]
+        }),
+        Description='Test CloudAux Policy'
+    )
+
+    return iam

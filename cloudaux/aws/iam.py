@@ -310,3 +310,60 @@ def all_managed_policies(resource=None, **kwargs):
                 managed_policies[attached_role.arn].append(policy_dict)
 
     return managed_policies
+
+
+@paginated('RoleDetailList')
+def _get_account_authorization_role_details(client=None, **kwargs):
+    return client.get_account_authorization_details(
+        Filter=['Role'],
+        **kwargs
+    )
+
+
+@paginated('UserDetailList')
+def _get_account_authorization_user_details(client=None, **kwargs):
+    return client.get_account_authorization_details(
+        Filter=['User'],
+        **kwargs
+    )
+
+@paginated('GroupDetailList')
+def _get_account_authorization_group_details(client=None, **kwargs):
+    return client.get_account_authorization_details(
+        Filter=['Group'],
+        **kwargs
+    )
+
+
+@paginated('Policies')
+def _get_account_authorization_local_managed_policies_details(client=None, **kwargs):
+    return client.get_account_authorization_details(
+        Filter=['LocalManagedPolicy'],
+        **kwargs
+    )
+
+
+@paginated('Policies')
+def _get_account_authorization_aws_managed_policies_details(client=None, **kwargs):
+    return client.get_account_authorization_details(
+        Filter=['AWSManagedPolicy'],
+        **kwargs
+    )
+
+
+@sts_conn('iam', service_type='client')
+@rate_limited()
+def get_account_authorization_details(filter=None, client=None, **kwargs):
+    if not filter:
+        raise Exception('Must provide filter value')
+
+    if filter == 'User':
+        return _get_account_authorization_user_details(client=client, **kwargs)
+    elif filter == 'Role':
+        return _get_account_authorization_role_details(client=client, **kwargs)
+    elif filter == 'Group':
+        return _get_account_authorization_group_details(client=client, **kwargs)
+    elif filter == 'LocalManagedPolicy':
+        return _get_account_authorization_local_managed_policies_details(client=client, **kwargs)
+    elif filter == 'AWSManagedPolicy':
+        return _get_account_authorization_aws_managed_policies_details(client=client, **kwargs)

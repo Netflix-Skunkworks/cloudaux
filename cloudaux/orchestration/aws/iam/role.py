@@ -1,5 +1,6 @@
 from cloudaux import CloudAux
-from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles
+from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles, \
+    get_account_authorization_details
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
 from cloudaux.orchestration import modify
 from cloudaux.decorators import modify_output
@@ -80,3 +81,55 @@ def get_role(role, flags=FLAGS.ALL, **conn):
     role = modify(role, output='camelized')
     _conn_from_args(role, conn)
     return registry.build_out(flags, start_with=role, pass_datastructure=True, **conn)
+
+
+def get_all_roles(**conn):
+    """
+    Returns a List of Roles respresented as dictionary below:
+
+    {
+        "Arn": ...,
+        "AssumeRolePolicyDocument": ...,
+        "CreateDate": ...,  # str
+        "InlinePolicies": ...,
+        "InstanceProfiles": ...,
+        "ManagedPolicies": ...,
+        "Path": ...,
+        "RoleId": ...,
+        "RoleName": ...,
+    }
+
+    :param conn: dict containing enough information to make a connection to the desired account.
+    :return: list containing dicts or fully built out roles
+    """
+
+    roles = []
+    account_roles = get_account_authorization_details('Role', **conn)
+
+    for role in account_roles:
+        roles.append(
+            {
+                'Arn': role['Arn'],
+                'AssumeRolePolicyDocument': role['AssumeRolePolicyDocument'],
+                'CreateDate': str(role['CreateDate']),  # str
+                'InlinePolicies': role['RolePolicyList'],
+                'InstanceProfiles': [{
+                                        'path': ip['Path'],
+                                        'instance_profile_name': ip['InstanceProfileName'],
+                                        'create_date': ip['CreateDate'].strftime('%Y-%m-%dT%H:%M:%SZ'),
+                                        'instance_profile_id': ip['InstanceProfileId'],
+                                        'arn': ip['Arn']
+                                    } for ip in role['InstanceProfileList']],
+                'ManagedPolicies': [
+                    {
+                      "name": x['PolicyName'],
+                      "arn": x['PolicyArn']
+                    } for x in role['AttachedManagedPolicies']
+                ],
+                'Path': role['Path'],
+                'RoleId': role['RoleId'],
+                'RoleName': role['RoleName']
+            }
+        )
+
+    return roles
