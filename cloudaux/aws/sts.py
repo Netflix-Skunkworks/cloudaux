@@ -62,7 +62,8 @@ def _get_cached_creds(key, service, service_type, region, future_expiration_minu
 
 @rate_limited()
 def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None,
-                      assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False):
+                      assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False,
+                      external_id=None):
     """
     Used to obtain a boto3 client or resource connection.
     For cross account, provide both account_number and assume_role.
@@ -88,12 +89,15 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     :param session_name: Session name to attach to requests. [Default 'cloudaux']
     :param region: Region name for connection. [Default us-east-1]
     :param return_credentials: Indicates if the STS credentials should be returned with the client [Default False]
+    :param external_id: Optional external id to pass to sts:AssumeRole.
+        See https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html
     :return: boto3 client or resource connection
     """
     key = (
         account_number,
         assume_role,
         session_name,
+        external_id,
         region,
         service_type,
         service)
@@ -115,7 +119,16 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
             account_number,
             assume_role
         )
-        role = sts.assume_role(RoleArn=arn, RoleSessionName=session_name)
+
+        assume_role_kwargs = {
+            'RoleArn': arn,
+            'RoleSessionName': session_name
+        }
+
+        if external_id:
+            assume_role_kwargs['ExternalId'] = external_id
+
+        role = sts.assume_role(**assume_role_kwargs)
 
     if service_type == 'client':
         conn = _client(service, region, role)
@@ -163,6 +176,7 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15):
                     account_number=kwargs.pop('account_number', None),
                     assume_role=kwargs.pop('assume_role', None),
                     session_name=kwargs.pop('session_name', 'cloudaux'),
+                    external_id=kwargs.pop('external_id', None),
                     region=kwargs.pop('region', 'us-east-1'))
             return f(*args, **kwargs)
         return decorated_function
