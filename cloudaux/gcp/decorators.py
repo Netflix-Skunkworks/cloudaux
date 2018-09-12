@@ -36,7 +36,8 @@ def gcp_conn(service, service_type='client', future_expiration_minutes=15):
             client_details, client = get_client(
                 service, service_type=service_type,
                 future_expiration_minutes=15, **conn_args)
-            kwargs = rewrite_kwargs(client_details['client_type'], kwargs,
+            if client_details:
+                kwargs = rewrite_kwargs(client_details['client_type'], kwargs,
                                     client_details['module_name'])
             kwargs['client'] = client
             return f(*args, **kwargs)
