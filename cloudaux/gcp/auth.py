@@ -51,13 +51,13 @@ def get_client(service, service_type='client', **conn_args):
             client = get_google_client(
                 mod_name=client_details['module_name'],
                 key_file=conn_args.get('key_file', None),
-                user_agent=user_agent)
+                user_agent=user_agent, api_version=conn_args.get('api_version', 'v1'))
     else:
         # There is no client known for this service. We can try the standard API.
         try:
             client = get_google_client(
                 mod_name=service, key_file=conn_args.get('key_file', None),
-                user_agent=user_agent)
+                user_agent=user_agent, api_version=conn_args.get('api_version', 'v1'))
         except Exception as e:
             raise e
 
