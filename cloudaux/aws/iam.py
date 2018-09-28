@@ -293,6 +293,12 @@ def get_user_signing_certificates(user, client=None, **kwargs):
 
 @sts_conn('iam', service_type='client')
 @rate_limited()
+def delete_role_policy(client=None, **kwargs):
+    return client.delete_role_policy(**kwargs)
+
+
+@sts_conn('iam', service_type='client')
+@rate_limited()
 def put_role_policy(client=None, **kwargs):
     return client.put_role_policy(**kwargs)
 
