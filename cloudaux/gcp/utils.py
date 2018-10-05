@@ -84,7 +84,7 @@ def gce_list(service=None, **kwargs):
 
     while req is not None:
         resp = req.execute()
-        for item in resp['items']:
+        for item in resp.get('items', []):
             resp_list.append(item)
         req = service.list_next(previous_request=req, previous_response=resp)
     return resp_list
