@@ -1,3 +1,14 @@
+"""
+.. module: cloudaux.aws.iam
+    :platform: Unix
+    :copyright: (c) 2018 by Netflix Inc., see AUTHORS for more
+    :license: Apache, see LICENSE for more details.
+.. moduleauthor:: Patrick Kelley <pkelley@netflix.com> @monkeysecurity
+.. moduleauthor:: Will Bengtson <wbengtson@netflix.com>
+.. moduleauthor:: Steven Reiling <sreiling@netflix.com>
+.. moduleauthor:: Travis McPeak <tmcpeak@netflix.com>
+.. moduleauthor:: Mike Grima <mgrima@netflix.com>
+"""
 from cloudaux.aws.sts import sts_conn
 from cloudaux.aws.decorators import rate_limited
 from cloudaux.aws.decorators import paginated
@@ -170,7 +181,8 @@ def get_role_managed_policy_documents(role, client=None, **kwargs):
     policies = get_role_managed_policies(role, force_client=client)
 
     policy_names = (policy['name'] for policy in policies)
-    delayed_gmpd_calls = (delayed(get_managed_policy_document)(policy['arn'], force_client=client) for policy in policies)
+    delayed_gmpd_calls = (delayed(get_managed_policy_document)(policy['arn'], force_client=client) for policy
+                          in policies)
     policy_documents = Parallel(n_jobs=20, backend="threading")(delayed_gmpd_calls)
 
     return dict(zip(policy_names, policy_documents))
@@ -178,12 +190,22 @@ def get_role_managed_policy_documents(role, client=None, **kwargs):
 
 @sts_conn('iam', service_type='client')
 @rate_limited()
-def get_managed_policy_document(policy_arn, client=None, **kwargs):
+def get_managed_policy_document(policy_arn, policy_metadata=None, client=None, **kwargs):
     """Retrieve the currently active (i.e. 'default') policy version document for a policy."""
-    policy_metadata = client.get_policy(PolicyArn=policy_arn)
+    if not policy_metadata:
+        policy_metadata = client.get_policy(PolicyArn=policy_arn)
+
     policy_document = client.get_policy_version(PolicyArn=policy_arn,
                                                 VersionId=policy_metadata['Policy']['DefaultVersionId'])
     return policy_document['PolicyVersion']['Document']
+
+
+@sts_conn('iam', service_type='client')
+@rate_limited()
+def get_policy(policy_arn, client=None, **kwargs):
+    """Retrieve the IAM Managed Policy."""
+    return client.get_policy(PolicyArn=policy_arn, **kwargs)
+
 
 @sts_conn('iam', service_type='client')
 @rate_limited()
@@ -338,6 +360,7 @@ def _get_account_authorization_user_details(client=None, **kwargs):
         Filter=['User'],
         **kwargs
     )
+
 
 @paginated('GroupDetailList')
 def _get_account_authorization_group_details(client=None, **kwargs):

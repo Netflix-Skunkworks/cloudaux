@@ -94,3 +94,6 @@ venv
 
 .pytest_cache/
 .coverage
+test-reports/
+
+.DS_Store

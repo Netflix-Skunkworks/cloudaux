@@ -163,6 +163,16 @@ def mock_vpc_flow_logs(ec2, test_vpc):
     return conn
 
 
+@pytest.fixture(scope='function')
+def mock_iam_client(iam):
+    yield boto3_cached_conn(
+        'iam',
+        service_type='client',
+        future_expiration_minutes=15,
+        account_number='123456789012',
+        region='us-east-1')
+
+
 @pytest.fixture(scope="function")
 def mock_classic_link(ec2):
     conn = boto3_cached_conn(

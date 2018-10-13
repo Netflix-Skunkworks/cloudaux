@@ -1,3 +1,11 @@
+"""
+.. module: cloudaux.orchestration.aws.iam.role
+    :platform: Unix
+    :copyright: (c) 2018 by Netflix Inc., see AUTHORS for more
+    :license: Apache, see LICENSE for more details.
+.. moduleauthor:: Patrick Kelley <pkelley@netflix.com> @monkeysecurity
+.. moduleauthor:: Will Bengtson <wbengtson@netflix.com>
+"""
 from cloudaux import CloudAux
 from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles, \
     get_account_authorization_details
@@ -85,7 +93,7 @@ def get_role(role, flags=FLAGS.ALL, **conn):
 
 def get_all_roles(**conn):
     """
-    Returns a List of Roles respresented as dictionary below:
+    Returns a List of Roles represented as the dictionary below:
 
     {
         "Arn": ...,
