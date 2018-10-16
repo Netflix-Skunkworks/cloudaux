@@ -81,12 +81,12 @@ def get_lifecycle(bucket_name, **conn):
         # Save all dates as a Proper ISO 8601 String:
         for transition in rule.get('Transitions', []):
             if 'Date' in transition:
-                transition['Date'] = transition["Date"].replace(tzinfo=None, microsecond=0).isoformat() + "Z"
+                transition['Date'] = transition["Date"].replace(tzinfo=None, microsecond=0).isoformat() + 'Z'
 
         if rule.get("Expiration"):
             if 'Date' in rule["Expiration"]:
                 rule["Expiration"]["Date"] = \
-                    rule["Expiration"]["Date"].replace(tzinfo=None, microsecond=0).isoformat() + "Z"
+                    rule["Expiration"]["Date"].replace(tzinfo=None, microsecond=0).isoformat() + 'Z'
 
     return result['Rules']
 
