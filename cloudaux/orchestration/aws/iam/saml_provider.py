@@ -33,7 +33,6 @@ def get_base(provider, **conn):
             if 'EmailAddress' in child.tag:
                 email_address = child.text
 
-
     return {
         'Name': root.attrib['entityID'],
         'CreateDate': str(saml_provider['CreateDate']),

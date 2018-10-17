@@ -1,4 +1,12 @@
-from cloudaux import CloudAux
+"""
+.. module: cloudaux.orchestration.aws.iam.user
+    :platform: Unix
+    :copyright: (c) 2018 by Netflix Inc., see AUTHORS for more
+    :license: Apache, see LICENSE for more details.
+.. moduleauthor:: Patrick Kelley <pkelley@netflix.com> @monkeysecurity
+.. moduleauthor:: Will Bengtson <wbengtson@netflix.com>
+"""
+from cloudaux import CloudAux, get_iso_string
 from cloudaux.aws.iam import get_account_authorization_details
 from cloudaux.aws.iam import get_user_inline_policies
 from cloudaux.aws.iam import get_user_access_keys
@@ -11,9 +19,11 @@ from cloudaux.orchestration import modify
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
+from cloudaux.orchestration.aws.iam import MissingFieldException
 
 registry = FlagRegistry()
-FLAGS = Flags('BASE', 'ACCESS_KEYS', 'INLINE_POLICIES', 'MANAGED_POLICIES', 'MFA_DEVICES', 'LOGIN_PROFILE', 'SIGNING_CERTIFICATES')
+FLAGS = Flags('BASE', 'ACCESS_KEYS', 'INLINE_POLICIES', 'MANAGED_POLICIES', 'MFA_DEVICES', 'LOGIN_PROFILE',
+              'SIGNING_CERTIFICATES')
 
 
 @registry.register(flag=FLAGS.ACCESS_KEYS, key='access_keys')
@@ -61,11 +71,11 @@ def _get_base(user, **conn):
         user = user['User']
 
     # cast CreateDate from a datetime to something JSON serializable.
-    user.update(dict(CreateDate=str(user['CreateDate'])))
+    user.update(dict(CreateDate=get_iso_string(user['CreateDate'])))
     if 'PasswordLastUsed' in user:
-        user.update(dict(PasswordLastUsed=str(user['PasswordLastUsed'])))
+        user.update(dict(PasswordLastUsed=get_iso_string(user['PasswordLastUsed'])))
 
-    user['_version'] = 1
+    user['_version'] = 2
     return user
 
 
@@ -87,20 +97,24 @@ def get_user(user, flags=FLAGS.ALL, **conn):
         "SigningCerts": ...
     }
 
-    :param user: dict containing (at the very least) arn or the combination of user_name and account_number
+    :param user: dict MUST contain the UserName and also a combination of either the ARN or the account_number
     :param output: Determines whether keys should be returned camelized or underscored.
     :param conn: dict containing enough information to make a connection to the desired account.
     Must at least have 'assume_role' key.
     :return: dict containing fully built out user.
     """
+    if not user.get('UserName'):
+        raise MissingFieldException('Must include UserName.')
+
     user = modify(user, output='camelized')
     _conn_from_args(user, conn)
     return registry.build_out(flags, start_with=user, pass_datastructure=True, **conn)
 
 
-def get_all_users(flags=FLAGS.ACCESS_KEYS|FLAGS.MFA_DEVICES|FLAGS.LOGIN_PROFILE|FLAGS.SIGNING_CERTIFICATES, **conn):
+def get_all_users(flags=FLAGS.ACCESS_KEYS | FLAGS.MFA_DEVICES | FLAGS.LOGIN_PROFILE | FLAGS.SIGNING_CERTIFICATES,
+                  **conn):
     """
-    Returns a List of Users respresented as dictionary below:
+    Returns a list of Users represented as dictionary below:
 
     {
         "Arn": ...,
@@ -115,6 +129,7 @@ def get_all_users(flags=FLAGS.ACCESS_KEYS|FLAGS.MFA_DEVICES|FLAGS.LOGIN_PROFILE|
         "SigningCerts": ...
     }
 
+    :param flags:
     :param conn: dict containing enough information to make a connection to the desired account.
     :return: list of dicts containing fully built out user.
     """
@@ -125,7 +140,7 @@ def get_all_users(flags=FLAGS.ACCESS_KEYS|FLAGS.MFA_DEVICES|FLAGS.LOGIN_PROFILE|
     for user in account_users:
         temp_user = {
             'Arn': user['Arn'],
-            'CreateDate': str(user['CreateDate']),
+            'CreateDate': get_iso_string(user['CreateDate']),
             'GroupList': user['GroupList'],
             'InlinePolicies': user['UserPolicyList'],
             'ManagedPolicies': [

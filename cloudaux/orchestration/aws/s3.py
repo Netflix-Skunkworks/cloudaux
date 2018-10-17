@@ -1,3 +1,4 @@
+from cloudaux import get_iso_string
 from cloudaux.aws.s3 import get_bucket_region
 from cloudaux.aws.s3 import get_bucket_acl
 from cloudaux.aws.s3 import get_bucket_lifecycle_configuration
@@ -81,12 +82,11 @@ def get_lifecycle(bucket_name, **conn):
         # Save all dates as a Proper ISO 8601 String:
         for transition in rule.get('Transitions', []):
             if 'Date' in transition:
-                transition['Date'] = transition["Date"].replace(tzinfo=None, microsecond=0).isoformat() + 'Z'
+                transition['Date'] = get_iso_string(transition["Date"])
 
         if rule.get("Expiration"):
             if 'Date' in rule["Expiration"]:
-                rule["Expiration"]["Date"] = \
-                    rule["Expiration"]["Date"].replace(tzinfo=None, microsecond=0).isoformat() + 'Z'
+                rule["Expiration"]["Date"] = get_iso_string(rule["Expiration"]["Date"])
 
     return result['Rules']
 
@@ -245,7 +245,7 @@ def get_bucket_created(bucket_name, **conn):
     bucket = get_bucket_resource(bucket_name, **conn)
 
     # Return the creation date as a Proper ISO 8601 String:
-    return bucket.creation_date.replace(tzinfo=None, microsecond=0).isoformat() + "Z"
+    return get_iso_string(bucket.creation_date)
 
 
 @registry.register(flag=FLAGS.ANALYTICS, key='analytics_configurations')

@@ -1,3 +1,11 @@
+"""
+.. module: cloudaux.aws.decorators
+    :platform: Unix
+    :copyright: (c) 2018 by Netflix Inc., see AUTHORS for more
+    :license: Apache, see LICENSE for more details.
+.. moduleauthor:: Patrick Kelley <pkelley@netflix.com> @monkeysecurity
+.. moduleauthor:: Mike Grima <mgrima@netflix.com>
+"""
 import functools
 import time
 

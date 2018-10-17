@@ -1,0 +1,3 @@
+
+class MissingFieldException(Exception):
+    pass

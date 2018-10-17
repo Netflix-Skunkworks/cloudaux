@@ -5,6 +5,7 @@
     :license: Apache, see LICENSE for more details.
 .. moduleauthor:: Mike Grima <mgrima@netflix.com>
 """
+import os
 from datetime import datetime
 import json
 
@@ -16,6 +17,33 @@ import boto3
 from cloudaux.aws.sts import boto3_cached_conn
 
 
+MOCK_CERT_ONE = """-----BEGIN CERTIFICATE-----
+MIIBpzCCARACCQCY5yOdxCTrGjANBgkqhkiG9w0BAQsFADAXMRUwEwYDVQQKDAxt
+b3RvIHRlc3RpbmcwIBcNMTgxMTA1MTkwNTIwWhgPMjI5MjA4MTkxOTA1MjBaMBcx
+FTATBgNVBAoMDG1vdG8gdGVzdGluZzCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkC
+gYEA1Jn3g2h7LD3FLqdpcYNbFXCS4V4eDpuTCje9vKFcC3pi/01147X3zdfPy8Mt
+ZhKxcREOwm4NXykh23P9KW7fBovpNwnbYsbPqj8Hf1ZaClrgku1arTVhEnKjx8zO
+vaR/bVLCss4uE0E0VM1tJn/QGQsfthFsjuHtwx8uIWz35tUCAwEAATANBgkqhkiG
+9w0BAQsFAAOBgQBWdOQ7bDc2nWkUhFjZoNIZrqjyNdjlMUndpwREVD7FQ/DuxJMj
+FyDHrtlrS80dPUQWNYHw++oACDpWO01LGLPPrGmuO/7cOdojPEd852q5gd+7W9xt
+8vUH+pBa6IBLbvBp+szli51V3TLSWcoyy4ceJNQU2vCkTLoFdS0RLd/7tQ==
+-----END CERTIFICATE-----"""
+
+
+MOCK_CERT_TWO = """-----BEGIN CERTIFICATE-----
+MIIBrzCCARgCCQCICxdQxUUR4TANBgkqhkiG9w0BAQsFADAbMRkwFwYDVQQLDBBD
+bG91ZEF1eCBUZXN0aW5nMCAXDTE4MTEwNTIyNDgwMVoYDzIyOTIwODE5MjI0ODAx
+WjAbMRkwFwYDVQQLDBBDbG91ZEF1eCBUZXN0aW5nMIGfMA0GCSqGSIb3DQEBAQUA
+A4GNADCBiQKBgQCz16wzxaVPKRYr+ibVIFBfuEBqEDkIwx6EP9nwu+PZ4AHClRpa
+TmVvhE90W55B5aGY///EIpkaowMBWO19iP2INUTUrHfQ9/ZwHFyq3htsN4Idb8vM
+EMu/abBOyCDi5vIAwx81AglUrGFiLQ+qNPY/idlDo1Q3l2V7Z7aGlAY5jwIDAQAB
+MA0GCSqGSIb3DQEBCwUAA4GBAHLJkvkcvIYZZYHI7LaUU8meuNa1HAQJnj/MB8LK
+oDoWCLmjx8oBH4XUzlupA087q6j1PQWyu1lm7j3lTze0j//XXlrwOXHL1z3QZ5Ys
+jRnIubUjNlVDBTuG/B6GWdxQiELscHsXezmXOxtiuHeB30VEf+/GzJw4gGXV+Rwc
+bKw4
+-----END CERTIFICATE-----"""
+
+
 @pytest.fixture(scope="function")
 def conn_dict():
     return {
@@ -23,8 +51,16 @@ def conn_dict():
     }
 
 
+@pytest.fixture(scope='function')
+def aws_credentials():
+    os.environ['AWS_ACCESS_KEY_ID'] = 'testing'
+    os.environ['AWS_SECRET_ACCESS_KEY'] = 'testing'
+    os.environ['AWS_SECURITY_TOKEN'] = 'testing'
+    os.environ['AWS_SESSION_TOKEN'] = 'testing'
+
+
 @pytest.fixture(scope="function")
-def sts(conn_dict):
+def sts(aws_credentials, conn_dict):
     with mock_sts():
         yield boto3.client("sts", region_name="us-east-1")
 
@@ -222,8 +258,8 @@ def mock_classic_link(ec2):
 @pytest.fixture(scope="function")
 def test_iam(iam):
     """Creates and setups up IAM things"""
-
-    role = iam.create_role(
+    # Role
+    iam.create_role(
         Path='/',
         RoleName='testRoleCloudAuxName',
         AssumeRolePolicyDocument=json.dumps({
@@ -241,18 +277,24 @@ def test_iam(iam):
         Description='Test Description'
     )
 
-    user = iam.create_user(
+    # Instance Profile:
+    iam.create_instance_profile(InstanceProfileName='testIPCloudAuxName')
+    iam.add_role_to_instance_profile(InstanceProfileName='testIPCloudAuxName', RoleName='testRoleCloudAuxName')
+
+    # User
+    iam.create_user(
         Path='/',
         UserName='testCloudAuxUser'
     )
 
-
-    group = iam.create_group(
+    # Group
+    iam.create_group(
         Path='/',
         GroupName='testCloudAuxGroup'
     )
 
-    policy = iam.create_policy(
+    # Policy
+    iam.create_policy(
         PolicyName='testCloudAuxPolicy',
         Path='/',
         PolicyDocument=json.dumps({
@@ -269,3 +311,52 @@ def test_iam(iam):
     )
 
     return iam
+
+
+@pytest.fixture(scope='function')
+def group_fixture(test_iam):
+    """Fixture to add complexity to the IAM group.
+
+    This will associate:
+    - an IAM user to the group
+    - an IAM managed policy to the group
+    """
+    # Associate the group to a user:
+    test_iam.add_user_to_group(GroupName='testCloudAuxGroup', UserName='testCloudAuxUser')
+
+    # Associate a managed policy to the group:
+    test_iam.attach_group_policy(GroupName='testCloudAuxGroup',
+                                 PolicyArn='arn:aws:iam::123456789012:policy/testCloudAuxPolicy')
+
+    # Add an inline policy to the group:
+    test_iam.put_group_policy(GroupName='testCloudAuxGroup', PolicyName='TestPolicy',
+                              PolicyDocument=json.dumps({
+                                  "Version": "2012-10-17",
+                                  "Statement": [
+                                      {
+                                          "Action": "s3:ListBucket",
+                                          "Resource": "*",
+                                          "Effect": "Allow",
+                                      }
+                                  ]
+                              }))
+
+    yield test_iam
+
+
+@pytest.fixture(scope='function')
+def server_certificates(iam):
+    """Fixture that creates 2 IAM SSL certs."""
+    iam.upload_server_certificate(
+        ServerCertificateName='certOne',
+        CertificateBody=MOCK_CERT_ONE,
+        PrivateKey='SomePrivateKey'
+    )
+
+    iam.upload_server_certificate(
+        ServerCertificateName='certTwo',
+        CertificateBody=MOCK_CERT_TWO,
+        PrivateKey='SomeOtherPrivateKey'
+    )
+
+    yield iam
