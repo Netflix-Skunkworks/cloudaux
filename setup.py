@@ -33,8 +33,8 @@ classifiers = [
 ]
 
 install_requires = [
-    'boto3>=1.7,<1.8',
-    'botocore>=1.8.34',
+    'boto3',
+    'botocore',
     'boto>=2.41.0',
     'joblib>=0.9.4',
     'inflection',

@@ -83,3 +83,12 @@ class CloudAux:
             return getattr(service_type, function_name)(**nargs)
 
         return wrapped_method(function_name, **kwargs)
+
+
+def get_iso_string(input):
+    """Strips out the microseconds from datetime objects, and returns a proper ISO-format UTC string.
+
+    :param input: Datetime object.
+    :returns string: A datetime ISO format string with
+    """
+    return input.replace(tzinfo=None, microsecond=0).isoformat() + 'Z'

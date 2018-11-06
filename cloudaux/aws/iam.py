@@ -9,11 +9,17 @@
 .. moduleauthor:: Travis McPeak <tmcpeak@netflix.com>
 .. moduleauthor:: Mike Grima <mgrima@netflix.com>
 """
+from cloudaux import get_iso_string
 from cloudaux.aws.sts import sts_conn
 from cloudaux.aws.decorators import rate_limited
 from cloudaux.aws.decorators import paginated
 from joblib import Parallel, delayed
 import botocore.exceptions
+
+
+class InvalidAuthorizationFilterException(Exception):
+    """Exception if an invalid get_account_authorization_details filter was provided"""
+    pass
 
 
 @sts_conn('iam')
@@ -165,11 +171,11 @@ def get_role_instance_profiles(role, client=None, **kwargs):
 
     return [
         {
-            'path': ip['Path'],
-            'instance_profile_name': ip['InstanceProfileName'],
-            'create_date': ip['CreateDate'].strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'instance_profile_id': ip['InstanceProfileId'],
-            'arn': ip['Arn']
+            'Path': ip['Path'],
+            'InstanceProfileName': ip['InstanceProfileName'],
+            'CreateDate': get_iso_string(ip['CreateDate']),
+            'InstanceProfileId': ip['InstanceProfileId'],
+            'Arn': ip['Arn']
         } for ip in instance_profiles
     ]
 
@@ -191,7 +197,15 @@ def get_role_managed_policy_documents(role, client=None, **kwargs):
 @sts_conn('iam', service_type='client')
 @rate_limited()
 def get_managed_policy_document(policy_arn, policy_metadata=None, client=None, **kwargs):
-    """Retrieve the currently active (i.e. 'default') policy version document for a policy."""
+    """Retrieve the currently active (i.e. 'default') policy version document for a policy.
+
+    :param policy_arn:
+    :param policy_metadata: This is a previously fetch managed policy response from boto/cloudaux.
+                            This is used to prevent unnecessary API calls to get the initial policy default version id.
+    :param client:
+    :param kwargs:
+    :return:
+    """
     if not policy_metadata:
         policy_metadata = client.get_policy(PolicyArn=policy_arn)
 
@@ -389,8 +403,10 @@ def _get_account_authorization_aws_managed_policies_details(client=None, **kwarg
 @sts_conn('iam', service_type='client')
 @rate_limited()
 def get_account_authorization_details(filter=None, client=None, **kwargs):
-    if not filter:
-        raise Exception('Must provide filter value')
+    possible_filters = ['User', 'Role', 'Group', 'LocalManagedPolicy', 'AWSManagedPolicy']
+
+    if filter not in possible_filters:
+        raise InvalidAuthorizationFilterException('Must provide filter value: {}'.format(', '.join(possible_filters)))
 
     if filter == 'User':
         return _get_account_authorization_user_details(client=client, **kwargs)
@@ -402,3 +418,88 @@ def get_account_authorization_details(filter=None, client=None, **kwargs):
         return _get_account_authorization_local_managed_policies_details(client=client, **kwargs)
     elif filter == 'AWSManagedPolicy':
         return _get_account_authorization_aws_managed_policies_details(client=client, **kwargs)
+
+
+@paginated('Users')
+@rate_limited()
+def _get_users_for_group(client, **kwargs):
+    """Fetch the paginated users attached to the group."""
+    return client.get_group(**kwargs)
+
+
+@sts_conn('iam', service_type='client')
+@rate_limited()
+def get_group(group_name, users=True, client=None, **kwargs):
+    """Get's the IAM Group details.
+
+    :param group_name:
+    :param users: Optional -- will return the IAM users that the group is attached to if desired (paginated).
+    :param client:
+    :param kwargs:
+    :return:
+    """
+    # First, make the initial call to get the details for the group:
+    result = client.get_group(GroupName=group_name, **kwargs)
+
+    # If we care about the user details, then fetch them:
+    if users:
+        if result.get('IsTruncated'):
+            kwargs_to_send = {'GroupName': group_name}
+            kwargs_to_send.update(kwargs)
+
+            user_list = result['Users']
+            kwargs_to_send['Marker'] = result['Marker']
+
+            result['Users'] = user_list + _get_users_for_group(client, **kwargs_to_send)
+
+    else:
+        result.pop('Users', None)
+        result.pop('IsTruncated', None)
+        result.pop('Marker', None)
+
+    return result
+
+
+@sts_conn('iam', service_type='client')
+@paginated('PolicyNames')
+@rate_limited()
+def list_group_policies(group_name, client=None, **kwargs):
+    """Lets the IAM group inline policies for a given group."""
+    return client.list_group_policies(GroupName=group_name, **kwargs)
+
+
+@sts_conn('iam', service_type='client')
+@rate_limited()
+def get_group_policy_document(group_name, policy_name, client=None, **kwargs):
+    """Fetches the specific IAM group inline-policy document."""
+    return client.get_group_policy(GroupName=group_name, PolicyName=policy_name, **kwargs)['PolicyDocument']
+
+
+@sts_conn('iam', service_type='client')
+@paginated('AttachedPolicies')
+@rate_limited()
+def list_attached_group_managed_policies(group_name, client=None, **kwargs):
+    """Lists the attached IAM managed policies for a given IAM group."""
+    return client.list_attached_group_policies(GroupName=group_name, **kwargs)
+
+
+@sts_conn('iam', service_type='client')
+@paginated('Groups')
+@rate_limited()
+def list_groups_for_user(user_name, client=None, **kwargs):
+    """Lists the IAM groups that is attached to a given IAM user."""
+    return client.list_groups_for_user(UserName=user_name, **kwargs)
+
+
+@sts_conn('iam', service_type='client')
+@paginated('ServerCertificateMetadataList')
+@rate_limited()
+def list_server_certificates(client=None, **kwargs):
+    """Lists the IAM Server Certificates (IAM SSL) for a given AWS account."""
+    return client.list_server_certificates(**kwargs)
+
+
+@sts_conn('iam', service_type='client')
+@rate_limited()
+def get_server_certificate(name, client=None, **kwargs):
+    return client.get_server_certificate(ServerCertificateName=name).get('ServerCertificate', {})

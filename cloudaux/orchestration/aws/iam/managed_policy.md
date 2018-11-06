@@ -10,7 +10,8 @@ CloudAux can build out a JSON object describing an IAM Managed Policy.
         account_number='123456789012',
         assume_role='SecurityMonkey')
 
-    managed_policy = get_managed_policy('arn:aws:iam::123456789012:policy/testCloudAuxPolicy', flags=FLAGS.ALL, **conn)
+    managed_policy = get_managed_policy(
+        {'Arn': 'arn:aws:iam::123456789012:policy/testCloudAuxPolicy'}, flags=FLAGS.ALL, **conn)
 
     # The flags parameter is optional. It presently doesn't have any other specified items at this time.
 

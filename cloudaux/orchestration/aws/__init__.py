@@ -43,6 +43,3 @@ def _get_name_from_structure(item, default):
         return item_arn.parsed_name
 
     raise CloudAuxException('Cannot extract item name from input: {input}.'.format(input=item))
-
-
-

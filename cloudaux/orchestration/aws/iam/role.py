@@ -6,7 +6,7 @@
 .. moduleauthor:: Patrick Kelley <pkelley@netflix.com> @monkeysecurity
 .. moduleauthor:: Will Bengtson <wbengtson@netflix.com>
 """
-from cloudaux import CloudAux
+from cloudaux import CloudAux, get_iso_string
 from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles, \
     get_account_authorization_details
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
@@ -14,6 +14,7 @@ from cloudaux.orchestration import modify
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
+from cloudaux.orchestration.aws.iam import MissingFieldException
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE', 'MANAGED_POLICIES', 'INLINE_POLICIES', 'INSTANCE_PROFILES')
@@ -57,8 +58,8 @@ def _get_base(role, **conn):
         role = role['Role']
 
     # cast CreateDate from a datetime to something JSON serializable.
-    role.update(dict(CreateDate=str(role['CreateDate'])))
-    role['_version'] = 1
+    role.update(dict(CreateDate=get_iso_string(role['CreateDate'])))
+    role['_version'] = 2
 
     return role
 
@@ -78,6 +79,7 @@ def get_role(role, flags=FLAGS.ALL, **conn):
         "Path": ...,
         "RoleId": ...,
         "RoleName": ...,
+        "_version": 2
     }
 
     :param role: dict containing (at the very least) role_name and/or arn.
@@ -86,6 +88,9 @@ def get_role(role, flags=FLAGS.ALL, **conn):
     Must at least have 'assume_role' key.
     :return: dict containing a fully built out role.
     """
+    if not role.get('RoleName'):
+        raise MissingFieldException('Must include RoleName.')
+
     role = modify(role, output='camelized')
     _conn_from_args(role, conn)
     return registry.build_out(flags, start_with=role, pass_datastructure=True, **conn)
@@ -119,12 +124,12 @@ def get_all_roles(**conn):
             {
                 'Arn': role['Arn'],
                 'AssumeRolePolicyDocument': role['AssumeRolePolicyDocument'],
-                'CreateDate': str(role['CreateDate']),  # str
+                'CreateDate': get_iso_string(role['CreateDate']),
                 'InlinePolicies': role['RolePolicyList'],
                 'InstanceProfiles': [{
                                         'path': ip['Path'],
                                         'instance_profile_name': ip['InstanceProfileName'],
-                                        'create_date': ip['CreateDate'].strftime('%Y-%m-%dT%H:%M:%SZ'),
+                                        'create_date': get_iso_string(ip['CreateDate']),
                                         'instance_profile_id': ip['InstanceProfileId'],
                                         'arn': ip['Arn']
                                     } for ip in role['InstanceProfileList']],
