@@ -227,3 +227,24 @@ def test_get_server_certificate(server_certificates):
         result = get_server_certificate(name)
 
         assert result['CertificateBody'] == cert
+
+
+def test_get_server_certificate_orchestration(server_certificates):
+    """Tests the Server Certificate orchestration."""
+    from cloudaux.orchestration.aws.iam.server_certificate import get_server_certificate
+    from cloudaux.tests.aws.conftest import MOCK_CERT_ONE
+
+    # Don't pass in the ServerCertificateName:
+    with pytest.raises(MissingFieldException, message='Must include ServerCertificateName.'):
+        get_server_certificate({}, force_client=server_certificates)
+
+    result = get_server_certificate({'ServerCertificateName': 'certOne'}, force_client=server_certificates)
+    assert result['ServerCertificateName'] == 'certOne'
+    assert isinstance(result['UploadDate'], str)
+    assert isinstance(result['Expiration'], str)
+    assert not result['CertificateChain']
+    assert result['CertificateBody'] == MOCK_CERT_ONE
+    assert result['_version'] == 1
+    assert result['Path'] == '/'
+    assert result['Arn'] == 'arn:aws:iam::123456789012:server-certificate/certOne'
+    assert result['ServerCertificateName'] == 'certOne'

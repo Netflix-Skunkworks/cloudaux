@@ -73,7 +73,7 @@ def _get_base(group, **conn):
 @modify_output
 def get_group(group, flags=FLAGS.BASE | FLAGS.INLINE_POLICIES | FLAGS.MANAGED_POLICIES, **conn):
     """
-    Orchestrates all the calls required to fully build out an IAM User in the following format:
+    Orchestrates all the calls required to fully build out an IAM Group in the following format:
 
     {
         "Arn": ...,
