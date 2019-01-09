@@ -14,7 +14,6 @@ from cloudaux.orchestration import modify
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
-from cloudaux.orchestration.aws.iam import MissingFieldException
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE', 'MANAGED_POLICIES', 'INLINE_POLICIES', 'INSTANCE_PROFILES')

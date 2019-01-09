@@ -19,39 +19,38 @@ from cloudaux.orchestration import modify
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
-from cloudaux.orchestration.aws.iam import MissingFieldException
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE', 'ACCESS_KEYS', 'INLINE_POLICIES', 'MANAGED_POLICIES', 'MFA_DEVICES', 'LOGIN_PROFILE',
               'SIGNING_CERTIFICATES')
 
 
-@registry.register(flag=FLAGS.ACCESS_KEYS, key='access_keys')
+@registry.register(flag=FLAGS.ACCESS_KEYS, depends_on=FLAGS.BASE, key='access_keys')
 def get_access_keys(user, **conn):
     return get_user_access_keys(user, **conn)
 
 
-@registry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
+@registry.register(flag=FLAGS.INLINE_POLICIES, depends_on=FLAGS.BASE, key='inline_policies')
 def get_inline_policies(user, **conn):
     return get_user_inline_policies(user, **conn)
 
 
-@registry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
+@registry.register(flag=FLAGS.MANAGED_POLICIES, depends_on=FLAGS.BASE, key='managed_policies')
 def get_managed_policies(user, **conn):
     return get_user_managed_policies(user, **conn)
 
 
-@registry.register(flag=FLAGS.MFA_DEVICES, key='mfa_devices')
+@registry.register(flag=FLAGS.MFA_DEVICES, depends_on=FLAGS.BASE, key='mfa_devices')
 def get_mfa_devices(user, **conn):
     return get_user_mfa_devices(user, **conn)
 
 
-@registry.register(flag=FLAGS.LOGIN_PROFILE, key='login_profile')
+@registry.register(flag=FLAGS.LOGIN_PROFILE, depends_on=FLAGS.BASE, key='login_profile')
 def get_login_profile(user, **conn):
     return get_user_login_profile(user, **conn)
 
 
-@registry.register(flag=FLAGS.SIGNING_CERTIFICATES, key='signing_certificates')
+@registry.register(flag=FLAGS.SIGNING_CERTIFICATES, depends_on=FLAGS.BASE, key='signing_certificates')
 def get_signing_certificates(user, **conn):
     return get_user_signing_certificates(user, **conn)
 
@@ -103,9 +102,6 @@ def get_user(user, flags=FLAGS.ALL, **conn):
     Must at least have 'assume_role' key.
     :return: dict containing fully built out user.
     """
-    if not user.get('UserName'):
-        raise MissingFieldException('Must include UserName.')
-
     user = modify(user, output='camelized')
     _conn_from_args(user, conn)
     return registry.build_out(flags, start_with=user, pass_datastructure=True, **conn)
