@@ -147,9 +147,10 @@ def test_list_groups_for_user(group_fixture):
 def test_get_role_orchestration(test_iam):
     """Tests the get_group orchestration."""
     from cloudaux.orchestration.aws.iam.role import get_role
+    from cloudaux.exceptions import CloudAuxException
 
     # Don't pass in the RoleName:
-    with pytest.raises(MissingFieldException, message='Must include RoleName.'):
+    with pytest.raises(CloudAuxException, message='Cannot extract item name from input: {}'):
         get_role({}, force_client=test_iam)
 
     result = get_role({'RoleName': 'testRoleCloudAuxName'}, force_client=test_iam)
