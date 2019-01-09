@@ -11,7 +11,7 @@ from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
 from cloudaux.orchestration.aws import _conn_from_args
-from cloudaux.orchestration.aws.iam import MissingFieldException
+from cloudaux.orchestration.aws import _get_name_from_structure
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE')
@@ -29,8 +29,9 @@ def get_base(managed_policy, **conn):
     """
     managed_policy['_version'] = 1
 
-    policy = get_policy(managed_policy['Arn'], **conn)
-    document = get_managed_policy_document(managed_policy['Arn'], policy_metadata=policy, **conn)
+    arn = _get_name_from_structure(managed_policy, 'Arn')
+    policy = get_policy(arn, **conn)
+    document = get_managed_policy_document(arn, policy_metadata=policy, **conn)
 
     managed_policy.update(policy['Policy'])
     managed_policy['Document'] = document
@@ -68,9 +69,5 @@ def get_managed_policy(managed_policy, flags=FLAGS.ALL, **conn):
     :param conn:
     :return:
     """
-    if not managed_policy.get('Arn'):
-        raise MissingFieldException('Must include Arn.')
-
     _conn_from_args(managed_policy, conn)
-
     return registry.build_out(flags, start_with=managed_policy, pass_datastructure=True, **conn)

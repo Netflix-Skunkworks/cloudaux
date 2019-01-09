@@ -14,23 +14,22 @@ from cloudaux.orchestration import modify
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
-from cloudaux.orchestration.aws.iam import MissingFieldException
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE', 'MANAGED_POLICIES', 'INLINE_POLICIES', 'INSTANCE_PROFILES')
 
 
-@registry.register(flag=FLAGS.MANAGED_POLICIES, key='managed_policies')
+@registry.register(flag=FLAGS.MANAGED_POLICIES, depends_on=FLAGS.BASE, key='managed_policies')
 def get_managed_policies(role, **conn):
     return get_role_managed_policies(role, **conn)
 
 
-@registry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
+@registry.register(flag=FLAGS.INLINE_POLICIES, depends_on=FLAGS.BASE, key='inline_policies')
 def get_inline_policies(role, **conn):
     return get_role_inline_policies(role, **conn)
 
 
-@registry.register(flag=FLAGS.INSTANCE_PROFILES, key='instance_profiles')
+@registry.register(flag=FLAGS.INSTANCE_PROFILES, depends_on=FLAGS.BASE, key='instance_profiles')
 def get_instance_profiles(role, **conn):
     return get_role_instance_profiles(role, **conn)
 
@@ -88,9 +87,6 @@ def get_role(role, flags=FLAGS.ALL, **conn):
     Must at least have 'assume_role' key.
     :return: dict containing a fully built out role.
     """
-    if not role.get('RoleName'):
-        raise MissingFieldException('Must include RoleName.')
-
     role = modify(role, output='camelized')
     _conn_from_args(role, conn)
     return registry.build_out(flags, start_with=role, pass_datastructure=True, **conn)

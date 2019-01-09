@@ -1,6 +1,6 @@
 from cloudaux.orchestration.aws.arn import ARN
 from cloudaux.exceptions import CloudAuxException
-
+from cloudaux.orchestration.aws.iam import MissingFieldException
 
 def _conn_from_args(item, conn):
     if item.get('Arn'):
@@ -42,4 +42,4 @@ def _get_name_from_structure(item, default):
             raise CloudAuxException('Bad ARN: {arn}'.format(arn=arn))
         return item_arn.parsed_name
 
-    raise CloudAuxException('Cannot extract item name from input: {input}.'.format(input=item))
+    raise MissingFieldException('Cannot extract item name from input: {input}.'.format(input=item))
