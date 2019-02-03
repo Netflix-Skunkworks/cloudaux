@@ -15,6 +15,7 @@ def test_arn():
 
     arn = ARN(test_arn)
 
+    assert arn.partition == 'aws'
     assert arn.tech == 'iam'
     assert arn.region == ''
     assert arn.account_number == '123456789123'
@@ -26,6 +27,20 @@ def test_arn():
 
     arn = ARN(test_arn2)
 
+    assert arn.partition == 'aws'
+    assert arn.tech == 'iam'
+    assert arn.region == ''
+    assert arn.account_number == '123456789123'
+    assert arn.name == 'role/service-role/DynamoDBAutoscaleRole'
+    assert arn.resource_type == 'role'
+    assert arn.resource == 'service-role/DynamoDBAutoscaleRole'
+
+    # Test for GovCloud Partition
+    test_arn3 = 'arn:aws-us-gov:iam::123456789123:role/service-role/DynamoDBAutoscaleRole'
+
+    arn = ARN(test_arn3)
+
+    assert arn.partition == 'aws-us-gov'
     assert arn.tech == 'iam'
     assert arn.region == ''
     assert arn.account_number == '123456789123'

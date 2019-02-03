@@ -63,7 +63,7 @@ def _get_cached_creds(key, service, service_type, region, future_expiration_minu
 @rate_limited()
 def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None,
                       assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False,
-                      external_id=None):
+                      external_id=None, arn_partition='aws'):
     """
     Used to obtain a boto3 client or resource connection.
     For cross account, provide both account_number and assume_role.
@@ -91,6 +91,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     :param return_credentials: Indicates if the STS credentials should be returned with the client [Default False]
     :param external_id: Optional external id to pass to sts:AssumeRole.
         See https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html
+    :param arn_partition: Optional parameter to specify other aws partitions such as aws-us-gov for aws govcloud
     :return: boto3 client or resource connection
     """
     key = (
@@ -100,7 +101,9 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         external_id,
         region,
         service_type,
-        service)
+        service,
+        arn_partition
+    )
 
     if key in CACHE:
         retval = _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials)
@@ -115,9 +118,10 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         if not all([account_number, assume_role]):
             raise ValueError("Account number and role to assume are both required")
 
-        arn = 'arn:aws:iam::{0}:role/{1}'.format(
+        arn = 'arn:{partition}:iam::{0}:role/{1}'.format(
             account_number,
-            assume_role
+            assume_role,
+            partition=arn_partition
         )
 
         assume_role_kwargs = {
@@ -152,6 +156,7 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15):
     - Account Number (Required for Assume Role)
     - IAM Role Name (Required for Assume Role)
     - Region (Optional, but recommended)
+    - AWS Partition (Optional, defaults to 'aws' if none specified)
     - IAM Session Name (Optional, but recommended to appear in CloudTrail)
 
     If `force_client` is set to a boto3 client, then this will simply pass that in as the client.
@@ -177,7 +182,9 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15):
                     assume_role=kwargs.pop('assume_role', None),
                     session_name=kwargs.pop('session_name', 'cloudaux'),
                     external_id=kwargs.pop('external_id', None),
-                    region=kwargs.pop('region', 'us-east-1'))
+                    region=kwargs.pop('region', 'us-east-1'),
+                    arn_partition=kwargs.pop('arn_partition', 'aws')
+                )
             return f(*args, **kwargs)
         return decorated_function
     return decorator

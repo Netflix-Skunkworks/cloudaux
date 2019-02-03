@@ -225,7 +225,13 @@ def get_notifications(bucket_name, **conn):
 
 @registry.register(flag=FLAGS.ACCELERATION, key='acceleration')
 def get_acceleration(bucket_name, **conn):
-    result = get_bucket_accelerate_configuration(Bucket=bucket_name, **conn)
+    try:
+        result = get_bucket_accelerate_configuration(Bucket=bucket_name, **conn)
+    except ClientError as e:
+        if "UnsupportedArgument" not in str(e):
+            # UnsupportedArgument exception is raised in aws-us-gov partition
+            raise e
+        return None
     return result.get("Status")
 
 
