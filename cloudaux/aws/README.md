@@ -103,7 +103,7 @@ For GCP support run:
     # The flags parameter is optional but allows the user to indicate that 
     # only a subset of the full item description is required.
     # IAM Role Flag Options:
-    #   BASE, MANAGED_POLICIES, INLINE_POLICIES, INSTANCE_PROFILES, ALL (default)
+    #   BASE, MANAGED_POLICIES, INLINE_POLICIES, INSTANCE_PROFILES, TAGS, ALL (default)
     # For instance: flags=FLAGS.MANAGED_POLICIES | FLAGS.INSTANCE_PROFILES
 
     # cloudaux makes a number of calls to obtain a full description of the role
@@ -119,7 +119,8 @@ For GCP support run:
         "Path": ...,
         "RoleId": ...,
         "RoleName": ...,
-        "_version": 1    # Orchestration results return a _Version
+        "Tags": {},
+        "_version": 3    # Orchestration results return a _Version
     }
     
 ### User    

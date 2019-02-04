@@ -8,7 +8,7 @@
 """
 from cloudaux import CloudAux, get_iso_string
 from cloudaux.aws.iam import get_role_managed_policies, get_role_inline_policies, get_role_instance_profiles, \
-    get_account_authorization_details
+    get_account_authorization_details, list_role_tags
 from cloudaux.orchestration.aws import _get_name_from_structure, _conn_from_args
 from cloudaux.orchestration import modify
 from cloudaux.decorators import modify_output
@@ -16,7 +16,21 @@ from flagpole import FlagRegistry, Flags
 
 
 registry = FlagRegistry()
-FLAGS = Flags('BASE', 'MANAGED_POLICIES', 'INLINE_POLICIES', 'INSTANCE_PROFILES')
+FLAGS = Flags('BASE', 'MANAGED_POLICIES', 'INLINE_POLICIES', 'INSTANCE_PROFILES', 'TAGS')
+
+
+@registry.register(flag=FLAGS.TAGS, depends_on=FLAGS.BASE, key='tags')
+def get_tags(role, **conn):
+    tags = list_role_tags(role, **conn)
+    # AWS Returns a funky format for tags:
+    # [{
+    #    "Key": "owner",
+    #    "Value": "bandersnatch"
+    # }]
+
+    # reformat into a single dict.
+    # { "owner": "bandersnatch" }
+    return {t.get('Key'): t.get('Value') for t in tags}
 
 
 @registry.register(flag=FLAGS.MANAGED_POLICIES, depends_on=FLAGS.BASE, key='managed_policies')
@@ -58,7 +72,7 @@ def _get_base(role, **conn):
 
     # cast CreateDate from a datetime to something JSON serializable.
     role.update(dict(CreateDate=get_iso_string(role['CreateDate'])))
-    role['_version'] = 2
+    role['_version'] = 3
 
     return role
 
@@ -78,7 +92,8 @@ def get_role(role, flags=FLAGS.ALL, **conn):
         "Path": ...,
         "RoleId": ...,
         "RoleName": ...,
-        "_version": 2
+        "Tags": {},
+        "_version": 3
     }
 
     :param role: dict containing (at the very least) role_name and/or arn.
