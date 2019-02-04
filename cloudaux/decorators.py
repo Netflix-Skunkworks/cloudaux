@@ -16,7 +16,7 @@ from cloudaux import CloudAux
 
 
 def iter_account_region(service, service_type='client', accounts=None, regions=None, assume_role=None,
-                        session_name='cloudaux', conn_type='cloudaux', external_id=None):
+                        session_name='cloudaux', conn_type='cloudaux', external_id=None, arn_partition='aws'):
     def decorator(func):
         @functools.wraps(func)
         def decorated_function(*args, **kwargs):
@@ -29,7 +29,8 @@ def iter_account_region(service, service_type='client', accounts=None, regions=N
                     'session_name': session_name,
                     'assume_role': assume_role,
                     'service_type': service_type,
-                    'external_id': external_id
+                    'external_id': external_id,
+                    'arn_partition': arn_partition
                 }
                 if conn_type == 'cloudaux':
                     kwargs['cloudaux'] = CloudAux(**conn_dict)
