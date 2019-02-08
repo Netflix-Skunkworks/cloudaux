@@ -1,0 +1,10 @@
+clouds:
+  mycloud:
+    auth:
+      auth_url: 'https://localhost/v2.0/'
+      project_name: test
+      username: secmonkey
+      password: foo
+    regions:
+    - RegionOne
+    - RegionTwo
