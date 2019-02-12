@@ -7,9 +7,6 @@
 """
 from functools import wraps
 
-from os_client_config import OpenStackConfig
-from openstack import connection
-
 
 def mock_get_regions(cloud_name, yaml_file):
     return [ {'name':'RegionOne'} ]
