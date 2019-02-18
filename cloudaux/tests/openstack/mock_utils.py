@@ -113,14 +113,30 @@ def mock_list_load_balancers(conn=None, **kwargs):
          conn.load_balancer.load_balancers.side_effect = [ [LoadBalancer(**EXAMPLE)] ]
          return [x for x in conn.load_balancer.load_balancers()]
 
+container_body = {
+    'count': 2,
+    'bytes': 630666,
+    'name': 'test',
+}
+
+container_headers = {
+    'x-container-object-count': '2',
+    'x-container-read': 'read-settings',
+    'x-container-write': 'write-settings',
+    'x-container-sync-to': 'sync-to',
+    'x-container-sync-key': 'sync-key',
+    'x-container-bytes-used': '630666',
+    'x-versions-location': 'versions-location',
+    'content-type': 'application/json; charset=utf-8',
+    'x-timestamp': '1453414055.48672'
+}
+
 def mock_list_containers(conn=None, **kwargs):
     with patch('openstack.connection.Connection'):
          from openstack.object_store.v1.container import Container
-         from openstack.tests.unit.object_store.v1.test_container import CONT_EXAMPLE, HEAD_EXAMPLE
 
-         container = Container(CONT_EXAMPLE)
-         container._attrs.update({'headers': HEAD_EXAMPLE})
+         body_plus_headers = dict(container_body, **container_headers)
 
          conn = connection.Connection()
-         conn.object_store.containers.side_effect = [ [container] ]
+         conn.object_store.containers.side_effect = [ [Container(body_plus_headers)] ]
          return [x for x in conn.object_store.containers()]
