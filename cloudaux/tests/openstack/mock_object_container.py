@@ -7,8 +7,9 @@
 """
 def mock_get_container_metadata(conn=None, **kwargs):
      from openstack.object_store.v1.container import Container
-     from openstack.tests.unit.object_store.v1.test_container import CONT_EXAMPLE, HEAD_EXAMPLE
+     from cloudaux.tests.openstack.mock_utils import container_body, container_headers
 
-     container = Container(CONT_EXAMPLE)
-     container._attrs.update({'headers': HEAD_EXAMPLE})
+     body_plus_headers = dict(container_body, **container_headers)
+
+     container = Container(body_plus_headers)
      return container
