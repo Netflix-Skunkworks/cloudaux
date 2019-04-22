@@ -40,7 +40,7 @@ install_requires = [
     'joblib>=0.9.4',
     'inflection',
     'flagpole>=1.0.1',
-    'defusedxml==0.5.0',
+    'defusedxml',
     'six>=1.11.0',
 ]
 
