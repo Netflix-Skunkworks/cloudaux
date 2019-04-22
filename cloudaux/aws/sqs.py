@@ -130,3 +130,9 @@ def send_message_batch(client=None, **kwargs):
 @rate_limited()
 def set_queue_attributes(client=None, **kwargs):
     return client.set_queue_attributes(**kwargs)
+
+
+@sts_conn('sqs', service_type='resource')
+@rate_limited()
+def list_all_existing_queues(resource=None, **kwargs):
+    return resource.queues.all(**kwargs)
