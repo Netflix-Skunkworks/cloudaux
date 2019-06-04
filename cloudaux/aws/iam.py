@@ -191,6 +191,14 @@ def list_role_tags(role, client=None, **kwargs):
 
 
 @sts_conn('iam', service_type='client')
+@paginated('Policies')
+@rate_limited()
+def get_all_managed_policies(client=None, **kwargs):
+    return client.list_policies(
+        **kwargs
+    )
+
+@sts_conn('iam', service_type='client')
 @rate_limited()
 def get_role_managed_policy_documents(role, client=None, **kwargs):
     """Retrieve the currently active policy version document for every managed policy that is attached to the role."""
