@@ -66,7 +66,7 @@ def test_get_managed_policy_orchestration(test_iam, mock_iam_client):
     """Tests the orchestration for getting a managed policy."""
     from cloudaux.orchestration.aws.iam.managed_policy import get_managed_policy
 
-    # Don't pass in the GroupName:
+    # Don't pass in the Arn:
     with pytest.raises(MissingFieldException, match='Must include Arn.'):
         get_managed_policy({}, force_client=mock_iam_client)
 
