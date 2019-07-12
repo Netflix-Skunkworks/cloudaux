@@ -16,6 +16,7 @@ def list_networks(client=None, **kwargs):
     return gce_list(service=client.networks(),
                         **kwargs)
 
+
 @gcp_conn('gce')
 def list_subnetworks(client=None, **kwargs):
     """
@@ -25,12 +26,14 @@ def list_subnetworks(client=None, **kwargs):
     return gce_list_aggregated(service=client.subnetworks(),
                                    key_name='subnetworks', **kwargs)
 
+
 @gcp_conn('gce')
 def get_network(client=None, **kwargs):
     service = client.networks()
     req = service.get(project=kwargs['project'], network=kwargs['Network'])
     resp = req.execute()
     return resp
+
 
 @gcp_conn('gce')
 def get_subnetwork(client=None, **kwargs):

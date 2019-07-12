@@ -45,3 +45,9 @@ def get_iam_policy(client=None, **kwargs):
         return resp['bindings']
     else:
         return None
+
+@gcp_conn('crm')
+def get_project_iam_policy(client=None, **kwargs):
+    print(kwargs)
+    req = client.projects().getIamPolicy(resource=kwargs['resource'])
+    return req.execute()

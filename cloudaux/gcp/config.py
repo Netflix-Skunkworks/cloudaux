@@ -22,5 +22,7 @@ GOOGLE_CLIENT_MAP = {
     'gce':
     {'client_type': 'general', 'module_name': 'compute'},
     'iam':
-    {'client_type': 'general', 'module_name': 'iam'}
+    {'client_type': 'general', 'module_name': 'iam'},
+    'crm':
+    {'client_type': 'general', 'module_name': 'cloudresourcemanager'},
 }
