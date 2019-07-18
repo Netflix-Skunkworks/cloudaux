@@ -12,6 +12,7 @@ from cloudaux.gcp.utils import service_list
 
 @gcp_conn('crm')
 def get_iam_policy(client=None, **kwargs):
-    req = client.projects().getIamPolicy(resource=kwargs['resource'])
+    # body={} workaround for https://github.com/googleapis/google-api-python-client/issues/713
+    req = client.projects().getIamPolicy(resource=kwargs['resource'], body={})
     return req.execute()
 
