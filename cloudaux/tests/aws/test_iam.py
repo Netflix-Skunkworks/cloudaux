@@ -40,7 +40,7 @@ def test_get_account_authorization_details_role(test_iam):
 
     # With no filter supplied:
     with pytest.raises(InvalidAuthorizationFilterException,
-                       message='Must provide filter value: User, Role, Group, LocalManagedPolicy, AWSManagedPolicy'):
+                       match='Must provide filter value: User, Role, Group, LocalManagedPolicy, AWSManagedPolicy'):
         get_account_authorization_details(filter='LOLNO')
 
 
@@ -66,8 +66,8 @@ def test_get_managed_policy_orchestration(test_iam, mock_iam_client):
     """Tests the orchestration for getting a managed policy."""
     from cloudaux.orchestration.aws.iam.managed_policy import get_managed_policy
 
-    # Don't pass in the GroupName:
-    with pytest.raises(MissingFieldException, message='Must include Arn.'):
+    # Don't pass in the Arn:
+    with pytest.raises(MissingFieldException, match='Must include Arn.'):
         get_managed_policy({}, force_client=mock_iam_client)
 
     result = get_managed_policy({'Arn': 'arn:aws:iam::123456789012:policy/testCloudAuxPolicy'},
@@ -149,7 +149,7 @@ def test_get_role_orchestration(test_iam):
     from cloudaux.orchestration.aws.iam.role import get_role
 
     # Don't pass in the RoleName:
-    with pytest.raises(MissingFieldException, message='Cannot extract item name from input: {}'):
+    with pytest.raises(MissingFieldException, match='Cannot extract item name from input: {}'):
         get_role({}, force_client=test_iam)
 
     result = get_role({'RoleName': 'testRoleCloudAuxName'}, force_client=test_iam)
@@ -164,7 +164,7 @@ def test_get_group_orchestration(group_fixture):
     from cloudaux.orchestration.aws.iam.group import FLAGS, get_group
 
     # Don't pass in the GroupName:
-    with pytest.raises(MissingFieldException, message='Must include GroupName.'):
+    with pytest.raises(MissingFieldException, match='Must include GroupName.'):
         get_group({}, force_client=group_fixture)
 
     result = get_group({'GroupName': 'testCloudAuxGroup'}, force_client=group_fixture)
@@ -191,7 +191,7 @@ def test_get_user_orchestration(test_iam):
     from cloudaux.orchestration.aws.iam.user import get_user
 
     # Don't pass in the RoleName:
-    with pytest.raises(MissingFieldException, message='Cannot extract item name from input: {}'):
+    with pytest.raises(MissingFieldException, match='Cannot extract item name from input: {}'):
         get_user({}, force_client=test_iam)
 
     result = get_user({'UserName': 'testCloudAuxUser'}, force_client=test_iam)
@@ -235,7 +235,7 @@ def test_get_server_certificate_orchestration(server_certificates):
     from cloudaux.tests.aws.conftest import MOCK_CERT_ONE
 
     # Don't pass in the ServerCertificateName:
-    with pytest.raises(MissingFieldException, message='Must include ServerCertificateName.'):
+    with pytest.raises(MissingFieldException, match='Must include ServerCertificateName.'):
         get_server_certificate({}, force_client=server_certificates)
 
     result = get_server_certificate({'ServerCertificateName': 'certOne'}, force_client=server_certificates)

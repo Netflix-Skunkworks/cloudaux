@@ -12,6 +12,7 @@ from flagpole import FlagRegistry, Flags
 
 from cloudaux.orchestration.aws import _conn_from_args
 from cloudaux.orchestration.aws import _get_name_from_structure
+from cloudaux.orchestration.aws.iam import MissingFieldException
 
 registry = FlagRegistry()
 FLAGS = Flags('BASE')
@@ -69,5 +70,8 @@ def get_managed_policy(managed_policy, flags=FLAGS.ALL, **conn):
     :param conn:
     :return:
     """
+    if not managed_policy.get('Arn'):
+        raise MissingFieldException('Must include Arn.')
+
     _conn_from_args(managed_policy, conn)
     return registry.build_out(flags, start_with=managed_policy, pass_datastructure=True, **conn)
