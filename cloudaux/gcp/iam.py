@@ -48,6 +48,6 @@ def get_iam_policy(client=None, **kwargs):
 
 @gcp_conn('crm')
 def get_project_iam_policy(client=None, **kwargs):
-    print(kwargs)
-    req = client.projects().getIamPolicy(resource=kwargs['resource'])
+    # body={} is a workaround for a bug in older version of the google libraries
+    req = client.projects().getIamPolicy(resource=kwargs['resource'], body={})
     return req.execute()

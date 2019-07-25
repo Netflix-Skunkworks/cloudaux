@@ -1,6 +1,10 @@
 import pytest
 import os
 
+from cloudaux.gcp.gcs import (
+    list_buckets,
+    list_objects_in_bucket,
+)
 from cloudaux.gcp.iam import get_project_iam_policy
 from cloudaux.gcp.gce.project import get_project
 from cloudaux.gcp.crm import get_iam_policy
@@ -56,3 +60,11 @@ def test_cloudaux_gcp_zoned_integration(function, p_param, z_param, project):
         result = function(**{p_param: project, z_param: zone['name']})
         assert result is not None
 
+@pytest.mark.skipif(
+    os.getenv('CLOUDAUX_GCP_TEST_PROJECT') is None,
+    reason="Cannot run integration tests unless GCP project configured"
+)
+def test_cloudaux_gcs(project):
+    for bucket in list_buckets(project=project):
+        for bucket_object in list_objects_in_bucket(Bucket=bucket['name']):
+            assert bucket_object is not None
