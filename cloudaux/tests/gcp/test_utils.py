@@ -17,6 +17,7 @@ class TestUtils(unittest.TestCase):
                 'foo': 'bar',
                 'user_agent': 'cloudaux'}
         expected_creds = {
+            'api_version': 'v1',
             'project': 'my-project',
             'key_file': '/path/to/myfile.json',
             'http_auth': None,
