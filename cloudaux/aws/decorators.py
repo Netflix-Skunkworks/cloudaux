@@ -67,8 +67,11 @@ def paginated(response_key, request_pagination_marker="Marker", response_paginat
                 response = func(*args, **kwargs)
                 results.extend(response[response_key])
 
-                if ('NextMarker' in response) or ('IsTruncated' in response and response['IsTruncated']):
+                # If the old 'NextMarker' is in the response, or we receive a next page token -- AND there are results, then
+                # we should paginate. The last check is in the event (is this true??) that there are no results but pagination tokens.
+                if response[response_key] and response.get(response_pagination_marker):
                     kwargs.update({request_pagination_marker: response[response_pagination_marker]})
+
                 else:
                     break
             return results
