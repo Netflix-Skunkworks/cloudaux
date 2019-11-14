@@ -72,7 +72,7 @@ def _get_event_source_mappings(lambda_function, **conn):
 @registry.register(flag=FLAGS.BASE)
 def get_base(lambda_function, **conn):
     base_fields = frozenset(
-        ['FunctionName', 'FunctionArn', 'Runtime', 'Role', 'Handler'
+        ['FunctionName', 'FunctionArn', 'Runtime', 'Role', 'Handler',
         'CodeSize', 'Description', 'Timeout', 'MemorySize', 'LastModified',
         'CodeSha256', 'Version', 'VpcConfig', 'DeadLetterConfig', 'Environment',
         'KMSKeyArn', 'TracingConfig', 'MasterArn'])
