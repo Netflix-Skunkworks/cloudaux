@@ -1,4 +1,14 @@
-from cloudaux.aws.elbv2 import *
+from cloudaux.aws.elbv2 import (
+    describe_load_balancers,
+    describe_listeners,
+    describe_load_balancer_attributes,
+    describe_rules,
+    describe_ssl_policies,
+    describe_tags,
+    describe_target_group_attributes,
+    describe_target_groups,
+    describe_target_health,
+)
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
@@ -71,8 +81,7 @@ def get_base(alb, **conn):
             alb = describe_load_balancers(arns=[alb['LoadBalancerArn']], **conn)
         alb = alb[0]
 
-    if not isinstance(alb['CreatedTime'], basestring):
-        alb['CreatedTime'] = str(alb['CreatedTime'])
+    alb['CreatedTime'] = str(alb['CreatedTime'])
 
     # Copy LoadBalancerArn to just Arn
     alb['Arn'] = alb.get('LoadBalancerArn')

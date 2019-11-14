@@ -1,4 +1,12 @@
-from cloudaux.aws.lambda_function import *
+from cloudaux.aws.lambda_function import (
+    list_aliases,
+    list_versions_by_function,
+    list_event_source_mappings,
+    list_tags,
+    get_function_configuration,
+    get_policy,
+    list_functions,
+)
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 import json
@@ -26,20 +34,20 @@ def _get_policy(lambda_function, **conn):
         try:
             policies['Versions'][version] = get_policy(FunctionName=lambda_function['FunctionName'], Qualifier=version, **conn)
             policies['Versions'][version] = json.loads(policies['Versions'][version])
-        except Exception as e:
+        except Exception as _:
             pass
 
     for alias in [v['Name'] for v in lambda_function['aliases']]:
         try:
             policies['Aliases'][alias] = get_policy(FunctionName=lambda_function['FunctionName'], Qualifier=alias, **conn)
             policies['Aliases'][alias] = json.loads(policies['Aliases'][alias])
-        except Exception as e:
+        except Exception as _:
             pass
 
     try:
         policies['DEFAULT'] = get_policy(FunctionName=lambda_function['FunctionName'], **conn)
         policies['DEFAULT'] = json.loads(policies['DEFAULT'])
-    except Exception as e:
+    except Exception as _:
         pass
 
     return policies
