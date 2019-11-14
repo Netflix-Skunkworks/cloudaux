@@ -13,7 +13,7 @@ __title__ = 'cloudaux'
 __summary__ = 'Cloud Auxiliary is a python wrapper and orchestration module for interacting with cloud providers'
 __uri__ = 'https://github.com/Netflix-Skunkworks/cloudaux'
 
-__version__ = '1.7.1'
+__version__ = '1.7.2'
 
 __author__ = 'The Cloudaux Developers'
 __email__ = 'oss@netflix.com'

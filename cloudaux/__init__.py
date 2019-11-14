@@ -2,10 +2,6 @@ from cloudaux.aws.sts import sts_conn
 
 
 class CloudAux:
-    conn_details = {
-        'session_name': 'cloudaux',
-        'region': 'us-east-1'
-    }
 
     def __init__(self, **kwargs):
         """
@@ -14,6 +10,10 @@ class CloudAux:
                'assume_role': 'role_name',
             })
         """
+        self.conn_details = {
+            'session_name': 'cloudaux',
+            'region': 'us-east-1'
+        }
         self.conn_details.update(kwargs)
 
     def call(self, function_expr, **kwargs):
