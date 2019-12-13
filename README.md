@@ -125,6 +125,16 @@ For OpenStack support run:
     @iter_account_region('kms', accounts=accounts, regions=['us-east-1'], **conn_details)
     def list_keys(conn=None):
         return conn.list_keys()['Keys']
+        
+    # If you want your role to be read-only, you can assume your role and add the read_only flag to connection details
+    # to inherit the AWS ReadOnlyAccess policy. This flag defaults to False
+    conn_details = {
+        'account_number': '111111111111',
+        'assume_role': 'MyRole',
+        'session_name': 'MySession',
+        'region': 'us-east-1',
+        'read_only': True
+    }
 
 ### GCP Example
 
