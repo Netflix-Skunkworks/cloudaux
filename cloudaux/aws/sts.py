@@ -63,7 +63,7 @@ def _get_cached_creds(key, service, service_type, region, future_expiration_minu
 @rate_limited()
 def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None,
                       assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False,
-                      external_id=None, arn_partition='aws'):
+                      external_id=None, arn_partition='aws', read_only=False):
     """
     Used to obtain a boto3 client or resource connection.
     For cross account, provide both account_number and assume_role.
@@ -92,6 +92,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     :param external_id: Optional external id to pass to sts:AssumeRole.
         See https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html
     :param arn_partition: Optional parameter to specify other aws partitions such as aws-us-gov for aws govcloud
+    :param read_only: Optional parameter to specify the built in ReadOnlyAccess AWS policy
     :return: boto3 client or resource connection
     """
     key = (
@@ -102,7 +103,8 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         region,
         service_type,
         service,
-        arn_partition
+        arn_partition,
+        read_only
     )
 
     if key in CACHE:
@@ -128,6 +130,13 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
             'RoleArn': arn,
             'RoleSessionName': session_name
         }
+
+        if read_only:
+            assume_role_kwargs['PolicyArns'] = [
+                {
+                    'arn': 'arn:aws:iam::aws:policy/ReadOnlyAccess'
+                },
+            ]
 
         if external_id:
             assume_role_kwargs['ExternalId'] = external_id
@@ -158,6 +167,7 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15):
     - Region (Optional, but recommended)
     - AWS Partition (Optional, defaults to 'aws' if none specified)
     - IAM Session Name (Optional, but recommended to appear in CloudTrail)
+    - ReadOnly (Optional, but recommended if no write actions are being executed)
 
     If `force_client` is set to a boto3 client, then this will simply pass that in as the client.
     `force_client` is mostly useful for mocks and tests.
@@ -183,7 +193,8 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15):
                     session_name=kwargs.pop('session_name', 'cloudaux'),
                     external_id=kwargs.pop('external_id', None),
                     region=kwargs.pop('region', 'us-east-1'),
-                    arn_partition=kwargs.pop('arn_partition', 'aws')
+                    arn_partition=kwargs.pop('arn_partition', 'aws'),
+                    read_only=kwargs.pop('read_only', False)
                 )
             return f(*args, **kwargs)
         return decorated_function
