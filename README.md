@@ -128,6 +128,7 @@ For OpenStack support run:
         
     # If you want your role to be read-only, you can assume your role and add the read_only flag to connection details
     # to inherit the AWS ReadOnlyAccess policy. This flag defaults to False
+    # The permissions from the role being assumed will be limited to Read and List only
     conn_details = {
         'account_number': '111111111111',
         'assume_role': 'MyRole',
