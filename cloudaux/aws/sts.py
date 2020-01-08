@@ -9,15 +9,16 @@ from functools import wraps
 import boto3
 import dateutil.tz
 import datetime
+from botocore.config import Config
 
 from cloudaux.aws.decorators import rate_limited
 
 CACHE = {}
 
 
-def _conn_kwargs(region, role):
+def _conn_kwargs(region, role, retry_config):
     kwargs = dict(region_name=region)
-
+    kwargs.update(dict(config=retry_config))
     if role:
         kwargs.update(dict(
             aws_access_key_id=role['Credentials']['AccessKeyId'],
@@ -28,28 +29,28 @@ def _conn_kwargs(region, role):
     return kwargs
 
 
-def _client(service, region, role):
+def _client(service, region, role, retry_config):
     return boto3.session.Session().client(
         service,
-        **_conn_kwargs(region, role)
+        **_conn_kwargs(region, role, retry_config)
     )
 
 
-def _resource(service, region, role):
+def _resource(service, region, role, retry_config):
     return boto3.session.Session().resource(
         service,
-        **_conn_kwargs(region, role)
+        **_conn_kwargs(region, role, retry_config)
     )
 
 
-def _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials):
+def _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, retry_config):
     role = CACHE[key]
     now = datetime.datetime.now(dateutil.tz.tzutc()) + datetime.timedelta(minutes=future_expiration_minutes)
     if role["Credentials"]["Expiration"] > now:
         if service_type == 'client':
-            conn = _client(service, region, role)
+            conn = _client(service, region, role, retry_config)
         else:
-            conn = _resource(service, region, role)
+            conn = _resource(service, region, role, retry_config)
 
         if return_credentials:
             return conn, role
@@ -60,10 +61,10 @@ def _get_cached_creds(key, service, service_type, region, future_expiration_minu
         del CACHE[key]
 
 
-@rate_limited()
+
 def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None,
                       assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False,
-                      external_id=None, arn_partition='aws', read_only=False):
+                      external_id=None, arn_partition='aws', read_only=False, retry_max_attempts=10):
     """
     Used to obtain a boto3 client or resource connection.
     For cross account, provide both account_number and assume_role.
@@ -93,6 +94,8 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         See https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html
     :param arn_partition: Optional parameter to specify other aws partitions such as aws-us-gov for aws govcloud
     :param read_only: Optional parameter to specify the built in ReadOnlyAccess AWS policy
+    :param retry_max_attempts: An integer representing the maximum number of retry attempts that will be made on a
+        single request
     :return: boto3 client or resource connection
     """
     key = (
@@ -106,9 +109,10 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         arn_partition,
         read_only
     )
+    retry_config = Config(retries=dict(max_attempts=retry_max_attempts))
 
     if key in CACHE:
-        retval = _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials)
+        retval = _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, retry_config)
         if retval:
             return retval
 
@@ -143,10 +147,11 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
 
         role = sts.assume_role(**assume_role_kwargs)
 
+
     if service_type == 'client':
-        conn = _client(service, region, role)
+        conn = _client(service, region, role, retry_config)
     elif service_type == 'resource':
-        conn = _resource(service, region, role)
+        conn = _resource(service, region, role, retry_config)
 
     if role:
         CACHE[key] = role
@@ -157,7 +162,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     return conn
 
 
-def sts_conn(service, service_type='client', future_expiration_minutes=15):
+def sts_conn(service, service_type='client', future_expiration_minutes=15, retry_max_attempts=10):
     """
     This will wrap all calls with an STS AssumeRole if the required parameters are sent over.
     Namely, it requires the following in the kwargs:
@@ -173,7 +178,8 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15):
     `force_client` is mostly useful for mocks and tests.
     :param service:
     :param service_type:
-    :param future_expiration_minutes:
+    :param retry_max_attempts: An integer representing the maximum number of retry attempts that will be made on a
+        single request
     :return:
     """
     def decorator(f):
@@ -194,7 +200,8 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15):
                     external_id=kwargs.pop('external_id', None),
                     region=kwargs.pop('region', 'us-east-1'),
                     arn_partition=kwargs.pop('arn_partition', 'aws'),
-                    read_only=kwargs.pop('read_only', False)
+                    read_only=kwargs.pop('read_only', False),
+                    retry_max_attempts=retry_max_attempts
                 )
             return f(*args, **kwargs)
         return decorated_function
