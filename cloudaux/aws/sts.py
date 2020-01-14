@@ -11,8 +11,6 @@ import dateutil.tz
 import datetime
 from botocore.config import Config
 
-from cloudaux.aws.decorators import rate_limited
-
 CACHE = {}
 
 
