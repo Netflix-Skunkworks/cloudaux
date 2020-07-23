@@ -41,14 +41,14 @@ def _resource(service, region, role, retry_config):
     )
 
 
-def _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, retry_config):
+def _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, client_config):
     role = CACHE[key]
     now = datetime.datetime.now(dateutil.tz.tzutc()) + datetime.timedelta(minutes=future_expiration_minutes)
     if role["Credentials"]["Expiration"] > now:
         if service_type == 'client':
-            conn = _client(service, region, role, retry_config)
+            conn = _client(service, region, role, client_config)
         else:
-            conn = _resource(service, region, role, retry_config)
+            conn = _resource(service, region, role, client_config)
 
         if return_credentials:
             return conn, role
@@ -62,7 +62,7 @@ def _get_cached_creds(key, service, service_type, region, future_expiration_minu
 
 def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None,
                       assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False,
-                      external_id=None, arn_partition='aws', read_only=False, retry_max_attempts=10):
+                      external_id=None, arn_partition='aws', read_only=False, retry_max_attempts=10, config=None):
     """
     Used to obtain a boto3 client or resource connection.
     For cross account, provide both account_number and assume_role.
@@ -94,6 +94,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     :param read_only: Optional parameter to specify the built in ReadOnlyAccess AWS policy
     :param retry_max_attempts: An integer representing the maximum number of retry attempts that will be made on a
         single request
+    :param config: Optional botocore.client.Config
     :return: boto3 client or resource connection
     """
     key = (
@@ -107,10 +108,12 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         arn_partition,
         read_only
     )
-    retry_config = Config(retries=dict(max_attempts=retry_max_attempts))
+    client_config = Config(retries=dict(max_attempts=retry_max_attempts))
+    if config:
+        client_config = client_config.merge(config)
 
     if key in CACHE:
-        retval = _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, retry_config)
+        retval = _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, client_config)
         if retval:
             return retval
 
@@ -147,9 +150,9 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
 
 
     if service_type == 'client':
-        conn = _client(service, region, role, retry_config)
+        conn = _client(service, region, role, client_config)
     elif service_type == 'resource':
-        conn = _resource(service, region, role, retry_config)
+        conn = _resource(service, region, role, client_config)
 
     if role:
         CACHE[key] = role
@@ -160,7 +163,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     return conn
 
 
-def sts_conn(service, service_type='client', future_expiration_minutes=15, retry_max_attempts=10):
+def sts_conn(service, service_type='client', future_expiration_minutes=15, retry_max_attempts=10, config=None):
     """
     This will wrap all calls with an STS AssumeRole if the required parameters are sent over.
     Namely, it requires the following in the kwargs:
@@ -199,7 +202,8 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15, retry
                     region=kwargs.pop('region', 'us-east-1'),
                     arn_partition=kwargs.pop('arn_partition', 'aws'),
                     read_only=kwargs.pop('read_only', False),
-                    retry_max_attempts=retry_max_attempts
+                    retry_max_attempts=retry_max_attempts,
+                    config=config
                 )
             return f(*args, **kwargs)
         return decorated_function
