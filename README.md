@@ -8,6 +8,10 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/Netflix-Skunkworks/cloudaux/badge.svg?branch=master)](https://coveralls.io/github/Netflix-Skunkworks/cloudaux?branch=master)
 
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/Netflix-Skunkworks/cloudaux.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Netflix-Skunkworks/cloudaux/alerts/)
+
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Netflix-Skunkworks/cloudaux.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Netflix-Skunkworks/cloudaux/context:python)
+
 Cloud Auxiliary is a python wrapper and orchestration module for interacting with cloud providers.
 
 ## Documentation

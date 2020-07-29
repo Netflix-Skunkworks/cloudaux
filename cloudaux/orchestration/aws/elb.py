@@ -1,4 +1,10 @@
-from cloudaux.aws.elb import *
+from cloudaux.aws.elb import (
+    describe_load_balancers,
+    describe_load_balancer_attributes,
+    describe_load_balancer_policies,
+    describe_load_balancer_policy_types,
+    describe_tags
+)
 from cloudaux.decorators import modify_output
 from flagpole import FlagRegistry, Flags
 
@@ -118,7 +124,7 @@ def get_policies(load_balancer, **conn):
 @registry.register(flag=FLAGS.POLICY_TYPES, depends_on=FLAGS.POLICIES, key='policy_type_descriptions')
 def get_policy_types(load_balancer, **conn):
     policy_types = set()
-    for policy_name, policy in load_balancer['policy_descriptions'].items():
+    for _, policy in load_balancer['policy_descriptions'].items():
         policy_types.add(policy['type'])
 
     return describe_load_balancer_policy_types(list(policy_types), **conn)
@@ -138,8 +144,7 @@ def get_base(load_balancer, **conn):
         load_balancer = describe_load_balancers(LoadBalancerNames=[load_balancer['LoadBalancerName']], **conn)
         load_balancer = load_balancer[0]
 
-    if not isinstance(load_balancer['CreatedTime'], basestring):
-        load_balancer['CreatedTime'] = str(load_balancer['CreatedTime'])
+    load_balancer['CreatedTime'] = str(load_balancer['CreatedTime'])
 
     listeners = load_balancer['ListenerDescriptions']
     new_listeners = list()

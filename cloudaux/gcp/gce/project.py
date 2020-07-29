@@ -5,9 +5,8 @@
     :license: Apache, see LICENSE for more details.
 .. moduleauthor:: Greg Harris <gharris@fitbit.com>
 """
-from cloudaux.gcp.utils import service_list
-from cloudaux.gcp.decorators import gcp_conn, gcp_stats
-from cloudaux.gcp.utils import service_list
+from cloudaux.gcp.decorators import gcp_conn
+
 
 @gcp_conn('gce')
 def get_project(client=None, **kwargs):

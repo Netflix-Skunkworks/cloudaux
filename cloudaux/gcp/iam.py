@@ -6,8 +6,9 @@
 .. moduleauthor:: Tom Melendez (@supertom) <supertom@google.com>
 """
 from cloudaux.gcp.utils import service_list
-from cloudaux.gcp.decorators import gcp_conn, gcp_stats
+from cloudaux.gcp.decorators import gcp_conn
 from cloudaux.gcp.utils import service_list
+
 
 @gcp_conn('iam')
 def list_serviceaccounts(client=None, **kwargs):
