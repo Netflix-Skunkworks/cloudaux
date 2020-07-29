@@ -22,7 +22,7 @@ FLAGS = Flags('BASE', 'INLINE_POLICIES', 'MANAGED_POLICIES', 'USERS')
 @registry.register(flag=FLAGS.INLINE_POLICIES, key='inline_policies')
 def get_inline_policies(group, **conn):
     """Get the inline policies for the group."""
-    policy_list = list_group_policies(group['GroupName'])
+    policy_list = list_group_policies(group['GroupName'], **conn)
 
     policy_documents = {}
 
