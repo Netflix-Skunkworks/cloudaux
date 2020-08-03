@@ -138,6 +138,12 @@ def get_base(load_balancer, **conn):
         load_balancer = describe_load_balancers(LoadBalancerNames=[load_balancer['LoadBalancerName']], **conn)
         load_balancer = load_balancer[0]
 
+    # Python 2 and 3 support:
+    try:
+        basestring
+    except NameError as _:
+        basestring = str
+
     if not isinstance(load_balancer['CreatedTime'], basestring):
         load_balancer['CreatedTime'] = str(load_balancer['CreatedTime'])
 
