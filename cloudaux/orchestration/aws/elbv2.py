@@ -71,6 +71,12 @@ def get_base(alb, **conn):
             alb = describe_load_balancers(arns=[alb['LoadBalancerArn']], **conn)
         alb = alb[0]
 
+    # Python 2 and 3 support:
+    try:
+        basestring
+    except NameError as _:
+        basestring = str
+
     if not isinstance(alb['CreatedTime'], basestring):
         alb['CreatedTime'] = str(alb['CreatedTime'])
 
