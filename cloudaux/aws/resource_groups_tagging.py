@@ -1,4 +1,7 @@
-"""Funcions for fetching resources using resourcegroupstaggingapi """
+"""
+Funcions for fetching resources using resourcegroupstaggingapi
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/resourcegroupstaggingapi.html
+"""
 from cloudaux import sts_conn
 from cloudaux.aws.decorators import paginated
 
