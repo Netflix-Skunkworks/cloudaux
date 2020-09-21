@@ -10,6 +10,9 @@
 
 Cloud Auxiliary is a python wrapper and orchestration module for interacting with cloud providers.
 
+## NOTE: Python 2 Deprecation
+Python 2 support has been dropped as of version 1.9.0. For projects that still require Python 2 support, please use the latest 1.8.x builds.
+
 ## Documentation
 
  - [CloudAux](README.md "CloudAux Readme") [THIS FILE]
