@@ -1,8 +1,7 @@
 language: python
 
 python:
-  - "2.7"
-  - "3.6"
+  - "3.8"
 
 before_install:
   - sudo rm -f /etc/boto.cfg
@@ -25,8 +24,3 @@ script:
 
 after_success:
   - coveralls
-
-notifications:
-  email:
-    - pkelley@netflix.com
-    - mgrima@netflix.com
