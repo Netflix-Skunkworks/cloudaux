@@ -94,6 +94,12 @@ def describe_instances(**kwargs):
 
 @sts_conn('ec2')
 @rate_limited()
+def describe_volumes(**kwargs):
+    return kwargs.pop('client').get_paginator('describe_volumes').paginate()
+
+
+@sts_conn('ec2')
+@rate_limited()
 def describe_vpn_connections(**kwargs):
     return kwargs.pop('client').describe_vpn_connections(**kwargs).get("VpnConnections", [])
 
