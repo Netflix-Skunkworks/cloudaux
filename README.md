@@ -4,7 +4,7 @@
 
 [![Version](http://img.shields.io/pypi/v/cloudaux.svg?style=flat)](https://pypi.python.org/pypi/cloudaux/)
 
-[![Build Status](https://travis-ci.org/Netflix-Skunkworks/cloudaux.svg?branch=master)](https://travis-ci.org/Netflix-Skunkworks/cloudaux)
+[![Build Status](https://travis-ci.com/Netflix-Skunkworks/cloudaux.svg?branch=master)](https://travis-ci.com/Netflix-Skunkworks/cloudaux)
 
 [![Coverage Status](https://coveralls.io/repos/github/Netflix-Skunkworks/cloudaux/badge.svg?branch=master)](https://coveralls.io/github/Netflix-Skunkworks/cloudaux?branch=master)
 
