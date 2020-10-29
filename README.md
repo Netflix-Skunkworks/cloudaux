@@ -10,6 +10,12 @@
 
 Cloud Auxiliary is a python wrapper and orchestration module for interacting with cloud providers.
 
+
+## NOTE: What are we supporting?
+CloudAux was initially developed to provide convenience wrappers for common patterns when working with cloud infrastructures (like role assumption, and multi-regionality). It also contained some convenience functions to describe entire resources with the wrappers to fetch the full resource configuration details.
+
+However, over time, we have stopped relying on the resource configuration wrapper capabilities and instead are only supporting the AWS convenience decorators, such as `sts_conn`, and `paginated` to name a few.  If you wish to make use of CloudAux, simply wrap your boto calls in a function with the decorators applied to them.
+
 ## NOTE: Python 2 Deprecation
 Python 2 support has been dropped as of version 1.9.0. For projects that still require Python 2 support, please use the latest 1.8.x builds.
 
@@ -58,12 +64,12 @@ AWS:
  - [Cloudwatch Events](cloudaux/orchestration/aws/events.md)
  - [SQS](cloudaux/orchestration/aws/sqs.md)
 
-GCP:
+GCP: (DEPRECATED - NO LONGER SUPPORTED)
  - IAM Service Accounts
  - Network/Subnetworks
  - Storage Buckets
 
-OpenStack:
+OpenStack: (DEPRECATED - NO LONGER SUPPORTED)
  - Network/Subnet
  - Floating IP/Router/Port
  - User
@@ -100,23 +106,23 @@ For OpenStack support run:
     queue = get_queue(queue_name='MyQueue', **conn_details)
     messages = get_messages(queue=queue)
 
-    
+
     # Using the CloudAux class
     from cloudaux import CloudAux
     CloudAux.go('kms.client.list_aliases', **conn_details)
-    
+
     ca = CloudAux(**conn_details)
     ca.call('kms.client.list_aliases')
-    
-    
+
+
     # directly asking for a boto3 connection:
     from cloudaux.aws.sts import boto3_cached_conn
     conn = boto3_cached_conn('ec2', **conn_details)
-   
-    
+
+
     # Over your entire environment:
     from cloudaux.decorators import iter_account_region
-   
+
     accounts = ['000000000000', '111111111111']
 
     conn_details = {
@@ -124,11 +130,11 @@ For OpenStack support run:
         'session_name': 'MySession',
         'conn_type': 'boto3'
     }
-        
+
     @iter_account_region('kms', accounts=accounts, regions=['us-east-1'], **conn_details)
     def list_keys(conn=None):
         return conn.list_keys()['Keys']
-        
+
     # If you want your role to be read-only, you can assume your role and add the read_only flag to connection details
     # to inherit the AWS ReadOnlyAccess policy. This flag defaults to False
     # The permissions from the role being assumed will be limited to Read and List only
@@ -140,15 +146,15 @@ For OpenStack support run:
         'read_only': True
     }
 
-### GCP Example
+### GCP Example -- DEPRECATED - NO LONGER SUPPORTED
 
     # directly asking for a client:
     from cloudaux.aws.gcp.auth import get_client
     client = get_client('gce', **conn_details)
-   
+
     # Over your entire environment:
     from cloudaux.gcp.decorators import iter_project
-   
+
     projects = ['my-project-one', 'my-project-two']
 
     # To specify per-project key_files, you can do thie following:
@@ -163,10 +169,10 @@ For OpenStack support run:
     #
     # To use default credentials, omit the key_file argument
     # @iter_project(projects=projects)
-    
+
     from cloudaux.gcp.iam import list_serviceaccounts
     from cloudaux.orchestration.gcp.iam.serviceaccount import get_serviceaccount_complete
-    
+
     @iter_project(projects=projects, key_file='/path/to/key.json')
     def test_iter(**kwargs):
        accounts = list_serviceaccounts(**kwargs)
@@ -175,7 +181,7 @@ For OpenStack support run:
          ret.append(get_serviceaccount_complete(service_account=account['name']))
        return ret
 
-### OpenStack Example
+### OpenStack Example -- DEPRECATED - NO LONGER SUPPORTED
 
     from cloudaux.openstack.decorators import _connect
     conn = _connect(cloud_name, region, yaml_file):
@@ -188,12 +194,12 @@ For OpenStack support run:
         from cloudaux.openstack.utils import list_items
         list_items(**kwargs)
 
-## Orchestration Example
+## Orchestration Example -- DEPRECATED - PLEASE DON'T USE THESE ANYMORE
 
 ### AWS IAM Role
 
     from cloudaux.orchestration.aws.iam.role import get_role, FLAGS
-    
+
     # account_number may be extracted from the ARN of the role passed to get_role
     # if not included in conn.
     conn = dict(
@@ -208,7 +214,7 @@ For OpenStack support run:
         flags=FLAGS.ALL,  # optional
         **conn)
 
-    # The flags parameter is optional but allows the user to indicate that 
+    # The flags parameter is optional but allows the user to indicate that
     # only a subset of the full item description is required.
     # IAM Role Flag Options:
     #   BASE, MANAGED_POLICIES, INLINE_POLICIES, INSTANCE_PROFILES, TAGS, ALL (default)
@@ -230,8 +236,8 @@ For OpenStack support run:
         "Tags": {},
         "_version": 3    # Orchestration results return a _Version
     }
-    
-### GCP IAM Service Account
+
+### GCP IAM Service Account -- DEPRECATED - PLEASE DON'T USE THESE ANYMORE
 
     from cloudaux.orchestration.gcp.iam.serviceaccount import get_serviceaccount_complete, FLAGS
     sa_name = 'projects/my-project-one/serviceAccounts/service-account-key@my-project-one.iam.gserviceaccount.com'
@@ -239,35 +245,35 @@ For OpenStack support run:
     print(json.dumps(sa, indent=4, sort_keys=True))
 
     # Flag options for Service Accounts are BASE, KEYS, POLICY, ALL (default).
-    
+
     {
-      "DisplayName": "service-account", 
-      "Email": "service-account@my-project-one.iam.gserviceaccount.com", 
-      "Etag": "BwUzTDvWgHw=", 
+      "DisplayName": "service-account",
+      "Email": "service-account@my-project-one.iam.gserviceaccount.com",
+      "Etag": "BwUzTDvWgHw=",
       "Keys": [
           {
-              "KeyAlgorithm": "KEY_ALG_RSA_2048", 
-              "Name": "projects/my-project-one/serviceAccounts/service-account@my-project-one.iam.gserviceaccount.com/keys/8be0096886f6ed5cf51abb463d3448c8aee6c6b6", 
-              "ValidAfterTime": "2016-06-30T18:26:45Z", 
+              "KeyAlgorithm": "KEY_ALG_RSA_2048",
+              "Name": "projects/my-project-one/serviceAccounts/service-account@my-project-one.iam.gserviceaccount.com/keys/8be0096886f6ed5cf51abb463d3448c8aee6c6b6",
+              "ValidAfterTime": "2016-06-30T18:26:45Z",
               "ValidBeforeTime": "2026-06-28T18:26:45Z"
-          }, 
+          },
  	  ...
-      ], 
-      "Name": "projects/my-project-one/serviceAccounts/service-account@my-project-one.iam.gserviceaccount.com", 
-      "Oauth2ClientId": "115386704809902483492", 
+      ],
+      "Name": "projects/my-project-one/serviceAccounts/service-account@my-project-one.iam.gserviceaccount.com",
+      "Oauth2ClientId": "115386704809902483492",
       "Policy": [
           {
               "Members": [
                   "user:test-user@gmail.com"
-              ], 
+              ],
               "Role": "roles/iam.serviceAccountActor"
           }
-      ], 
-      "ProjectId": "my-project-one", 
+      ],
+      "ProjectId": "my-project-one",
       "UniqueId": "115386704809902483492"
     }
 
-### OpenStack Security Group
+### OpenStack Security Group - DEPRECATED - PLEASE DON'T USE THESE ANYMORE
 
     from cloudaux.orchestration.openstack.security_group import get_security_group, FLAGS
 
