@@ -62,7 +62,8 @@ def _get_cached_creds(key, service, service_type, region, future_expiration_minu
 
 def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None,
                       assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False,
-                      external_id=None, arn_partition='aws', read_only=False, retry_max_attempts=10, config=None):
+                      external_id=None, arn_partition='aws', read_only=False, retry_max_attempts=10, config=None,
+                      sts_client_kwargs=None):
     """
     Used to obtain a boto3 client or resource connection.
     For cross account, provide both account_number and assume_role.
@@ -95,6 +96,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     :param retry_max_attempts: An integer representing the maximum number of retry attempts that will be made on a
         single request
     :param config: Optional botocore.client.Config
+    :param sts_client_kwargs: Optional arguments to pass during STS client creation
     :return: boto3 client or resource connection
     """
     key = (
@@ -119,7 +121,8 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
 
     role = None
     if assume_role:
-        sts = boto3.session.Session().client('sts')
+        sts_client_kwargs = sts_client_kwargs or {}
+        sts = boto3.session.Session().client('sts', **sts_client_kwargs)
 
         # prevent malformed ARN
         if not all([account_number, assume_role]):
@@ -163,7 +166,8 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
     return conn
 
 
-def sts_conn(service, service_type='client', future_expiration_minutes=15, retry_max_attempts=10, config=None):
+def sts_conn(service, service_type='client', future_expiration_minutes=15, retry_max_attempts=10, config=None,
+             sts_client_kwargs=None):
     """
     This will wrap all calls with an STS AssumeRole if the required parameters are sent over.
     Namely, it requires the following in the kwargs:
@@ -181,6 +185,7 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15, retry
     :param service_type:
     :param retry_max_attempts: An integer representing the maximum number of retry attempts that will be made on a
         single request
+    :param sts_client_kwargs: Optional arguments to pass during STS client creation
     :return:
     """
     def decorator(f):
@@ -203,7 +208,8 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15, retry
                     arn_partition=kwargs.pop('arn_partition', 'aws'),
                     read_only=kwargs.pop('read_only', False),
                     retry_max_attempts=retry_max_attempts,
-                    config=config
+                    config=config,
+                    sts_client_kwargs=sts_client_kwargs,
                 )
             return f(*args, **kwargs)
         return decorated_function
