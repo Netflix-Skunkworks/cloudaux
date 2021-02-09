@@ -209,7 +209,7 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15, retry
                     read_only=kwargs.pop('read_only', False),
                     retry_max_attempts=retry_max_attempts,
                     config=config,
-                    sts_client_kwargs=sts_client_kwargs,
+                    sts_client_kwargs=kwargs.pop("sts_client_kwargs", None),
                 )
             return f(*args, **kwargs)
         return decorated_function
