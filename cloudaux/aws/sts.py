@@ -207,7 +207,7 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15, retry
                     region=kwargs.pop('region', 'us-east-1'),
                     arn_partition=kwargs.pop('arn_partition', 'aws'),
                     read_only=kwargs.pop('read_only', False),
-                    retry_max_attempts=retry_max_attempts,
+                    retry_max_attempts=kwargs.pop('retry_max_attempts', retry_max_attempts),
                     config=config,
                     sts_client_kwargs=kwargs.pop("sts_client_kwargs", None),
                 )
