@@ -27,28 +27,31 @@ def _conn_kwargs(region, role, retry_config):
     return kwargs
 
 
-def _client(service, region, role, retry_config):
+def _client(service, region, role, retry_config, client_kwargs):
     return boto3.session.Session().client(
         service,
-        **_conn_kwargs(region, role, retry_config)
+        **_conn_kwargs(region, role, retry_config),
+        **client_kwargs,
     )
 
 
-def _resource(service, region, role, retry_config):
+def _resource(service, region, role, retry_config, client_kwargs):
     return boto3.session.Session().resource(
         service,
-        **_conn_kwargs(region, role, retry_config)
+        **_conn_kwargs(region, role, retry_config),
+        **client_kwargs,
     )
 
 
-def _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, client_config):
+def _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, client_config,
+                      client_kwargs):
     role = CACHE[key]
     now = datetime.datetime.now(dateutil.tz.tzutc()) + datetime.timedelta(minutes=future_expiration_minutes)
     if role["Credentials"]["Expiration"] > now:
         if service_type == 'client':
-            conn = _client(service, region, role, client_config)
+            conn = _client(service, region, role, client_config, client_kwargs)
         else:
-            conn = _resource(service, region, role, client_config)
+            conn = _resource(service, region, role, client_config, client_kwargs)
 
         if return_credentials:
             return conn, role
@@ -63,7 +66,7 @@ def _get_cached_creds(key, service, service_type, region, future_expiration_minu
 def boto3_cached_conn(service, service_type='client', future_expiration_minutes=15, account_number=None,
                       assume_role=None, session_name='cloudaux', region='us-east-1', return_credentials=False,
                       external_id=None, arn_partition='aws', read_only=False, retry_max_attempts=10, config=None,
-                      sts_client_kwargs=None):
+                      sts_client_kwargs=None, client_kwargs=None):
     """
     Used to obtain a boto3 client or resource connection.
     For cross account, provide both account_number and assume_role.
@@ -111,11 +114,13 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         read_only
     )
     client_config = Config(retries=dict(max_attempts=retry_max_attempts))
+    if not client_kwargs:
+        client_kwargs = {}
     if config:
         client_config = client_config.merge(config)
 
     if key in CACHE:
-        retval = _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, client_config)
+        retval = _get_cached_creds(key, service, service_type, region, future_expiration_minutes, return_credentials, client_config, client_kwargs)
         if retval:
             return retval
 
@@ -153,9 +158,9 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
 
 
     if service_type == 'client':
-        conn = _client(service, region, role, client_config)
+        conn = _client(service, region, role, client_config, client_kwargs)
     elif service_type == 'resource':
-        conn = _resource(service, region, role, client_config)
+        conn = _resource(service, region, role, client_config, client_kwargs)
 
     if role:
         CACHE[key] = role
@@ -167,7 +172,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
 
 
 def sts_conn(service, service_type='client', future_expiration_minutes=15, retry_max_attempts=10, config=None,
-             sts_client_kwargs=None):
+             sts_client_kwargs=None, client_kwargs=None):
     """
     This will wrap all calls with an STS AssumeRole if the required parameters are sent over.
     Namely, it requires the following in the kwargs:
@@ -210,6 +215,7 @@ def sts_conn(service, service_type='client', future_expiration_minutes=15, retry
                     retry_max_attempts=kwargs.pop('retry_max_attempts', retry_max_attempts),
                     config=config,
                     sts_client_kwargs=kwargs.pop("sts_client_kwargs", None),
+                    client_kwargs=kwargs.pop("client_kwargs", None),
                 )
             return f(*args, **kwargs)
         return decorated_function
