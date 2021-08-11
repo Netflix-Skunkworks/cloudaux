@@ -147,7 +147,7 @@ def boto3_cached_conn(service, service_type='client', future_expiration_minutes=
         if read_only:
             assume_role_kwargs['PolicyArns'] = [
                 {
-                    'arn': 'arn:aws:iam::aws:policy/ReadOnlyAccess'
+                    'arn': 'arn:{partition}:iam::aws:policy/ReadOnlyAccess'.format(partition=arn_partition)
                 },
             ]
 
