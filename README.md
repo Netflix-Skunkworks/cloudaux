@@ -12,7 +12,7 @@ Cloud Auxiliary is a python wrapper and orchestration module for interacting wit
 
 
 ## NOTE: What are we supporting?
-CloudAux was initially developed to provide convenience wrappers for common patterns when working with cloud infrastructures (like role assumption, and multi-regionality). It also contained some convenience functions to describe entire resources with the wrappers to fetch the full resource configuration details.
+CloudAux was initially developed to provide convenience wrappers for common patterns when working with cloud infrastructures (like role assumption, and multi-regionality). It also contained some convenience functions to describe entire resources with the wrappers to fetch the full resource configuration details. 
 
 However, over time, we have stopped relying on the resource configuration wrapper capabilities and instead are only supporting the AWS convenience decorators, such as `sts_conn`, and `paginated` to name a few.  If you wish to make use of CloudAux, simply wrap your boto calls in a function with the decorators applied to them.
 
