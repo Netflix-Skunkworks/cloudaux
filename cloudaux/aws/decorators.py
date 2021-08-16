@@ -7,7 +7,7 @@
 .. moduleauthor:: Mike Grima <mgrima@netflix.com>
 """
 import functools
-import time
+import time 
 
 import boto
 import botocore
