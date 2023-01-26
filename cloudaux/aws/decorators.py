@@ -9,7 +9,6 @@
 import functools
 import time
 
-import boto
 import botocore
 
 RATE_LIMITING_ERRORS = ['Throttling', 'RequestLimitExceeded', 'SlowDown', 'RequestThrottled']
@@ -45,10 +44,6 @@ def rate_limited(max_attempts=None, max_delay=4):
                     return retval
                 except botocore.exceptions.ClientError as e:
                     if e.response["Error"]["Code"] not in RATE_LIMITING_ERRORS:
-                        raise e
-                    increase_delay(e)
-                except boto.exception.BotoServerError as e:
-                    if e.error_code not in RATE_LIMITING_ERRORS:
                         raise e
                     increase_delay(e)
 
