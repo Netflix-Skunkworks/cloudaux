@@ -6,7 +6,7 @@
 .. moduleauthor:: Patrick Sanders <psanders@netflix.com>
 """
 
-from mock import MagicMock, call
+from unittest.mock import MagicMock, call
 
 from cloudaux.aws.decorators import paginated
 

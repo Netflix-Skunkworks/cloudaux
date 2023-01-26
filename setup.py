@@ -33,7 +33,6 @@ classifiers = [
 install_requires = [
     'boto3',
     'botocore',
-    'boto>=2.41.0',
     'joblib>=0.9.4',
     'inflection',
     'flagpole>=1.0.1',
@@ -41,24 +40,11 @@ install_requires = [
     'six>=1.11.0',
 ]
 
-gcp_require = [
-    'google-api-python-client>=1.6.1',
-    'google-cloud-storage==0.22.0',
-    'oauth2client>=4.1.2'
-]
-
-openstack_require = [
-    'openstacksdk>=0.13.0'
-]
-
 tests_require = [
     'pytest',
     'pytest-cov',
     'moto',
-    'mock',
-    'coveralls',
     'tox',
-    'flake8'
 ]
 
 docs_require = []
@@ -80,8 +66,6 @@ setup(
     install_requires=install_requires,
     classifiers=classifiers,
     extras_require={
-        'gcp': gcp_require,
-        'openstack': openstack_require,
         'tests': tests_require,
         'docs': docs_require,
         'dev': dev_require

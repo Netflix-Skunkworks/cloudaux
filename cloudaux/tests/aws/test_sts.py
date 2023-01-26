@@ -7,7 +7,7 @@
 """
 from botocore.client import Config
 from cloudaux.aws.sts import boto3_cached_conn
-from mock import patch
+from unittest.mock import patch
 
 
 def test_boto3_cached_conn_read_only():
